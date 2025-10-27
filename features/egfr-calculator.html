@@ -1,0 +1,181 @@
+<!-- features/egfr-calculator.html -->
+<style>
+/* Scoped styles for the eGFR calculator feature */
+.egfr-calculator-feature { display: flex; flex-direction: column; gap: 20px; }
+.calculator-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
+@media (min-width: 768px) {
+    .calculator-grid { grid-template-columns: 400px 1fr; align-items: flex-start; }
+}
+.input-section {
+    background: rgba(0,0,0,0.02); padding: 16px; border-radius: 12px;
+    display: flex; flex-direction: column; gap: 16px;
+}
+.radio-group { display: flex; gap: 16px; }
+.radio-group label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+
+/* Results Section Styles */
+.results-section h3 { margin-top: 0; font-size: 18px; }
+.result-card {
+    padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 12px;
+    background: linear-gradient(135deg, rgba(230, 235, 255, 0.8), rgba(220, 225, 250, 0.7));
+}
+.result-card .label { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+.result-card .value { font-size: 28px; font-weight: 700; color: var(--text); }
+.result-card .unit { font-size: 14px; font-weight: 600; color: var(--muted); margin-left: 4px; }
+.interpretation-card {
+    padding: 16px; border-radius: 12px; text-align: center;
+    font-weight: bold; font-size: 16px;
+}
+/* CKD Stage Colors */
+.status-normal { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.status-mild { background: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
+.status-moderate { background: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
+.status-severe { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.status-failure { background: #e0e0e0; color: #1f1f1f; border: 1px solid #bdbdbd; }
+
+.notes-section {
+    font-size: 13px; color: var(--muted); margin-top: 10px; background: rgba(0,0,0,0.02);
+    padding: 12px; border-radius: 8px; line-height: 1.6;
+}
+.notes-section li > strong { color: var(--text); }
+</style>
+
+<div class="egfr-calculator-feature">
+    <div class="calculator-grid">
+        <!-- Left Column: Inputs -->
+        <form class="input-section" id="egfrForm">
+            <h3>Patient Data</h3>
+            <div class="field">
+                <label for="serumCreatinine">Serum Creatinine (mg/dL)</label>
+                <input type="number" id="serumCreatinine" step="any" required placeholder="e.g., 1.2">
+            </div>
+            <div class="field">
+                <label for="age">Age (Years)</label>
+                <input type="number" id="age" required placeholder="e.g., 55">
+            </div>
+            <div class="field">
+                <label>Sex</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="sex" value="male" checked> Male</label>
+                    <label><input type="radio" name="sex" value="female"> Female</label>
+                </div>
+            </div>
+            <div class="field">
+                <label>Race</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="race" value="nonblack" checked> Non-Black</label>
+                    <label><input type="radio" name="race" value="black"> Black</label>
+                </div>
+            </div>
+            <button type="submit" class="calc">Calculate eGFR</button>
+        </form>
+
+        <!-- Right Column: Results -->
+        <div class="results-section">
+            <h3>Results</h3>
+            <div class="result-card" id="egfrResultCard">
+                <div class="label">Estimated GFR (MDRD)</div>
+                <div>
+                    <span class="value" id="egfrValue">0</span>
+                    <span class="unit">mL/min/1.73 m²</span>
+                </div>
+            </div>
+            <div class="interpretation-card" id="interpretationCard">
+                Enter values to see interpretation
+            </div>
+            <div class="notes-section">
+                <strong>Chronic Kidney Disease (CKD) Stages:</strong>
+                <ul>
+                    <li><strong>Stage 1:</strong> ≥ 90 (Normal or high GFR)</li>
+                    <li><strong>Stage 2:</strong> 60 - 89 (Mildly decreased GFR)</li>
+                    <li><strong>Stage 3a:</strong> 45 - 59 (Mild-moderately decreased GFR)</li>
+                    <li><strong>Stage 3b:</strong> 30 - 44 (Moderate-severely decreased GFR)</li>
+                    <li><strong>Stage 4:</strong> 15 - 29 (Severely decreased GFR)</li>
+                    <li><strong>Stage 5:</strong> &lt; 15 (Kidney Failure)</li>
+                </ul>
+                <p><strong>Note:</strong> This calculator uses the original MDRD formula, which includes a race-based variable. Modern guidelines often recommend the CKD-EPI 2021 equation, which omits race.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(() => {
+    // --- DOM Elements ---
+    const form = document.getElementById('egfrForm');
+    const inputs = {
+        scr: document.getElementById('serumCreatinine'),
+        age: document.getElementById('age'),
+    };
+    const results = {
+        egfrValue: document.getElementById('egfrValue'),
+        interpretation: document.getElementById('interpretationCard'),
+    };
+
+    // --- Functions ---
+    const calculate = (event) => {
+        event.preventDefault();
+        
+        const scr = parseFloat(inputs.scr.value);
+        const age = parseFloat(inputs.age.value);
+        const sex = document.querySelector('input[name="sex"]:checked').value;
+        const race = document.querySelector('input[name="race"]:checked').value;
+
+        if (isNaN(scr) || isNaN(age) || scr <= 0 || age <= 0) {
+            alert('Please enter valid, positive numbers for Creatinine and Age.');
+            return;
+        }
+
+        // --- MDRD Calculation ---
+        let egfr = 175 * Math.pow(scr, -1.154) * Math.pow(age, -0.203);
+
+        if (sex === 'female') {
+            egfr *= 0.742;
+        }
+        if (race === 'black') {
+            egfr *= 1.212;
+        }
+
+        updateUI(egfr);
+    };
+
+    const updateUI = (egfr) => {
+        results.egfrValue.textContent = egfr.toFixed(0);
+        
+        // --- CKD Stage Interpretation ---
+        const card = results.interpretation;
+        card.className = 'interpretation-card'; // Reset classes
+        let stageText = '';
+
+        if (egfr >= 90) {
+            stageText = 'CKD Stage 1';
+            card.classList.add('status-normal');
+        } else if (egfr >= 60) {
+            stageText = 'CKD Stage 2';
+            card.classList.add('status-normal');
+        } else if (egfr >= 45) {
+            stageText = 'CKD Stage 3a';
+            card.classList.add('status-mild');
+        } else if (egfr >= 30) {
+            stageText = 'CKD Stage 3b';
+            card.classList.add('status-moderate');
+        } else if (egfr >= 15) {
+            stageText = 'CKD Stage 4';
+            card.classList.add('status-severe');
+        } else {
+            stageText = 'CKD Stage 5';
+            card.classList.add('status-failure');
+        }
+        
+        card.textContent = stageText;
+    };
+
+    // --- Initialization ---
+    function initialize() {
+        if (!form) return;
+        form.addEventListener('submit', calculate);
+    }
+    
+    initialize();
+})();
+</script>

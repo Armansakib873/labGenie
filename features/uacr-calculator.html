@@ -1,0 +1,191 @@
+<!-- features/uacr-calculator.html -->
+<style>
+/* Scoped styles for the UACR calculator feature */
+.uacr-calculator-feature { display: flex; flex-direction: column; gap: 20px; }
+.calculator-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
+@media (min-width: 768px) {
+    .calculator-grid { grid-template-columns: repeat(2, 1fr); align-items: flex-start; }
+}
+.input-section {
+    background: rgba(0,0,0,0.02); padding: 16px; border-radius: 12px;
+    display: flex; flex-direction: column; gap: 16px;
+}
+
+/* Unit Selector Styles */
+.unit-selector { display: flex; gap: 8px; }
+.unit-btn {
+    flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);
+    background: var(--card-bg); cursor: pointer; font-weight: 600;
+}
+.unit-btn:hover { border-color: #764ba2; }
+.unit-btn.active { background: #764ba2; color: white; border-color: #764ba2; }
+
+/* Results Section Styles */
+.results-section h3 { margin-top: 0; font-size: 18px; }
+.result-card {
+    padding: 16px; border-radius: 12px; border: 1px solid var(--border-color);
+    margin-bottom: 12px;
+}
+.result-card .label { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+.result-card .value { font-size: 24px; font-weight: 700; color: var(--text); }
+.result-card .unit { font-size: 16px; font-weight: 600; color: var(--muted); margin-left: 4px; }
+
+/* Interpretation Card Styles */
+.interpretation-card {
+    padding: 16px; border-radius: 12px;
+    text-align: center; font-weight: bold; font-size: 16px;
+}
+.status-normal { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.status-moderate { background: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
+.status-severe { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+.notes-section {
+    font-size: 13px; color: var(--muted); margin-top: 10px; background: rgba(0,0,0,0.02);
+    padding: 12px; border-radius: 8px; line-height: 1.6;
+}
+</style>
+
+<div class="uacr-calculator-feature">
+    <div class="calculator-grid">
+        <!-- Left Column: Inputs -->
+        <form class="input-section" id="uacrForm">
+            <h3>Urine Sample Values</h3>
+            <div class="field">
+                <label for="urineAlbumin">Urine Albumin (mg/L)</label>
+                <input type="number" id="urineAlbumin" step="any" required placeholder="e.g., 15">
+            </div>
+            <div class="field">
+                <label>Select Unit for Urine Creatinine</label>
+                <div class="unit-selector">
+                    <button type="button" class="unit-btn active" data-unit="mg/dL">mg/dL</button>
+                    <button type="button" class="unit-btn" data-unit="mmol/L">mmol/L</button>
+                </div>
+            </div>
+            <div class="field">
+                <label for="urineCreatinine" id="creatinineLabel">Urine Creatinine (mg/dL)</label>
+                <input type="number" id="urineCreatinine" step="any" required placeholder="e.g., 120">
+            </div>
+            <button type="submit" class="calc">Calculate UACR</button>
+        </form>
+
+        <!-- Right Column: Results -->
+        <div class="results-section">
+            <h3>Results</h3>
+            <div class="result-card" id="uacrResultCard">
+                <div class="label">Albumin/Creatinine Ratio (UACR)</div>
+                <div>
+                    <span class="value" id="uacrValue">0</span>
+                    <span class="unit">mg/g</span>
+                </div>
+            </div>
+            <div class="interpretation-card" id="interpretationCard">
+                Enter values to see interpretation
+            </div>
+            <div class="notes-section" id="interpretationNote">
+                <strong>KDIGO Categories for Albuminuria:</strong>
+                <ul>
+                    <li>&lt; 30 mg/g: Normal to Mildly Increased</li>
+                    <li>30 - 300 mg/g: Moderately Increased</li>
+                    <li>&gt; 300 mg/g: Severely Increased</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(() => {
+    // --- Constants ---
+    const CREATININE_MW = 113.12; // g/mol
+    // Conversion from mmol/L to mg/dL for Creatinine: (mmol/L * MW) / 10
+    const MMOL_TO_MGDL = CREATININE_MW / 10; // ~11.312
+
+    // --- State ---
+    let currentUnit = 'mg/dL';
+
+    // --- DOM Elements ---
+    const form = document.getElementById('uacrForm');
+    const unitBtns = document.querySelectorAll('.unit-btn');
+    const inputs = {
+        albumin: document.getElementById('urineAlbumin'),
+        creatinine: document.getElementById('urineCreatinine'),
+    };
+    const labels = {
+        creatinine: document.getElementById('creatinineLabel'),
+    };
+    const results = {
+        uacrValue: document.getElementById('uacrValue'),
+        interpretation: document.getElementById('interpretationCard'),
+    };
+
+    // --- Functions ---
+    const handleUnitChange = (event) => {
+        currentUnit = event.target.dataset.unit;
+        
+        unitBtns.forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        labels.creatinine.textContent = `Urine Creatinine (${currentUnit})`;
+        inputs.creatinine.placeholder = (currentUnit === 'mg/dL') ? 'e.g., 120' : 'e.g., 10.6';
+    };
+
+    const calculate = (event) => {
+        event.preventDefault();
+        
+        const albuminVal_mgL = parseFloat(inputs.albumin.value);
+        let creatinineVal = parseFloat(inputs.creatinine.value);
+
+        if (isNaN(albuminVal_mgL) || isNaN(creatinineVal)) {
+            alert('Please fill in all required fields.');
+            return;
+        }
+
+        // --- Unit Conversion ---
+        // Step 1: Ensure creatinine is in mg/dL.
+        if (currentUnit === 'mmol/L') {
+            creatinineVal = creatinineVal * MMOL_TO_MGDL;
+        }
+        
+        // Step 2: Convert creatinine from mg/dL to g/L.
+        const creatinineVal_gL = creatinineVal / 100;
+        
+        if (creatinineVal_gL <= 0) {
+            alert("Urine creatinine must be a positive value.");
+            return;
+        }
+        
+        // --- Perform Final Calculation ---
+        const uacr = albuminVal_mgL / creatinineVal_gL;
+
+        updateUI(uacr);
+    };
+
+    const updateUI = (uacr) => {
+        results.uacrValue.textContent = uacr.toFixed(2);
+        
+        // Update interpretation card
+        const card = results.interpretation;
+        card.className = 'interpretation-card'; // Reset classes
+
+        if (uacr < 30) {
+            card.textContent = 'Normal to Mildly Increased';
+            card.classList.add('status-normal');
+        } else if (uacr >= 30 && uacr <= 300) {
+            card.textContent = 'Moderately Increased';
+            card.classList.add('status-moderate');
+        } else { // > 300
+            card.textContent = 'Severely Increased';
+            card.classList.add('status-severe');
+        }
+    };
+
+    // --- Initialization ---
+    function initialize() {
+        if (!form) return;
+        form.addEventListener('submit', calculate);
+        unitBtns.forEach(btn => btn.addEventListener('click', handleUnitChange));
+    }
+    
+    initialize();
+})();
+</script>
