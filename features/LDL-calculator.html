@@ -1,0 +1,191 @@
+<!-- features/LDL-calculator.html -->
+
+<style>
+/* Scoped styles for the LDL calculator feature */
+.ldl-calculator-feature { display: flex; flex-direction: column; gap: 20px; }
+.calculator-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
+@media (min-width: 768px) {
+    .calculator-grid { grid-template-columns: repeat(2, 1fr); align-items: flex-start; }
+}
+.input-section {
+    background: rgba(0,0,0,0.02);
+    padding: 16px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Results Section Styles */
+.results-section h3 { margin-top: 0; font-size: 18px; }
+.result-card {
+    background: var(--card-bg);
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 12px;
+    transition: all 0.3s ease-in-out;
+    position: relative; /* For the recommendation badge */
+}
+.result-card .label { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+.result-card .value { font-size: 24px; font-weight: 700; color: var(--text); }
+.result-card .unit { font-size: 16px; font-weight: 600; color: var(--muted); margin-left: 4px; }
+
+/* Styles for the RECOMMENDED card */
+.result-card.recommended {
+    border-color: #7ed957;
+    background: #e2ffda;
+    transform: scale(1.03);
+}
+.recommendation-badge {
+    position: absolute;
+    top: -10px;
+    right: 12px;
+    background: #22c55e;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    display: none; /* Hidden by default */
+}
+.result-card.recommended .recommendation-badge {
+    display: inline-block;
+}
+
+.notes-section {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 10px;
+    background: rgba(0,0,0,0.02);
+    padding: 12px;
+    border-radius: 8px;
+    line-height: 1.6;
+}
+
+/* Animation for result cards */
+@keyframes flash {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+}
+.result-card.recommended.flash-animation {
+    animation: flash 0.5s ease-out;
+}
+</style>
+
+<div class="ldl-calculator-feature">
+    <div class="calculator-grid">
+        <!-- Left Column: Inputs -->
+        <form class="input-section" id="ldlForm">
+            <h3>Lipid Panel Inputs</h3>
+            <div class="field">
+                <label for="totalCholesterol">Total Cholesterol (mg/dL)</label>
+                <input type="number" id="totalCholesterol" min="0" required placeholder="e.g., 200">
+            </div>
+            <div class="field">
+                <label for="hdlCholesterol">HDL Cholesterol (mg/dL)</label>
+                <input type="number" id="hdlCholesterol" min="0" required placeholder="e.g., 50">
+            </div>
+            <div class="field">
+                <label for="triglycerides">Triglycerides (mg/dL)</label>
+                <input type="number" id="triglycerides" min="0" required placeholder="e.g., 150">
+            </div>
+            <button type="submit" class="calc">Calculate LDL</button>
+        </form>
+
+        <!-- Right Column: Results -->
+        <div class="results-section">
+            <h3>Results</h3>
+            <div class="result-card" id="friedewaldCard">
+                <span class="recommendation-badge">Recommended</span>
+                <div class="label">LDL (Friedewald Formula)</div>
+                <div>
+                    <span class="value" id="friedewaldValue">0</span><span class="unit">mg/dL</span>
+                </div>
+            </div>
+            <div class="result-card" id="alternativeCard">
+                 <span class="recommendation-badge">Recommended</span>
+                <div class="label">LDL (Alternative Formula for High TG)</div>
+                <div>
+                     <span class="value" id="alternativeValue">0</span><span class="unit">mg/dL</span>
+                </div>
+            </div>
+             <div class="notes-section" id="formulaNote">
+                Enter all values to see results. The recommended formula is highlighted based on the triglyceride level.
+             </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(() => {
+    // --- DOM Element References ---
+    const ldlForm = document.getElementById('ldlForm');
+    const totalCholesterolInput = document.getElementById('totalCholesterol');
+    const hdlCholesterolInput = document.getElementById('hdlCholesterol');
+    const triglyceridesInput = document.getElementById('triglycerides');
+    
+    // Result card references
+    const friedewaldCard = document.getElementById('friedewaldCard');
+    const alternativeCard = document.getElementById('alternativeCard');
+    const friedewaldValueEl = document.getElementById('friedewaldValue');
+    const alternativeValueEl = document.getElementById('alternativeValue');
+    const formulaNoteEl = document.getElementById('formulaNote');
+
+    // --- Core Calculation Logic ---
+    function calculateLDL(event) {
+        event.preventDefault(); // Prevent form from reloading the page
+
+        const totalChol = parseFloat(totalCholesterolInput.value);
+        const hdl = parseFloat(hdlCholesterolInput.value);
+        const tg = parseFloat(triglyceridesInput.value);
+
+        if (isNaN(totalChol) || isNaN(hdl) || isNaN(tg) || totalChol <= 0 || hdl <= 0 || tg <= 0) {
+            alert("Please enter valid, positive numbers for all fields.");
+            return;
+        }
+        if (totalChol < hdl) {
+            alert("Total Cholesterol cannot be less than HDL Cholesterol.");
+            return;
+        }
+        
+        // --- Calculate BOTH formulas regardless of TG value ---
+        const nonHdl = totalChol - hdl;
+        const ldlFriedewald = nonHdl - (tg / 5);
+        const ldlAlternative = nonHdl * 0.75;
+        
+        // Update the UI with both values
+        friedewaldValueEl.textContent = ldlFriedewald.toFixed(1);
+        alternativeValueEl.textContent = ldlAlternative.toFixed(1);
+
+        // --- Apply conditional highlighting ---
+        // First, reset both cards
+        friedewaldCard.classList.remove('recommended', 'flash-animation');
+        alternativeCard.classList.remove('recommended', 'flash-animation');
+
+        if (tg < 400) {
+            friedewaldCard.classList.add('recommended');
+            void friedewaldCard.offsetWidth; // Force reflow for animation
+            friedewaldCard.classList.add('flash-animation');
+            formulaNoteEl.textContent = 'Triglycerides are below 400 mg/dL, so the Friedewald formula is the recommended method for estimation.';
+        } else {
+            alternativeCard.classList.add('recommended');
+            void alternativeCard.offsetWidth; // Force reflow
+            alternativeCard.classList.add('flash-animation');
+            formulaNoteEl.textContent = 'Triglycerides are 400 mg/dL or higher, making the Friedewald formula unreliable. The alternative calculation is recommended.';
+        }
+    }
+
+    // --- Run Initialization ---
+    function initialize() {
+        if (!ldlForm) return; // Guard clause
+        
+        ldlForm.addEventListener('submit', calculateLDL);
+    }
+    
+    initialize();
+
+})();
+</script>

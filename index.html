@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>LabGenie</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+  :root{
+    --bg: #f3f6ff;
+    --card-bg: rgba(255,255,255,0.65);
+    --text: #111827;
+    --muted: #4b5563;
+    --border-color: rgba(0,0,0,0.08);
+    --shadow-color: rgba(60, 64, 80, 0.1);
+    --header-bg: rgba(255,255,255,0.55);
+    --accent-1:#ffb86b; --accent-1-light: #fff0db;
+    --accent-2:#7ed957; --accent-2-light: #e2ffda;
+    --accent-3:#6ec6ff; --accent-3-light: #dff2ff;
+    --accent-4:#ff6ea6; --accent-4-light: #ffe0ef;
+    --accent-5:#c18cff; --accent-5-light: #f2e7ff;
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+
+  html,body{
+    height:100%; margin:0;
+    color: var(--text);
+    -webkit-font-smoothing:antialiased;
+  }
+  
+  body::before, body::after {
+    content: ''; position: fixed; left: 50%; top: 50%;
+    width: 150vmax; height: 150vmax;
+    border-radius: 50%;
+    background-image: radial-gradient(circle, #d5d5c8 0%, transparent 40%);
+    animation: rotate 20s linear infinite;
+    z-index: -1;
+  }
+  body::after {
+    background-image: radial-gradient(circle, #aebcc0 0%, transparent 40%);
+    animation-delay: -10s;
+  }
+  @keyframes rotate {
+    0% { transform: translate(-50%, -50%) rotate(0deg) translateX(10%); }
+    100% { transform: translate(-50%, -50%) rotate(360deg) translateX(10%); }
+  }
+
+  header.app-header{
+    position:sticky; top:0; z-index:20;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--border-color);
+    display:flex; align-items:center; gap:12px;
+    padding:10px 16px;
+  }
+  .logo {display:flex;align-items:center;gap:10px}
+  .logo svg{width:38px;height:38px}
+  .app-title{font-weight:700;font-size:17px}
+  .app-sub{font-size:12px;color:var(--muted); display: none;}
+  @media(min-width: 768px) { .app-sub { display: block; } }
+  .header-actions{margin-left:auto;display:flex;gap:10px;align-items:center}
+  
+  main{display:flex;flex-direction:column;gap:18px;padding:16px;max-width:1100px;margin:0 auto}
+
+  @keyframes card-fade-in {
+    from { opacity:0; transform: translateY(15px); }
+    to { opacity:1; transform: translateY(0); }
+  }
+  .grid {display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:14px}
+  .card{
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius:16px; padding:16px;
+    box-shadow: 0 6px 24px 0 var(--shadow-color);
+    display:flex; flex-direction:column; gap:8px;
+    cursor:pointer; user-select:none;
+    transition:all .2s ease, box-shadow .2s ease;
+    animation: card-fade-in .5s ease-out forwards;
+    opacity: 0;
+  }
+
+.card:hover {
+    border-color: #764ba2;
+    background: rgb(231, 239, 249);
+    scale: 1.05;
+    transform: translateY(-4px);
+}
+.card.active {
+    background: #764ba2;
+    color: white;
+    border-color: #764ba2;
+}
+
+  .card:hover { transform: translateY(-4px); }
+  .card:active{transform:translateY(0px) scale(0.97)}
+  .card .icon-wrapper{
+    width:48px; height:48px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .card .icon-wrapper svg { width: 26px; height: 26px; }
+  .card h3{margin:4px 0 0;font-size:15px; color: var(--text);}
+  .card p{margin:0;font-size:12px;line-height:1.5;color:var(--muted)}
+  .a1 .icon-wrapper{background:var(--accent-1-light);}
+  .a2 .icon-wrapper{background:var(--accent-2-light);}
+  .a3 .icon-wrapper{background:var(--accent-3-light);}
+  .a4 .icon-wrapper{background:var(--accent-4-light);}
+  .a5 .icon-wrapper{background:var(--accent-5-light);}
+
+  .add-card{
+    background: transparent; border: 2px dashed var(--border-color);
+    justify-content:center; align-items:center; text-align:center;
+    color: var(--muted); box-shadow: none;
+  }
+  .add-card:hover { border-color: #764ba2; color: var(--text); }
+  
+  /* Feature View styles */
+  @keyframes feature-fade-in {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+  }
+  #feature-view-section {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 32px 0 var(--shadow-color);
+    animation: feature-fade-in 0.4s ease-out;
+  }
+
+  /* Logic for switching between views */
+  body.viewing-feature #grid-section { display: none; }
+  body:not(.viewing-feature) #feature-view-section { display: none; }
+  body:not(.viewing-feature) .home-btn { display: none; }
+  body.viewing-feature .help-btn { display: none; }
+
+  /* Shared UI Elements */
+  .btn {
+    background:var(--card-bg); border: 1px solid var(--border-color);
+    padding:8px 12px; border-radius:10px; font-size:14px; font-weight: 600;
+    cursor: pointer; transition: all .2s ease; color: var(--text);
+  }
+  .btn:hover { border-color: #764ba2; background: rgba(128,90,213,0.1); }
+  .loader { margin: 100px auto; width: 48px; height: 48px; border: 5px solid; border-color: #667eea transparent; border-radius: 50%; animation: rotation 1s linear infinite;}
+  @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  
+  /* Form Elements in Feature View */
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .field{flex:1;min-width:150px}
+  label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;font-weight:600;}
+  input, textarea, select {
+    width:95%;padding:12px;border-radius:10px;font-size:14px;
+    border:1px solid var(--border-color); background:var(--bg); color: var(--text);
+  }
+  input:focus { outline: 2px solid #764ba2; border-color: transparent; }
+  button.calc{background:linear-gradient(90deg,#667eea,#764ba2);color:white;border:0;padding:12px 16px;border-radius:10px;font-weight:600; cursor:pointer;}
+  .result{margin-top:12px;padding:12px;border-radius:10px;background:rgba(0,0,0,0.05);font-weight:600;font-size:15px;}
+  pre {background:rgba(0,0,0,0.05); padding:12px; border-radius:8px; font-size:13px; white-space:pre-wrap; line-height: 1.6;}
+
+
+@media (max-width: 768px) {
+      .card{
+    border-radius:30px;
+     padding:16px;
+    display:flex; 
+    flex-direction:column; gap:8px;
+  }
+
+
+   .card .icon-wrapper{
+    width:25px; height:25px; border-radius:50%;
+    padding: 8px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .card .icon-wrapper svg { width: 26px; height: 26px; }
+  .card h3{margin:4px 0 0;font-size:15px; color: var(--text);}
+  .card p{margin:0;font-size:12px;line-height:1.5;color:var(--muted)}
+
+ .app-title{font-weight:700;font-size:15px}
+  .app-sub{font-size:12px;color:var(--muted); display: none;}
+
+    input, textarea, select {
+    width:50%;padding:12px;border-radius:10px;font-size:14px;
+    border:1px solid var(--border-color); background:var(--bg); color: var(--text);
+  }
+
+
+    #feature-view-section {
+    background: var(--bg);
+    border-radius: 16px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 32px 0 var(--shadow-color);
+
+  }
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="logo">
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#764ba2"/><stop offset="100%" stop-color="#667eea"/></linearGradient></defs>
+      <rect x="2" y="2" width="44" height="44" rx="12" fill="url(#g)"/><path d="M24 12v24M12 24h24" stroke="white" stroke-width="3" stroke-linecap="round"/><circle cx="33" cy="15" r="4" fill="#ffb86b" stroke="white" stroke-width="1.5"/>
+    </svg>
+    <div>
+      <div id="app-title-display" class="app-title">LabGenie</div>
+      <div class="app-sub">Your Modern Lab Sidekick</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn home-btn" onclick="showGrid()">🏠 Home</button>
+    <button class="btn help-btn" onclick="showFeature('dev-instructions', 'Developer Instructions')">Help</button>
+  </div>
+</header>
+
+<main>
+  <section id="grid-section">
+    <div style="margin-bottom:12px">
+      <h2 style="margin:0;font-size:20px">Core Features</h2>
+      <p style="margin:4px 0 0;font-size:14px;color:var(--muted)">Tap a feature to open its workspace.</p>
+    </div>
+
+    <div class="grid" id="cardGrid">
+        <div class="card a1" role="button" onclick="showFeature('dilution-calculator', 'Dilution Calculator')">
+            <div class="icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31"/><path d="M14 9.31V2"/><path d="M12 12.31v8.69"/><path d="m15 15-3 3-3-3"/><path d="M4.69 11.31h14.62"/></svg></div>
+            <h3>Dilution Calc</h3>
+            <p>Compute dilution volumes.</p>
+        </div>
+
+<!-- Add this card inside the #cardGrid in index.html -->
+
+<div class="card a3" role="button" onclick="showFeature('anticoagulant-calculator', 'Anticoagulant Calc')">
+    <div class="icon-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22a8 8 0 0 0 8-8c0-4.42-8-12-8-12S4 9.58 4 14a8 8 0 0 0 8 8z" />
+        </svg>
+    </div>
+    <h3>Anticoagulant Calc</h3>
+    <p>Adjust blood bag volumes.</p>
+</div>
+
+
+
+<div class="card a1" role="button" onclick="showFeature('LDL-calculator', 'LDL Calculator')">
+        <div class="icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></div>
+        <h3>LDL Calculator</h3>
+        <p>Calculate LDL levels.</p>
+    </div>
+    
+    <!-- Card for Electrolyte Verification -->
+<div class="card a2" role="button" onclick="showFeature('electrolyte-verification', 'Electrolyte Verification')">
+    <div class="icon-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+    </div>
+    <h3>Electrolyte Check</h3>
+    <p>Verify ion panel consistency.</p>
+</div>
+
+<!-- Card for Osmolality Calculator -->
+<div class="card a5" role="button" onclick="showFeature('osmolality-calculator', 'Osmolality Calculator')">
+    <div class="icon-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/>
+        </svg>
+    </div>
+    <h3>Osmolality Calc</h3>
+    <p>Calculate osmolal gap.</p>
+</div>
+
+
+
+        <div class="card a2" role="button" onclick="showFeature('qc-westgard-helper', 'QC Westgard Helper')">
+            <div class="icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg></div>
+            <h3>Westgard QC</h3>
+            <p>Get quick QC rule hints.</p>
+        </div>
+        <div class="card a3" role="button" onclick="showFeature('manual-report-template', 'Manual Report Template')">
+            <div class="icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg></div>
+            <h3>Report Template</h3>
+            <p>Printable manual reports.</p>
+        </div>
+        <div class="card a4" role="button" onclick="showFeature('unit-conversion', 'Unit Conversion')">
+            <div class="icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11.6V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 12.4v2.6a4 4 0 0 1-4 4H3"/></svg></div>
+            <h3>Unit Converter</h3>
+            <p>Common lab conversions.</p>
+        </div>
+        <div class="card a5" role="button" onclick="showFeature('molarity-calculator', 'Molarity Calculator')">
+            <div class="icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7.5a2.5 2.5 0 0 1-5 0"/><path d="M21 7.5v11a2.5 2.5 0 0 1-5 0"/><path d="M16 7.5h.01"/><path d="M3 14a2.5 2.5 0 0 1 5 0"/><path d="M3 14v-2.5a2.5 2.5 0 0 1 5 0V14"/><path d="M8 11.5h.01"/><path d="M16 22a2.5 2.5 0 0 1 5 0"/><path d="M16 22v-2.5a2.5 2.5 0 0 1 5 0V22"/><path d="M21 19.5h.01"/><path d="M8 7.5a2.5 2.5 0 0 1-5 0"/><path d="M8 7.5v2a2.5 2.5 0 0 1-5 0"/><path d="M3 9.5h.01"/></svg></div>
+            <h3>Molarity Calc</h3>
+            <p>Mass, MW, and volume.</p>
+        </div>
+
+        <div class="card add-card" role="button" onclick="showFeature('dev-instructions', 'Developer Instructions')">
+            <div class="icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+            <h3>Add Feature</h3>
+            <p>Extend LabGenie's tools.</p>
+        </div>
+    </div>
+  </section>
+
+  <section id="feature-view-section">
+      <!-- Feature content is loaded here by JavaScript -->
+  </section>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const body = document.body;
+    const featureContainer = document.getElementById('feature-view-section');
+    const titleDisplay = document.getElementById('app-title-display');
+    const defaultTitle = "LabGenie";
+
+    // --- Router and View Management ---
+    const handleRouteChange = () => {
+        const hash = window.location.hash.substring(1);
+        const card = document.querySelector(`.card[onclick*="'${hash}'"]`);
+        
+        if (hash && card) {
+            const title = card.getAttribute('onclick').split("', '")[1].replace("')", "");
+            renderFeatureView(hash, title);
+        } else if (hash === 'dev-instructions') {
+            renderFeatureView('dev-instructions', 'Developer Instructions');
+        } else {
+            renderGridView();
+        }
+    };
+
+    window.showFeature = (id, title) => {
+        window.location.hash = id;
+    };
+    
+    window.showGrid = () => {
+        // Use pushState to clean the URL without reloading the page
+        history.pushState("", document.title, window.location.pathname + window.location.search);
+        renderGridView();
+    };
+
+    const renderGridView = () => {
+        body.classList.remove('viewing-feature');
+        document.title = defaultTitle;
+        titleDisplay.textContent = defaultTitle;
+        featureContainer.innerHTML = '';
+        window.scrollTo(0, 0);
+    };
+
+    const renderFeatureView = (id, title) => {
+        body.classList.add('viewing-feature');
+        document.title = `${title} | ${defaultTitle}`;
+        titleDisplay.textContent = title;
+        featureContainer.innerHTML = '<div class="loader"></div>';
+        window.scrollTo(0, 0);
+        loadFeatureContent(id, featureContainer);
+    };
+
+    // --- Content Loading ---
+    async function loadFeatureContent(id, container) {
+        if (id === 'dev-instructions') {
+            container.innerHTML = getDevInstructionsHTML();
+            return;
+        }
+
+        try {
+            const resp = await fetch(`features/${id}.html`, { cache: "no-store" });
+            if (resp.ok) {
+                container.innerHTML = await resp.text();
+                runScriptsIn(container);
+            } else { throw new Error('Not found'); }
+        } catch (e) {
+            container.innerHTML = `<div style="text-align:center; padding: 40px 0;"><h3>Feature Not Found</h3><p>Could not load content for <code>${id}</code>.</p></div>`;
+        }
+    }
+
+    function runScriptsIn(container) {
+        container.querySelectorAll('script').forEach(oldScript => {
+            const newScript = document.createElement('script');
+            Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+            newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
+    }
+    
+    function getDevInstructionsHTML() {
+        return `
+            <h3>Developer Instructions</h3>
+            <p>Follow these steps to add a new feature to LabGenie:</p>
+            <pre>
+1) Add a new card:
+   In index.html, copy a &lt;div class="card"...&gt; element.
+   Update the \`onclick\` function to "showFeature('your-id', 'Your Title')".
+
+2) Create the feature file:
+   Create a new file at: \`features/your-id.html\`.
+   The app will automatically fetch and load it.
+
+3) Example feature file content:
+   &lt;!-- features/my-feature.html --&gt;
+   &lt;div&gt;
+     &lt;h3&gt;My Awesome New Feature&lt;/h3&gt;
+     &lt;!-- Your HTML, CSS, and JS here --&gt;
+   &lt;/div&gt;
+            </pre>`;
+    }
+
+    // --- Initial Setup ---
+    // Staggered card animation for dashboard view
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.05}s`;
+    });
+
+    // Listen for hash changes (back/forward buttons)
+    window.addEventListener('hashchange', handleRouteChange);
+    
+    // Initial route check on page load
+    handleRouteChange();
+});
+</script>
+</body>
+</html>

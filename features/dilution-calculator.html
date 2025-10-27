@@ -1,0 +1,308 @@
+<!-- features/dilution-calculator.html -->
+
+<style>
+/* Scoped styles for the dilution calculator feature */
+.dilution-calculator-feature {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.calculator-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+}
+
+@media (min-width: 768px) {
+    .calculator-grid {
+        grid-template-columns: repeat(2, 1fr);
+        align-items: flex-start;
+    }
+
+}
+.input-section {
+    background: rgba(0,0,0,0.02);
+    padding: 10px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+
+.dilution-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+}
+
+.dilution-button {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+.dilution-button:hover {
+    border-color: #764ba2;
+    background: rgba(128,90,213,0.1);
+}
+.dilution-button.active {
+    background: #764ba2;
+    color: white;
+    border-color: #764ba2;
+}
+
+/* Results Section */
+.results-section h3 {
+    margin-top: 0;
+    font-size: 18px;
+}
+
+.result-card {
+    background: linear-gradient(135deg, rgba(230, 235, 255, 0.8), rgba(220, 225, 250, 0.7));
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 12px;
+}
+
+.result-card .label {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 6px;
+}
+.result-card .value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+}
+.result-card .unit {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-left: 4px;
+}
+
+@keyframes flash {
+    0% { transform: scale(1); box-shadow: 0 0 0 rgba(118, 75, 162, 0.4); }
+    50% { transform: scale(1.02); box-shadow: 0 0 12px rgba(118, 75, 162, 0.2); }
+    100% { transform: scale(1); box-shadow: 0 0 0 rgba(118, 75, 162, 0.0); }
+}
+.result-card.flash-animation {
+    animation: flash 0.5s ease-out;
+}
+
+.notes-section {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 10px;
+    background: rgba(0,0,0,0.02);
+    padding: 12px;
+    border-radius: 8px;
+}
+.notes-section ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.calc {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 16px;
+    padding: 14px;
+}
+@media (max-width: 768px) {
+    
+
+.dilution-button {
+    font-size: 12px;
+    padding: 3px 2px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+#calculateBtn{
+    font-size: 15px;
+    padding: 10px;
+}
+}
+
+</style>
+
+<div class="dilution-calculator-feature">
+    <div class="calculator-grid">
+        <!-- Left Column: Inputs -->
+        <div class="input-section">
+            <div>
+                <label for="dilutionButtons">Select Common Dilution (1:X)</label>
+                <div class="dilution-grid" id="dilutionButtons">
+                    <!-- Buttons are added by JavaScript -->
+                </div>
+            </div>
+            <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+            <div class="field">
+                <label for="customDilution">Dilution Factor</label>
+                <input type="number" id="customDilution" min="2" placeholder="e.g., 20">
+            </div>
+            <div class="field">
+                <label for="totalVolume">Final Volume (µL)</label>
+                <input type="number" id="totalVolume" min="0" value="1000" placeholder="e.g., 1000">
+            </div>
+            </div>
+
+
+             <button id="calculateBtn" class="calc">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                Calculate
+            </button>
+        </div>
+
+        <!-- Right Column: Results -->
+        <div class="results-section">
+            <h3>Results</h3>
+            <div class="result-card" id="sampleVolumeCard">
+                <div class="label">Sample Volume (Serum/Plasma)</div>
+                <div>
+                    <span class="value" id="sampleVolume">0</span><span class="unit">µL</span>
+                </div>
+            </div>
+            <div class="result-card" id="diluentVolumeCard">
+                <div class="label">Diluent Volume (Normal Saline)</div>
+                <div>
+                     <span class="value" id="diluentVolume">0</span><span class="unit">µL</span>
+                </div>
+            </div>
+             <div class="notes-section">
+                <ul>
+                    <li>All volumes are in microliters (µL).</li>
+                    <li>Minimum dilution factor is 1:2.</li>
+                    <li>Results are rounded to 2 decimal places.</li>
+                    <li>Press <strong>Enter</strong> in fields to calculate.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(() => {
+    // --- Constants ---
+    const COMMON_DILUTIONS = [2, 3, 4, 5, 10, 20, 50, 100, 200, 500];
+    const DEFAULT_DILUTION_FACTOR = 2;
+    let currentDilution = COMMON_DILUTIONS[0];
+
+    // --- DOM Element References ---
+    const dilutionGrid = document.getElementById('dilutionButtons');
+    const customDilutionInput = document.getElementById('customDilution');
+    const totalVolumeInput = document.getElementById('totalVolume');
+    const calculateBtn = document.getElementById('calculateBtn');
+    const sampleVolumeEl = document.getElementById('sampleVolume');
+    const diluentVolumeEl = document.getElementById('diluentVolume');
+    const sampleVolumeCard = document.getElementById('sampleVolumeCard');
+    const diluentVolumeCard = document.getElementById('diluentVolumeCard');
+    
+    // --- Initialization ---
+    function initialize() {
+        if (!dilutionGrid) return; // Guard against element not found
+        
+        createDilutionButtons();
+        addEventListeners();
+        setActiveDilution(currentDilution); // Set initial active button
+        customDilutionInput.value = currentDilution;
+        calculateVolumes(); // Perform an initial calculation on load
+    }
+
+    function createDilutionButtons() {
+        dilutionGrid.innerHTML = ''; // Clear any existing buttons
+        COMMON_DILUTIONS.forEach(factor => {
+            const button = document.createElement('button');
+            button.className = 'dilution-button';
+            button.textContent = `1:${factor}`;
+            button.dataset.factor = factor;
+            button.addEventListener('click', () => {
+                setActiveDilution(factor);
+                customDilutionInput.value = factor;
+            });
+            dilutionGrid.appendChild(button);
+        });
+    }
+
+    function addEventListeners() {
+        calculateBtn.addEventListener('click', calculateVolumes);
+        customDilutionInput.addEventListener('input', handleCustomDilutionInput);
+        
+        // Trigger calculation on Enter key press
+        customDilutionInput.addEventListener('keydown', handleEnterKey);
+        totalVolumeInput.addEventListener('keydown', handleEnterKey);
+    }
+    
+    function handleEnterKey(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            calculateBtn.click();
+        }
+    }
+
+    // --- State Management ---
+    function setActiveDilution(factor) {
+        currentDilution = factor;
+        document.querySelectorAll('.dilution-button').forEach(button => {
+            button.classList.toggle('active', parseInt(button.dataset.factor) === factor);
+        });
+    }
+    
+    function handleCustomDilutionInput(event) {
+        const value = parseInt(event.target.value);
+        if (value && value >= DEFAULT_DILUTION_FACTOR) {
+            setActiveDilution(value);
+        } else {
+             // If input is cleared or invalid, deselect buttons
+            document.querySelectorAll('.dilution-button.active').forEach(b => b.classList.remove('active'));
+        }
+    }
+
+    // --- Core Calculation Logic ---
+    function calculateVolumes() {
+        const totalVolume = parseFloat(totalVolumeInput.value) || 0;
+        const dilutionFactor = parseInt(customDilutionInput.value) || currentDilution;
+        
+        if (dilutionFactor < DEFAULT_DILUTION_FACTOR) {
+            alert(`Dilution factor must be ${DEFAULT_DILUTION_FACTOR} or greater.`);
+            return;
+        }
+
+        const sampleVolume = totalVolume / dilutionFactor;
+        const diluentVolume = totalVolume - sampleVolume;
+
+        updateResults(sampleVolume, diluentVolume);
+        triggerResultAnimation();
+    }
+    
+    function updateResults(sample, diluent) {
+        sampleVolumeEl.textContent = sample.toFixed(2);
+        diluentVolumeEl.textContent = diluent.toFixed(2);
+    }
+
+    function triggerResultAnimation() {
+        [sampleVolumeCard, diluentVolumeCard].forEach(card => {
+            card.classList.remove('flash-animation');
+            // This forces a reflow, allowing the animation to be re-triggered
+            void card.offsetWidth; 
+            card.classList.add('flash-animation');
+        });
+    }
+
+    // --- Run Initialization ---
+    initialize();
+
+})();
+</script>

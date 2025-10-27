@@ -1,0 +1,513 @@
+
+    <style>
+        :root {
+            --card-bg: #ffffff;
+            --border-color: #e0e0e0;
+            --muted: #666;
+            --primary: #764ba2;
+        }
+        
+        
+        .container {
+            background: rgb(235, 235, 235);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 32px;
+            font-size: 28px;
+        }
+        
+        .unit-converter-feature {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .converter-setup {
+            background: rgba(0,0,0,0.02);
+            padding: 16px;
+            border-radius: 12px;
+        }
+        
+        .converter-setup label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .converter-setup select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 15px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .converter-main {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .converter-col {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .converter-col input {
+            font-size: 20px;
+            font-weight: 700;
+            padding: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .converter-col input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .converter-col select {
+            padding: 14px;
+            font-size: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .swap-button {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        
+        .swap-button:hover {
+            transform: rotate(180deg);
+            border-color: #764ba2;
+            background: rgba(128,90,213,0.1);
+        }
+        
+        .swap-button svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--muted);
+        }
+        
+        .notes-section {
+            text-align: center;
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 16px;
+        }
+        
+        @media (max-width: 600px) {
+            .converter-main {
+                flex-direction: column;
+            }
+            
+            .swap-button {
+                transform: rotate(90deg);
+            }
+            
+            .swap-button:hover {
+                transform: rotate(270deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Lab Unit Converter</h1>
+        
+        <div class="unit-converter-feature">
+            <!-- Category Selector -->
+            <div class="converter-setup">
+                <label for="categorySelector">Select Conversion Category</label>
+                <select id="categorySelector"></select>
+            </div>
+
+            <!-- Main Converter UI -->
+            <div class="converter-main">
+                <!-- From Column -->
+                <div class="converter-col">
+                    <input type="number" id="inputValue1" placeholder="0" step="any">
+                    <select id="unitSelect1"></select>
+                </div>
+
+                <!-- Swap Button -->
+                <button class="swap-button" id="swapButton" title="Swap Units">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+                
+                <!-- To Column -->
+                <div class="converter-col">
+                    <input type="number" id="inputValue2" placeholder="0" step="any">
+                    <select id="unitSelect2"></select>
+                </div>
+            </div>
+            
+            <div class="notes-section">
+                Type in either box to convert in real-time.
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (() => {
+        // --- Data Store for all conversion factors ---
+        const CONVERSIONS = {
+            // Basic conversions
+            volume: {
+                name: 'Volume',
+                baseUnit: 'l',
+                units: {
+                    'l':  { name: 'Liters (L)', factor: 1 },
+                    'ml': { name: 'Milliliters (mL)', factor: 1e-3 },
+                    'µl': { name: 'Microliters (µL)', factor: 1e-6 },
+                    'dl': { name: 'Deciliters (dL)', factor: 0.1 }
+                }
+            },
+            
+            concentration: {
+                name: 'Concentration (Molarity)',
+                baseUnit: 'm',
+                units: {
+                    'm':  { name: 'Molar (M)', factor: 1 },
+                    'mm': { name: 'Millimolar (mM)', factor: 1e-3 },
+                    'µm': { name: 'Micromolar (µM)', factor: 1e-6 },
+                    'nm': { name: 'Nanomolar (nM)', factor: 1e-9 }
+                }
+            },
+
+            mass: {
+                name: 'Mass',
+                baseUnit: 'g',
+                units: {
+                    'kg': { name: 'Kilograms (kg)', factor: 1e3 },
+                    'g':  { name: 'Grams (g)', factor: 1 },
+                    'mg': { name: 'Milligrams (mg)', factor: 1e-3 },
+                    'µg': { name: 'Micrograms (µg)', factor: 1e-6 },
+                    'ng': { name: 'Nanograms (ng)', factor: 1e-9 }
+                }
+            },
+            
+            // Lab test specific conversions
+            glucose: {
+                name: '🩸 Glucose (Blood Sugar)',
+                units: {
+                    'mgdl': { name: 'mg/dL' },
+                    'mmoll': { name: 'mmol/L' }
+                },
+                convert: (value, from, to) => {
+                    if (from === to) return value;
+                    // Glucose: mg/dL ÷ 18.018 = mmol/L
+                    if (from === 'mgdl' && to === 'mmoll') return value / 18.018;
+                    if (from === 'mmoll' && to === 'mgdl') return value * 18.018;
+                    return value;
+                }
+            },
+            
+            cholesterol: {
+                name: '💊 Cholesterol (Total/LDL/HDL)',
+                units: {
+                    'mgdl': { name: 'mg/dL' },
+                    'mmoll': { name: 'mmol/L' }
+                },
+                convert: (value, from, to) => {
+                    if (from === to) return value;
+                    // Cholesterol: mg/dL ÷ 38.67 = mmol/L
+                    if (from === 'mgdl' && to === 'mmoll') return value / 38.67;
+                    if (from === 'mmoll' && to === 'mgdl') return value * 38.67;
+                    return value;
+                }
+            },
+            
+            triglycerides: {
+                name: '🫀 Triglycerides',
+                units: {
+                    'mgdl': { name: 'mg/dL' },
+                    'mmoll': { name: 'mmol/L' }
+                },
+                convert: (value, from, to) => {
+                    if (from === to) return value;
+                    // Triglycerides: mg/dL ÷ 88.57 = mmol/L
+                    if (from === 'mgdl' && to === 'mmoll') return value / 88.57;
+                    if (from === 'mmoll' && to === 'mgdl') return value * 88.57;
+                    return value;
+                }
+            },
+            
+            creatinine: {
+                name: '🫘 Creatinine (Kidney Function)',
+                units: {
+                    'mgdl': { name: 'mg/dL' },
+                    'µmoll': { name: 'µmol/L' }
+                },
+                convert: (value, from, to) => {
+                    if (from === to) return value;
+                    // Creatinine: mg/dL × 88.42 = µmol/L
+                    if (from === 'mgdl' && to === 'µmoll') return value * 88.42;
+                    if (from === 'µmoll' && to === 'mgdl') return value / 88.42;
+                    return value;
+                }
+            },
+            
+            bilirubin: {
+                name: '🟡 Bilirubin (Liver Function)',
+                units: {
+                    'mgdl': { name: 'mg/dL' },
+                    'µmoll': { name: 'µmol/L' }
+                },
+                convert: (value, from, to) => {
+                    if (from === to) return value;
+                    // Bilirubin: mg/dL × 17.1 = µmol/L
+                    if (from === 'mgdl' && to === 'µmoll') return value * 17.1;
+                    if (from === 'µmoll' && to === 'mgdl') return value / 17.1;
+                    return value;
+                }
+            },
+            
+            calcium: {
+                name: '🦴 Calcium',
+                units: {
+                    'mgdl': { name: 'mg/dL' },
+                    'mmoll': { name: 'mmol/L' }
+                },
+                convert: (value, from, to) => {
+                    if (from === to) return value;
+                    // Calcium: mg/dL ÷ 4.008 = mmol/L
+                    if (from === 'mgdl' && to === 'mmoll') return value / 4.008;
+                    if (from === 'mmoll' && to === 'mgdl') return value * 4.008;
+                    return value;
+                }
+            },
+            
+            hemoglobin: {
+                name: '🩸 Hemoglobin',
+                units: {
+                    'gdl': { name: 'g/dL' },
+                    'gl': { name: 'g/L' },
+                    'mmoll': { name: 'mmol/L' }
+                },
+                convert: (value, from, to) => {
+                    if (from === to) return value;
+                    let gdl;
+                    // Convert to g/dL first
+                    switch (from) {
+                        case 'gl': gdl = value / 10; break;
+                        case 'mmoll': gdl = value * 1.611; break;
+                        default: gdl = value;
+                    }
+                    // Convert from g/dL to target
+                    switch (to) {
+                        case 'gl': return gdl * 10;
+                        case 'mmoll': return gdl / 1.611;
+                        default: return gdl;
+                    }
+                }
+            },
+            
+            urea: {
+                name: '🫘 BUN/Urea (Kidney Function)',
+                units: {
+                    'mgdl': { name: 'mg/dL (BUN)' },
+                    'mmoll': { name: 'mmol/L (Urea)' }
+                },
+                convert: (value, from, to) => {
+                    if (from === to) return value;
+                    // BUN (mg/dL) × 0.357 = Urea (mmol/L)
+                    if (from === 'mgdl' && to === 'mmoll') return value * 0.357;
+                    if (from === 'mmoll' && to === 'mgdl') return value / 0.357;
+                    return value;
+                }
+            },
+            
+            iron: {
+                name: '⚙️ Iron (Serum)',
+                units: {
+                    'µgdl': { name: 'µg/dL' },
+                    'µmoll': { name: 'µmol/L' }
+                },
+                convert: (value, from, to) => {
+                    if (from === to) return value;
+                    // Iron: µg/dL × 0.1791 = µmol/L
+                    if (from === 'µgdl' && to === 'µmoll') return value * 0.1791;
+                    if (from === 'µmoll' && to === 'µgdl') return value / 0.1791;
+                    return value;
+                }
+            },
+            
+            vitaminD: {
+                name: '☀️ Vitamin D',
+                units: {
+                    'ngml': { name: 'ng/mL' },
+                    'nmoll': { name: 'nmol/L' }
+                },
+                convert: (value, from, to) => {
+                    if (from === to) return value;
+                    // Vitamin D: ng/mL × 2.496 = nmol/L
+                    if (from === 'ngml' && to === 'nmoll') return value * 2.496;
+                    if (from === 'nmoll' && to === 'ngml') return value / 2.496;
+                    return value;
+                }
+            },
+            
+            temperature: {
+                name: '🌡️ Temperature',
+                units: {
+                    'c': { name: 'Celsius (°C)' },
+                    'f': { name: 'Fahrenheit (°F)' },
+                    'k': { name: 'Kelvin (K)' }
+                },
+                convert: (value, from, to) => {
+                    if (from === to) return value;
+                    let celsius;
+                    // Step 1: Convert input to Celsius (a common base)
+                    switch (from) {
+                        case 'f': celsius = (value - 32) * 5 / 9; break;
+                        case 'k': celsius = value - 273.15; break;
+                        default: celsius = value; // Already in Celsius
+                    }
+                    // Step 2: Convert from Celsius to the target unit
+                    switch (to) {
+                        case 'f': return (celsius * 9 / 5) + 32;
+                        case 'k': return celsius + 273.15;
+                        default: return celsius; // Target is Celsius
+                    }
+                }
+            }
+        };
+
+        // --- DOM Elements ---
+        const categorySelector = document.getElementById('categorySelector');
+        const input1 = document.getElementById('inputValue1');
+        const unit1 = document.getElementById('unitSelect1');
+        const input2 = document.getElementById('inputValue2');
+        const unit2 = document.getElementById('unitSelect2');
+        const swapButton = document.getElementById('swapButton');
+
+        // --- Functions ---
+        function populateCategorySelector() {
+            for (const key in CONVERSIONS) {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = CONVERSIONS[key].name;
+                categorySelector.appendChild(option);
+            }
+        }
+
+        function populateUnitSelectors(categoryKey) {
+            const category = CONVERSIONS[categoryKey];
+            if (!category) return;
+
+            unit1.innerHTML = '';
+            unit2.innerHTML = '';
+
+            for (const unitKey in category.units) {
+                const option1 = document.createElement('option');
+                option1.value = unitKey;
+                option1.textContent = category.units[unitKey].name;
+
+                const option2 = option1.cloneNode(true);
+
+                unit1.appendChild(option1);
+                unit2.appendChild(option2);
+            }
+            // Set default selection
+            unit1.selectedIndex = 0;
+            unit2.selectedIndex = Math.min(1, unit2.options.length - 1);
+        }
+
+        function performConversion(sourceInput) {
+            const categoryKey = categorySelector.value;
+            const category = CONVERSIONS[categoryKey];
+
+            const isSourceInput1 = sourceInput === input1;
+            const sourceVal = parseFloat(sourceInput.value);
+            const sourceUnit = isSourceInput1 ? unit1.value : unit2.value;
+            const targetInput = isSourceInput1 ? input2 : input1;
+            const targetUnit = isSourceInput1 ? unit2.value : unit1.value;
+            
+            if (isNaN(sourceVal)) {
+                targetInput.value = '';
+                return;
+            }
+            
+            let result;
+
+            if (category.convert) { // Use special conversion function if it exists
+                result = category.convert(sourceVal, sourceUnit, targetUnit);
+            } else { // Use standard base-unit factor calculation
+                const sourceFactor = category.units[sourceUnit].factor;
+                const targetFactor = category.units[targetUnit].factor;
+                const valueInBase = sourceVal * sourceFactor;
+                result = valueInBase / targetFactor;
+            }
+
+            // Display result with reasonable precision, avoiding scientific notation for typical values.
+            if (result !== null && isFinite(result)) {
+                targetInput.value = parseFloat(result.toPrecision(6));
+            } else {
+                targetInput.value = '';
+            }
+        }
+        
+        function handleSwap() {
+            const tempIndex = unit1.selectedIndex;
+            unit1.selectedIndex = unit2.selectedIndex;
+            unit2.selectedIndex = tempIndex;
+            performConversion(input1); // Recalculate after swapping
+        }
+        
+        // --- Event Listeners and Initialization ---
+        function initialize() {
+            if(!categorySelector) return; // Guard clause
+
+            populateCategorySelector();
+            populateUnitSelectors(categorySelector.value);
+            
+            categorySelector.addEventListener('change', () => {
+                populateUnitSelectors(categorySelector.value);
+                input1.value = '';
+                input2.value = '';
+            });
+            
+            input1.addEventListener('input', () => performConversion(input1));
+            unit1.addEventListener('change', () => performConversion(input1));
+            
+            input2.addEventListener('input', () => performConversion(input2));
+            unit2.addEventListener('change', () => performConversion(input2));
+
+            swapButton.addEventListener('click', handleSwap);
+        }
+        
+        initialize();
+    })();
+    </script>

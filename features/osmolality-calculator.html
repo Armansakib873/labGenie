@@ -1,0 +1,206 @@
+<!-- features/osmolality-calculator.html -->
+
+<style>
+/* Scoped styles for the osmolality calculator feature */
+.osmolality-calculator-feature { display: flex; flex-direction: column; gap: 20px; }
+.calculator-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
+@media (min-width: 768px) {
+    .calculator-grid { grid-template-columns: repeat(2, 1fr); align-items: flex-start; }
+}
+.input-section {
+    background: rgba(0,0,0,0.02); padding: 16px; border-radius: 12px;
+    display: flex; flex-direction: column; gap: 16px;
+}
+
+/* Unit Selector Styles */
+.unit-selector { display: flex; gap: 8px; }
+.unit-btn {
+    flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);
+    background: var(--card-bg); cursor: pointer; font-weight: 600;
+}
+.unit-btn:hover { border-color: #764ba2; }
+.unit-btn.active { background: #764ba2; color: white; border-color: #764ba2; }
+
+/* Results Section Styles */
+.results-section h3 { margin-top: 0; font-size: 18px; }
+.result-card {
+    background: linear-gradient(135deg, rgba(230, 235, 255, 0.8), rgba(220, 225, 250, 0.7));
+    padding: 16px; border-radius: 12px; border: 1px solid var(--border-color);
+    margin-bottom: 12px;
+}
+.result-card.hidden { display: none; }
+.result-card .label { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+.result-card .value { font-size: 24px; font-weight: 700; color: var(--text); }
+.result-card .unit { font-size: 16px; font-weight: 600; color: var(--muted); margin-left: 4px; }
+.notes-section {
+    font-size: 13px; color: var(--muted); margin-top: 10px; background: rgba(0,0,0,0.02);
+    padding: 12px; border-radius: 8px; line-height: 1.6;
+}
+.interpretation-high { color: #b91c1c; font-weight: bold; }
+</style>
+
+<div class="osmolality-calculator-feature">
+    <div class="calculator-grid">
+        <!-- Left Column: Inputs -->
+        <form class="input-section" id="osmolalityForm">
+            <h3>Analyte Values</h3>
+            <div class="field">
+                <label>Select Units for Glucose & Urea</label>
+                <div class="unit-selector">
+                    <button type="button" class="unit-btn active" data-unit="mmol/L">mmol/L</button>
+                    <button type="button" class="unit-btn" data-unit="mg/dL">mg/dL</button>
+                </div>
+            </div>
+            <div class="field">
+                <label for="na">Sodium (Na+)</label>
+                <input type="number" id="na" step="any" required placeholder="mmol/L">
+            </div>
+            <div class="field">
+                <label for="glucose" id="glucoseLabel">Glucose (mmol/L)</label>
+                <input type="number" id="glucose" step="any" required>
+            </div>
+            <div class="field">
+                <label for="urea" id="ureaLabel">Urea (mmol/L)</label>
+                <input type="number" id="urea" step="any" required>
+            </div>
+            <hr style="border: none; border-top: 1px solid var(--border-color);">
+            <div class="field">
+                <label for="measuredOsmolality">Measured Osmolality (Optional)</label>
+                <input type="number" id="measuredOsmolality" step="any" placeholder="mOsm/kg">
+            </div>
+            <button type="submit" class="calc">Calculate</button>
+        </form>
+
+        <!-- Right Column: Results -->
+        <div class="results-section">
+            <h3>Results</h3>
+            <div class="result-card" id="calculatedOsmolalityCard">
+                <div class="label">Calculated Osmolality</div>
+                <div>
+                    <span class="value" id="calculatedOsmolalityValue">0</span>
+                    <span class="unit">mOsm/kg</span>
+                </div>
+            </div>
+            <div class="result-card hidden" id="osmolalGapCard">
+                <div class="label">Osmolal Gap</div>
+                <div>
+                    <span class="value" id="osmolalGapValue">0</span>
+                </div>
+            </div>
+            <div class="notes-section" id="interpretationNote">
+                A normal osmolal gap is typically &lt; 10-15. Enter a measured osmolality to calculate the gap.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(() => {
+    // --- Constants ---
+    const GLUCOSE_CONV_FACTOR = 18; // mg/dL to mmol/L: divide by 18
+    const UREA_CONV_FACTOR = 2.8;   // BUN (mg/dL) to Urea (mmol/L): divide by 2.8
+
+    // --- State ---
+    let currentUnit = 'mmol/L';
+
+    // --- DOM Elements ---
+    const form = document.getElementById('osmolalityForm');
+    const unitBtns = document.querySelectorAll('.unit-btn');
+    const inputs = {
+        na: document.getElementById('na'),
+        glucose: document.getElementById('glucose'),
+        urea: document.getElementById('urea'),
+        measured: document.getElementById('measuredOsmolality'),
+    };
+    const labels = {
+        glucose: document.getElementById('glucoseLabel'),
+        urea: document.getElementById('ureaLabel'),
+    };
+    const results = {
+        calculated: document.getElementById('calculatedOsmolalityValue'),
+        gapCard: document.getElementById('osmolalGapCard'),
+        gapValue: document.getElementById('osmolalGapValue'),
+        note: document.getElementById('interpretationNote'),
+    };
+
+    // --- Functions ---
+    const handleUnitChange = (event) => {
+        currentUnit = event.target.dataset.unit;
+        
+        // Update button styles
+        unitBtns.forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        // Update labels
+        if (currentUnit === 'mmol/L') {
+            labels.glucose.textContent = 'Glucose (mmol/L)';
+            labels.urea.textContent = 'Urea (mmol/L)';
+            inputs.glucose.placeholder = 'e.g., 5.5';
+            inputs.urea.placeholder = 'e.g., 5';
+        } else {
+            labels.glucose.textContent = 'Glucose (mg/dL)';
+            labels.urea.textContent = 'Blood Urea Nitrogen (BUN) (mg/dL)';
+            inputs.glucose.placeholder = 'e.g., 100';
+            inputs.urea.placeholder = 'e.g., 15';
+        }
+    };
+
+    const calculate = (event) => {
+        event.preventDefault();
+        
+        const naVal = parseFloat(inputs.na.value);
+        let glucoseVal = parseFloat(inputs.glucose.value);
+        let ureaVal = parseFloat(inputs.urea.value);
+        const measuredVal = parseFloat(inputs.measured.value);
+
+        if (isNaN(naVal) || isNaN(glucoseVal) || isNaN(ureaVal)) {
+            alert('Please fill in all required fields (Na, Glucose, Urea).');
+            return;
+        }
+
+        // Convert values to mmol/L if necessary
+        if (currentUnit === 'mg/dL') {
+            glucoseVal = glucoseVal / GLUCOSE_CONV_FACTOR;
+            ureaVal = ureaVal / UREA_CONV_FACTOR;
+        }
+        
+        // --- Perform Calculations ---
+        const calculatedOsmolality = (2 * naVal) + glucoseVal + ureaVal;
+
+        let osmolalGap = null;
+        if (!isNaN(measuredVal) && measuredVal > 0) {
+            osmolalGap = measuredVal - calculatedOsmolality;
+        }
+
+        updateUI(calculatedOsmolality, osmolalGap);
+    };
+
+    const updateUI = (calculated, gap) => {
+        results.calculated.textContent = calculated.toFixed(1);
+
+        if (gap !== null) {
+            results.gapCard.classList.remove('hidden');
+            results.gapValue.textContent = gap.toFixed(1);
+            
+            if (gap > 15) {
+                results.note.innerHTML = `An osmolal gap of <span class="interpretation-high">${gap.toFixed(1)}</span> is considered HIGH. This suggests the presence of unmeasured, osmotically active substances (e.g., ethanol, methanol, ethylene glycol).`;
+            } else {
+                 results.note.textContent = `An osmolal gap of ${gap.toFixed(1)} is within the normal range (<15).`;
+            }
+
+        } else {
+            results.gapCard.classList.add('hidden');
+            results.note.textContent = 'A normal osmolal gap is typically < 10-15. Enter a measured osmolality to calculate the gap.';
+        }
+    };
+
+    // --- Initialization ---
+    function initialize() {
+        if (!form) return;
+        form.addEventListener('submit', calculate);
+        unitBtns.forEach(btn => btn.addEventListener('click', handleUnitChange));
+    }
+    
+    initialize();
+})();
+</script>

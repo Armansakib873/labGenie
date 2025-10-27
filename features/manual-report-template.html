@@ -1,0 +1,324 @@
+<!-- features/manual-report-template.html -->
+<style>
+/* --- UTILITY & SETUP --- */
+:root {
+    --report-border-color: #dee2e6;
+    --report-bg-color: #fff;
+    --report-text-color: #212529;
+    --report-muted-color: #6c757d;
+    --report-header-bg: #f8f9fa;
+    --report-accent-color: #4f46e5;
+}
+.report-generator-feature { display: flex; flex-direction: column; gap: 20px; }
+.report-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; background: rgba(0,0,0,0.02); padding: 12px; border-radius: 12px; }
+.report-btn { 
+    padding: 10px 16px; border-radius: 8px; border: 1px solid var(--border-color);
+    background: var(--card-bg); cursor: pointer; font-weight: 600;
+}
+.report-btn.primary { background: #764ba2; color: white; border-color: #764ba2; }
+
+/* --- EDITOR STYLES --- */
+#report-editor-container { 
+    padding: 24px; background: #e9ecef; border-radius: 8px; overflow-x: auto;
+}
+#report-sheet {
+    width: 210mm; /* A4 width */
+    min-height: 297mm; /* A4 height */
+    padding: 12mm; margin: 0 auto;
+    background: var(--report-bg-color); color: var(--report-text-color);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); box-sizing: border-box;
+    font-family: Arial, sans-serif; font-size: 10pt;
+    display: flex; flex-direction: column;
+}
+
+/* --- REPORT STRUCTURE & HEADER --- */
+.report-title { 
+    text-align: center; font-size: 16pt; font-weight: bold; 
+    margin: 20px 0; padding-bottom: 8px;
+    border-bottom: 2px solid #000;
+}
+.report-patient-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two-column layout */
+    gap: 4px 16px; /* Row gap, Column gap */
+    margin: 16px 0; font-size: 10pt;
+    line-height: 1.6;
+}
+.detail-item { display: grid; grid-template-columns: 90px 1fr; gap: 8px; }
+.detail-item strong { color: var(--report-text-color); }
+/* Make header details editable */
+.detail-item span[contenteditable="true"] {
+    border-bottom: 1px solid var(--report-border-color);
+}
+[contenteditable="true"]:hover, [contenteditable="true"]:focus {
+    outline: none;
+    background: rgba(79, 70, 229, 0.05);
+}
+
+/* --- RESULTS TABLE --- */
+#report-results-table {
+    width: 100%; border-collapse: collapse; margin-top: 10px;
+}
+#report-results-table th, #report-results-table td {
+    padding: 2px 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--report-border-color);
+    vertical-align: middle;
+}
+#report-results-table thead th {
+    background: var(--report-header-bg); font-weight: bold; font-size: 11pt;
+    border-bottom: 2px solid #000;
+    padding: 8px;
+}
+.editable-cell {
+    min-height: 22px; padding: 6px 4px; border-radius: 4px;
+    outline: none;
+}
+.result-row-actions { text-align: center !important; }
+.delete-row-btn {
+    cursor: pointer; color: #ef4444; font-weight: bold; border: none; background: none; font-size: 14px;
+}
+.section-header-row .editable-cell {
+    font-weight: bold; padding: 10px 4px 4px 4px; font-size: 11pt;
+}
+.section-header-row td {
+    border: none; border-bottom: 1px solid #000;
+}
+
+/* --- FOOTER --- */
+.report-footer {
+    display: flex; justify-content: space-between;
+    margin-top: auto; /* Pushes footer to the bottom */
+    padding-top: 50px;
+}
+.signature-block { width: 250px; text-align: left; font-size: 9pt; }
+.signature-line {
+    border-top: 1px dotted var(--report-text-color); margin: 40px 0 8px 0;
+}
+.signature-block .designation { color: var(--report-muted-color); }
+
+/* --- PRINT-SPECIFIC STYLES (CORRECTED) --- */
+@media print {
+    /* Hide everything on the page by default */
+    body * {
+        visibility: hidden;
+    }
+
+    /* Make only the report sheet and its contents visible */
+    #report-sheet, #report-sheet * {
+        visibility: visible;
+    }
+    
+    /* Position the report sheet to take up the whole page */
+    #report-sheet {
+        position: absolute;
+        left: 0;
+        top: 0;
+        margin: 0;
+        padding: 10mm; /* Standard print margin */
+        width: 100%;
+        height: auto;
+        box-shadow: none;
+        border: none;
+    }
+
+    /* Ensure editable content looks normal and remove delete buttons */
+    .result-row-actions, .delete-row-btn {
+        display: none !important;
+    }
+    #report-results-table th:last-child {
+        display: none !important;
+    }
+}
+</style>
+
+<div class="report-generator-feature">
+    <!-- Action Buttons -->
+    <div class="report-actions">
+        <div>
+            <label for="reportTypeSelector" style="font-size:13px; font-weight:600;">Report Type</label>
+            <select id="reportTypeSelector" style="padding: 8px; border-radius: 8px;">
+                <option value="Biochemistry Report">Biochemistry Report</option>
+                <option value="Haematology Report">Haematology Report</option>
+                <option value="Immunology Report">Immunology Report</option>
+                <option value="Serology Report">Serology Report</option>
+                <option value="PCR Report">PCR Report</option>
+            </select>
+        </div>
+        <button id="addRowBtn" class="report-btn">Add Test Row</button>
+        <button id="addSectionBtn" class="report-btn">Add Section</button>
+        <button id="printBtn" class="report-btn primary">Print</button>
+        <button id="exportBtn" class="report-btn primary">Export as Image</button>
+    </div>
+
+    <!-- Report Editor -->
+    <div id="report-editor-container">
+        <div id="report-sheet">
+            <h2 class="report-title" id="reportTitle">Biochemistry Report</h2>
+
+            <div class="report-patient-details">
+                <div class="detail-item"><strong>InvoiceNo:</strong><span contenteditable="true">250904437</span></div>
+                <div class="detail-item"><strong>InvDate:</strong><span contenteditable="true">22-09-2025</span></div>
+                <div class="detail-item"><strong>Name:</strong><span contenteditable="true">AYMAN</span></div>
+                <div class="detail-item"><strong>Age:</strong><span contenteditable="true">3Y 0M 1D</span></div>
+                <div class="detail-item"><strong>Specimen:</strong><span contenteditable="true">Blood</span></div>
+                <div class="detail-item"><strong>Gender:</strong><span contenteditable="true">Male</span></div>
+                <div class="detail-item"><strong>Prof./Dr:</strong><span contenteditable="true">DR. CHOWDHURY MD. FUAD GALIB</span></div>
+                <div class="detail-item"><strong>Coll. Time:</strong><span contenteditable="true">22/09/2025 12:18</span></div>
+            </div>
+
+            <table id="report-results-table">
+                <thead>
+                    <tr>
+                        <th style="width:35%;">Test Name</th>
+                        <th style="width:20%;">Result</th>
+                        <th style="width:15%;">Unit</th>
+                        <th style="width:30%;">Normal Range</th>
+                        <th class="result-row-actions" style="width:5%;"></th>
+                    </tr>
+                </thead>
+                <tbody id="results-tbody">
+                    <tr class="result-row">
+                        <td><div class="editable-cell" contenteditable="true">SGPT (ALT)</div></td>
+                        <td><div class="editable-cell" contenteditable="true">4448</div></td>
+                        <td><div class="editable-cell" contenteditable="true">U/L</div></td>
+                        <td><div class="editable-cell" contenteditable="true">Male: 16-63 U/L</div></td>
+                        <td class="result-row-actions"><button class="delete-row-btn">X</button></td>
+                    </tr>
+                    <tr class="result-row">
+                        <td><div class="editable-cell" contenteditable="true">S Bilirubin (Total)</div></td>
+                        <td><div class="editable-cell" contenteditable="true">6.37</div></td>
+                        <td><div class="editable-cell" contenteditable="true">mg/dl</div></td>
+                        <td><div class="editable-cell" contenteditable="true">Adults: 0.20-1.30</div></td>
+                        <td class="result-row-actions"><button class="delete-row-btn">X</button></td>
+                    </tr>
+                     <tr class="section-header-row">
+                        <td colspan="4"><div class="editable-cell" contenteditable="true">ELECTROLYTES</div></td>
+                        <td class="result-row-actions"><button class="delete-row-btn">X</button></td>
+                     </tr>
+                      <tr class="result-row">
+                        <td><div class="editable-cell" contenteditable="true">S. Sodium (Na+)</div></td>
+                        <td><div class="editable-cell" contenteditable="true">136</div></td>
+                        <td><div class="editable-cell" contenteditable="true">mmol/L</div></td>
+                        <td><div class="editable-cell" contenteditable="true">136 - 145 mmol/L</div></td>
+                        <td class="result-row-actions"><button class="delete-row-btn">X</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="report-footer">
+                <div class="signature-block">
+                    <div class="signature-line"></div>
+                    <strong contenteditable="true">Checked By</strong><br>
+                    <span class="designation" contenteditable="true">Medical Technologist</span>
+                </div>
+                <div class="signature-block" style="text-align: right;">
+                    <div class="signature-line"></div>
+                    <strong contenteditable="true">Md. Arman Hossen</strong><br>
+                    <span class="designation" contenteditable="true">Medical Technologist</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(() => {
+    // We will use this library to export the report as an image
+    const HTML2CANVAS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    let isLibLoaded = false;
+    
+    // --- Element References ---
+    const reportTitle = document.getElementById('reportTitle');
+    const reportTypeSelector = document.getElementById('reportTypeSelector');
+    const tbody = document.getElementById('results-tbody');
+    
+    const addRowBtn = document.getElementById('addRowBtn');
+    const addSectionBtn = document.getElementById('addSectionBtn');
+    const printBtn = document.getElementById('printBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    
+    // --- Functions ---
+    const loadScript = (url, callback) => {
+        if(isLibLoaded) {
+            callback();
+            return;
+        }
+        const script = document.createElement('script');
+        script.src = url;
+        script.onload = () => { isLibLoaded = true; callback(); };
+        document.head.appendChild(script);
+    };
+    
+    const createRow = (isSection = false) => {
+        const tr = document.createElement('tr');
+        if (isSection) {
+            tr.className = 'section-header-row';
+            tr.innerHTML = `
+                <td colspan="4"><div class="editable-cell" contenteditable="true">New Section</div></td>
+                <td class="result-row-actions"><button class="delete-row-btn">X</button></td>
+            `;
+        } else {
+            tr.className = 'result-row';
+            tr.innerHTML = `
+                <td><div class="editable-cell" contenteditable="true"></div></td>
+                <td><div class="editable-cell" contenteditable="true"></div></td>
+                <td><div class="editable-cell" contenteditable="true"></div></td>
+                <td><div class="editable-cell" contenteditable="true"></div></td>
+                <td class="result-row-actions"><button class="delete-row-btn">X</button></td>
+            `;
+        }
+        tbody.appendChild(tr);
+    };
+    
+    // --- Event Handlers ---
+    const handleReportTypeChange = (e) => {
+        reportTitle.textContent = e.target.value;
+    };
+    
+    const handleTableClick = (e) => {
+        if (e.target.classList.contains('delete-row-btn')) {
+            e.target.closest('tr').remove();
+        }
+    };
+
+    const handlePrint = () => {
+        window.print();
+    };
+
+    const handleExport = () => {
+        const sheet = document.getElementById('report-sheet');
+        const actions = sheet.querySelectorAll('.result-row-actions');
+        // Hide actions column for the export
+        actions.forEach(el => el.style.display = 'none');
+        
+        loadScript(HTML2CANVAS_URL, () => {
+             html2canvas(sheet, { scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `LabGenie_Report_${Date.now()}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+                actions.forEach(el => el.style.display = '');
+            });
+        });
+    };
+
+    // --- Initialization ---
+    function initialize() {
+        if (!reportTypeSelector) return;
+        
+        // Event Listeners
+        reportTypeSelector.addEventListener('change', handleReportTypeChange);
+        addRowBtn.addEventListener('click', () => createRow(false));
+        addSectionBtn.addEventListener('click', () => createRow(true));
+        tbody.addEventListener('click', handleTableClick);
+        printBtn.addEventListener('click', handlePrint);
+        exportBtn.addEventListener('click', handleExport);
+
+        reportTypeSelector.value = "Biochemistry Report";
+    }
+    
+    initialize();
+
+})();
+</script>

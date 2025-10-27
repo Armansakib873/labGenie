@@ -1,0 +1,243 @@
+<!-- features/electrolyte-verification.html -->
+
+<style>
+/* Scoped styles for the electrolyte verification feature */
+.electro-veri-feature { display: flex; flex-direction: column; gap: 20px; }
+.calculator-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
+@media (min-width: 900px) {
+    .calculator-grid { grid-template-columns: 400px 1fr; align-items: flex-start; }
+}
+.input-section {
+    background: rgba(0,0,0,0.02); padding: 16px; border-radius: 12px;
+    display: flex; flex-direction: column; gap: 12px;
+}
+.input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px;}
+
+/* Results Section Styles */
+.results-section h3 { margin-top: 0; font-size: 18px; margin-bottom: 16px; }
+.verification-card {
+    background: var(--card-bg); padding: 16px; border-radius: 12px;
+    border: 1px solid var(--border-color); margin-bottom: 12px;
+}
+.verification-card.hidden { display: none; }
+.verification-card h4 {
+    margin: 0 0 12px 0; font-size: 15px; border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px; color: var(--muted);
+}
+.verification-item {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 14px; padding: 6px 0;
+}
+.verification-item .label { font-weight: 600; }
+.verification-item .value { font-weight: bold; font-size: 16px; }
+.verification-item .unit { font-size: 12px; color: var(--muted); margin-left: 4px; }
+.verification-item .status { font-weight: bold; padding: 3px 8px; border-radius: 12px; font-size: 11px; }
+
+/* Status Colors */
+.status-normal { background: #dcfce7; color: #166534; }
+.status-high { background: #fee2e2; color: #991b1b; }
+.status-low { background: #ffedd5; color: #9a3412; }
+.status-note { color: var(--muted); font-style: italic; font-size: 12px; }
+
+</style>
+
+<div class="electro-veri-feature">
+    <div class="calculator-grid">
+        <!-- Left Column: Inputs -->
+        <form class="input-section" id="electroForm">
+            <h3>Patient Values</h3>
+            <div class="input-grid">
+                <div class="field"><label>Na+ (mmol/L)</label><input type="number" id="na" step="any" required></div>
+                <div class="field"><label>K+ (mmol/L)</label><input type="number" id="k" step="any" required></div>
+                <div class="field"><label>Cl- (mmol/L)</label><input type="number" id="cl" step="any" required></div>
+                <div class="field"><label>HCO3- (Optional)</label><input type="number" id="hco3" step="any"></div>
+            </div>
+             <div class="field"><label>Total CO2 (Optional)</label><input type="number" id="co2" step="any"></div>
+            <div class="input-grid">
+                 <div class="field"><label>Glucose (Optional) mmol/L</label><input type="number" id="glucose" step="any"></div>
+                <div class="field"><label>Albumin (Optional) g/dL</label><input type="number" id="albumin" step="any"></div>
+            </div>
+            <button type="submit" class="calc">Verify Electrolytes</button>
+        </form>
+
+        <!-- Right Column: Results -->
+        <div class="results-section">
+            <h3>Verification Report</h3>
+            
+            <div class="verification-card hidden" id="calculatedCard">
+                <h4>Calculated Values</h4>
+                <div class="verification-item hidden" id="estHco3Item"><span class="label">Estimated HCO3-</span><div><span class="value">0</span><span class="unit">mmol/L</span></div></div>
+                <div class="verification-item hidden" id="estCo2Item"><span class="label">Estimated Total CO2</span><div><span class="value">0</span><span class="unit">mmol/L</span></div></div>
+                <div class="verification-item hidden" id="correctedNaItem"><span class="label">Corrected Sodium</span><div><span class="value">0</span><span class="unit">mmol/L</span></div></div>
+            </div>
+            
+            <div class="verification-card" id="agCard">
+                <h4>Anion Gap Analysis</h4>
+                 <div class="verification-item" id="anionGapItem">
+                    <span class="label">Anion Gap (AG)</span>
+                    <div><span class="value">--</span><span class="unit">mmol/L</span> <span class="status"></span></div>
+                </div>
+                 <div class="verification-item hidden" id="correctedAgItem">
+                    <span class="label">Albumin-Corrected AG</span>
+                     <div><span class="value">--</span><span class="unit">mmol/L</span> <span class="status"></span></div>
+                </div>
+                <p class="status-note" id="agNote">Normal Range: 8-16 mmol/L.</p>
+            </div>
+            
+            <div class="verification-card" id="balanceCard">
+                <h4>Electrolyte Balance Checks</h4>
+                 <div class="verification-item" id="naclDiffItem">
+                    <span class="label">Sodium-Chloride Differential</span>
+                    <div><span class="value">--</span><span class="unit">mmol/L</span> <span class="status"></span></div>
+                </div>
+                <p class="status-note">A normal Na-Cl difference is typically 32-40 mmol/L.</p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+(() => {
+    // --- DOM Elements ---
+    const form = document.getElementById('electroForm');
+    const inputs = {
+        na: document.getElementById('na'),
+        k: document.getElementById('k'),
+        cl: document.getElementById('cl'),
+        hco3: document.getElementById('hco3'),
+        co2: document.getElementById('co2'),
+        glucose: document.getElementById('glucose'),
+        albumin: document.getElementById('albumin')
+    };
+    const results = {
+        calculatedCard: document.getElementById('calculatedCard'),
+        estHco3Item: { cont: document.getElementById('estHco3Item'), val: document.querySelector('#estHco3Item .value') },
+        estCo2Item: { cont: document.getElementById('estCo2Item'), val: document.querySelector('#estCo2Item .value') },
+        correctedNaItem: { cont: document.getElementById('correctedNaItem'), val: document.querySelector('#correctedNaItem .value') },
+        anionGapItem: { val: document.querySelector('#anionGapItem .value'), status: document.querySelector('#anionGapItem .status') },
+        correctedAgItem: { cont: document.getElementById('correctedAgItem'), val: document.querySelector('#correctedAgItem .value'), status: document.querySelector('#correctedAgItem .status') },
+        naclDiffItem: { val: document.querySelector('#naclDiffItem .value'), status: document.querySelector('#naclDiffItem .status') },
+        agNote: document.getElementById('agNote')
+    };
+
+    // --- Verification Logic ---
+    const verify = (event) => {
+        event.preventDefault();
+
+        // 1. Parse Inputs
+        const values = {};
+        for (const key in inputs) {
+            values[key] = parseFloat(inputs[key].value) || null;
+        }
+
+        if (!values.na || !values.k || !values.cl) {
+            alert('Please enter required values: Na+, K+, and Cl-.');
+            return;
+        }
+
+        // --- 2. Perform Calculations ---
+        let hco3 = values.hco3;
+        let isHco3Estimated = false;
+        
+        // A. Calculated/Estimated Values
+        if (!hco3) {
+            hco3 = values.na - values.cl - 12; // Per user formula
+            isHco3Estimated = true;
+        }
+
+        const estCo2 = hco3 ? hco3 + 2 : null;
+        
+        let correctedNa = null;
+        if (values.glucose) {
+            // Hillier formula for glucose in mmol/L
+            correctedNa = values.na + 2.4 * ((values.glucose - 5.5) / 5.5);
+        }
+
+        // B. Anion Gap
+        const anionGap = hco3 ? values.na - (values.cl + hco3) : null;
+        let correctedAg = null;
+        if (anionGap && values.albumin) {
+            correctedAg = anionGap + 2.5 * (4.4 - values.albumin);
+        }
+
+        // C. Balance Checks
+        const naclDiff = values.na - values.cl;
+        
+        // --- 3. Update UI ---
+        updateUI({ ...values, hco3, isHco3Estimated, estCo2, correctedNa, anionGap, correctedAg, naclDiff });
+    };
+
+    const updateUI = (data) => {
+        let isCalculatedCardVisible = false;
+
+        // Calculated Values Card
+        if (data.isHco3Estimated) {
+            results.estHco3Item.val.textContent = data.hco3.toFixed(1);
+            results.estHco3Item.cont.classList.remove('hidden');
+            isCalculatedCardVisible = true;
+        } else {
+            results.estHco3Item.cont.classList.add('hidden');
+        }
+
+        if (!data.co2 && data.estCo2) { // Show estimated CO2 only if user didn't provide it
+             results.estCo2Item.val.textContent = data.estCo2.toFixed(1);
+             results.estCo2Item.cont.classList.remove('hidden');
+             isCalculatedCardVisible = true;
+        } else {
+            results.estCo2Item.cont.classList.add('hidden');
+        }
+
+        if (data.correctedNa) {
+            results.correctedNaItem.val.textContent = data.correctedNa.toFixed(1);
+            results.correctedNaItem.cont.classList.remove('hidden');
+            isCalculatedCardVisible = true;
+        } else {
+            results.correctedNaItem.cont.classList.add('hidden');
+        }
+        results.calculatedCard.classList.toggle('hidden', !isCalculatedCardVisible);
+
+        // Anion Gap Card
+        const finalAg = data.correctedAg || data.anionGap;
+        updateStatus(results.anionGapItem.val, results.anionGapItem.status, data.anionGap, 8, 16);
+        if(data.correctedAg) {
+            results.correctedAgItem.cont.classList.remove('hidden');
+            updateStatus(results.correctedAgItem.val, results.correctedAgItem.status, data.correctedAg, 8, 16);
+            results.agNote.textContent = 'Albumin-corrected AG is the recommended value for interpretation. Normal: 8-16 mmol/L.'
+        } else {
+            results.correctedAgItem.cont.classList.add('hidden');
+            results.agNote.textContent = 'Normal Range: 8-16 mmol/L.'
+        }
+        
+        // Balance Card
+        updateStatus(results.naclDiffItem.val, results.naclDiffItem.status, data.naclDiff, 32, 40);
+    };
+
+    const updateStatus = (valEl, statusEl, value, low, high) => {
+        if (value === null) {
+            valEl.textContent = '--';
+            statusEl.textContent = '';
+            statusEl.className = 'status';
+            return;
+        }
+        valEl.textContent = value.toFixed(1);
+        if (value < low) {
+            statusEl.textContent = 'LOW';
+            statusEl.className = 'status status-low';
+        } else if (value > high) {
+            statusEl.textContent = 'HIGH';
+            statusEl.className = 'status status-high';
+        } else {
+            statusEl.textContent = 'NORMAL';
+            statusEl.className = 'status status-normal';
+        }
+    };
+
+    // --- Initialization ---
+    function initialize() {
+        if (!form) return;
+        form.addEventListener('submit', verify);
+    }
+    initialize();
+})();
+</script>
