@@ -1,0 +1,44 @@
+{
+  "name": "LabGenie",
+  "short_name": "LabGenie",
+  "description": "Your Modern Lab Sidekick for essential calculations and tools.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f3f6ff",
+  "theme_color": "#764ba2",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "ss7.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "LabGenie Dashboard on Desktop"
+    },
+    {
+      "src": "ss8.png",
+      "sizes": "720x1280",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "LabGenie Dashboard on Mobile"
+    }
+  ]
+}

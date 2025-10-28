@@ -3,6 +3,15 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+<!-- PWA Manifest and Theme Color -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#764ba2"/>
+
+<!-- Apple-specific tags for a better "Add to Home Screen" experience -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <title>LabGenie</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -229,8 +238,6 @@
             <p>Compute dilution volumes.</p>
         </div>
 
-<!-- Add this card inside the #cardGrid in index.html -->
-
 <div class="card a3" role="button" onclick="showFeature('anticoagulant-calculator', 'Anticoagulant Calc')">
     <div class="icon-wrapper">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -241,16 +248,12 @@
     <p>Adjust blood bag volumes.</p>
 </div>
 
-
-
 <div class="card a1" role="button" onclick="showFeature('LDL-calculator', 'LDL Calculator')">
         <div class="icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></div>
         <h3>LDL Calculator</h3>
         <p>Calculate LDL levels.</p>
     </div>
 
-
-    <!-- Card for MDRD eGFR Calculator -->
 <div class="card a4" role="button" onclick="showFeature('egfr-calculator', 'MDRD eGFR Calculator')">
     <div class="icon-wrapper">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -262,7 +265,6 @@
     <p>Estimate kidney function.</p>
 </div>
 
-    <!-- Card for UACR Calculator -->
 <div class="card a3" role="button" onclick="showFeature('uacr-calculator', 'UACR Calculator')">
     <div class="icon-wrapper">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -275,7 +277,6 @@
     <p>Albumin/Creatinine Ratio.</p>
 </div>
     
-    <!-- Card for Electrolyte Verification -->
 <div class="card a2" role="button" onclick="showFeature('electrolyte-verification', 'Electrolyte Verification')">
     <div class="icon-wrapper">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -286,7 +287,6 @@
     <p>Verify ion panel consistency.</p>
 </div>
 
-<!-- Card for Osmolality Calculator -->
 <div class="card a5" role="button" onclick="showFeature('osmolality-calculator', 'Osmolality Calculator')">
     <div class="icon-wrapper">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -297,13 +297,6 @@
     <p>Calculate osmolal gap.</p>
 </div>
 
-
-
-        <div class="card a2" role="button" onclick="showFeature('qc-westgard-helper', 'QC Westgard Helper')">
-            <div class="icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg></div>
-            <h3>Westgard QC</h3>
-            <p>Get quick QC rule hints.</p>
-        </div>
         <div class="card a3" role="button" onclick="showFeature('manual-report-template', 'Manual Report Template')">
             <div class="icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg></div>
             <h3>Report Template</h3>
@@ -313,11 +306,6 @@
             <div class="icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11.6V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 12.4v2.6a4 4 0 0 1-4 4H3"/></svg></div>
             <h3>Unit Converter</h3>
             <p>Common lab conversions.</p>
-        </div>
-        <div class="card a5" role="button" onclick="showFeature('molarity-calculator', 'Molarity Calculator')">
-            <div class="icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7.5a2.5 2.5 0 0 1-5 0"/><path d="M21 7.5v11a2.5 2.5 0 0 1-5 0"/><path d="M16 7.5h.01"/><path d="M3 14a2.5 2.5 0 0 1 5 0"/><path d="M3 14v-2.5a2.5 2.5 0 0 1 5 0V14"/><path d="M8 11.5h.01"/><path d="M16 22a2.5 2.5 0 0 1 5 0"/><path d="M16 22v-2.5a2.5 2.5 0 0 1 5 0V22"/><path d="M21 19.5h.01"/><path d="M8 7.5a2.5 2.5 0 0 1-5 0"/><path d="M8 7.5v2a2.5 2.5 0 0 1-5 0"/><path d="M3 9.5h.01"/></svg></div>
-            <h3>Molarity Calc</h3>
-            <p>Mass, MW, and volume.</p>
         </div>
 
         <div class="card add-card" role="button" onclick="showFeature('dev-instructions', 'Developer Instructions')">
@@ -335,12 +323,25 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // Service Worker Registration (FIXED: using relative path)
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./service-worker.js')
+                .then(registration => {
+                    console.log('✅ ServiceWorker registered successfully:', registration.scope);
+                })
+                .catch(error => {
+                    console.error('❌ ServiceWorker registration failed:', error);
+                });
+        });
+    }
+    
     const body = document.body;
     const featureContainer = document.getElementById('feature-view-section');
     const titleDisplay = document.getElementById('app-title-display');
     const defaultTitle = "LabGenie";
 
-    // --- Router and View Management ---
+    // Router and View Management
     const handleRouteChange = () => {
         const hash = window.location.hash.substring(1);
         const card = document.querySelector(`.card[onclick*="'${hash}'"]`);
@@ -360,7 +361,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     window.showGrid = () => {
-        // Use pushState to clean the URL without reloading the page
         history.pushState("", document.title, window.location.pathname + window.location.search);
         renderGridView();
     };
@@ -382,7 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadFeatureContent(id, featureContainer);
     };
 
-    // --- Content Loading ---
+    // Content Loading
     async function loadFeatureContent(id, container) {
         if (id === 'dev-instructions') {
             container.innerHTML = getDevInstructionsHTML();
@@ -390,7 +390,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const resp = await fetch(`features/${id}.html`, { cache: "no-store" });
+            const resp = await fetch(`./features/${id}.html`, { cache: "no-store" });
             if (resp.ok) {
                 container.innerHTML = await resp.text();
                 runScriptsIn(container);
@@ -411,39 +411,62 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function getDevInstructionsHTML() {
         return `
-            <h3>Developer Instructions</h3>
-            <p>Follow these steps to add a new feature to LabGenie:</p>
+            <h3>🛠️ How to Make This a PWA</h3>
+            <p>Your app is almost ready! Follow these steps to complete the PWA setup:</p>
             <pre>
-1) Add a new card:
-   In index.html, copy a &lt;div class="card"...&gt; element.
-   Update the \`onclick\` function to "showFeature('your-id', 'Your Title')".
+<strong>1. Test Locally:</strong>
+   - You need to serve your app over HTTPS or localhost
+   - Use a local server like:
+     • Python: python -m http.server 8000
+     • Node: npx serve
+     • VS Code: Live Server extension
 
-2) Create the feature file:
-   Create a new file at: \`features/your-id.html\`.
-   The app will automatically fetch and load it.
+<strong>2. Deploy to a Web Host:</strong>
+   Your PWA must be served over HTTPS. Free options:
+   • GitHub Pages (github.com/pages)
+   • Netlify (netlify.com)
+   • Vercel (vercel.com)
+   • Firebase Hosting (firebase.google.com)
 
-3) Example feature file content:
-   &lt;!-- features/my-feature.html --&gt;
-   &lt;div&gt;
-     &lt;h3&gt;My Awesome New Feature&lt;/h3&gt;
-     &lt;!-- Your HTML, CSS, and JS here --&gt;
-   &lt;/div&gt;
-            </pre>`;
+<strong>3. Install on Mobile:</strong>
+   <strong>Android (Chrome):</strong>
+   - Open your deployed site
+   - Tap the menu (⋮) → "Install app" or "Add to Home Screen"
+   
+   <strong>iOS (Safari):</strong>
+   - Open your deployed site
+   - Tap the Share button (⬆️)
+   - Scroll down and tap "Add to Home Screen"
+
+<strong>4. Add New Features:</strong>
+   a) Copy an existing card in index.html
+   b) Create a new HTML file in the features/ folder
+   c) Add the path to service-worker.js urlsToCache array
+   d) Increment the CACHE_NAME version (e.g., 'labgenie-v2')
+            </pre>
+            
+            <h3>✅ What's Already Done:</h3>
+            <ul style="line-height: 2;">
+                <li>✓ Manifest file configured</li>
+                <li>✓ Service worker with offline caching</li>
+                <li>✓ App icons (192x192, 512x512, maskable)</li>
+                <li>✓ Theme colors and Apple meta tags</li>
+                <li>✓ Responsive design</li>
+            </ul>
+            
+            <p><strong>Next Step:</strong> Deploy your app to start using it as a PWA!</p>`;
     }
 
-    // --- Initial Setup ---
-    // Staggered card animation for dashboard view
+    // Initial Setup
     const cards = document.querySelectorAll('.card');
     cards.forEach((card, index) => {
         card.style.animationDelay = `${index * 0.05}s`;
     });
 
-    // Listen for hash changes (back/forward buttons)
     window.addEventListener('hashchange', handleRouteChange);
-    
-    // Initial route check on page load
     handleRouteChange();
 });
 </script>
+
 </body>
 </html>
