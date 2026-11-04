@@ -1,472 +1,270 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-
-<!-- PWA Manifest and Theme Color -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#764ba2"/>
-
-<!-- Apple-specific tags for a better "Add to Home Screen" experience -->
+<meta name="theme-color" id="tc" content="#f4f3fb">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <title>LabGenie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>try{var t=JSON.parse(localStorage.getItem('lg.th')||'"auto"');document.documentElement.dataset.e=t=='dark'||(t=='auto'&&matchMedia('(prefers-color-scheme:dark)').matches)?'dark':'light'}catch(e){}</script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-
-  :root{
-    --bg: #f3f6ff;
-    --card-bg: rgba(255,255,255,0.65);
-    --text: #111827;
-    --muted: #4b5563;
-    --border-color: rgba(0,0,0,0.08);
-    --shadow-color: rgba(60, 64, 80, 0.1);
-    --header-bg: rgba(255,255,255,0.55);
-    --accent-1:#ffb86b; --accent-1-light: #fff0db;
-    --accent-2:#7ed957; --accent-2-light: #e2ffda;
-    --accent-3:#6ec6ff; --accent-3-light: #dff2ff;
-    --accent-4:#ff6ea6; --accent-4-light: #ffe0ef;
-    --accent-5:#c18cff; --accent-5-light: #f2e7ff;
-    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  }
-
-  html,body{
-    height:100%; margin:0;
-    color: var(--text);
-    -webkit-font-smoothing:antialiased;
-  }
-  
-  body::before, body::after {
-    content: ''; position: fixed; left: 50%; top: 50%;
-    width: 150vmax; height: 150vmax;
-    border-radius: 50%;
-    background-image: radial-gradient(circle, #d5d5c8 0%, transparent 40%);
-    animation: rotate 20s linear infinite;
-    z-index: -1;
-  }
-  body::after {
-    background-image: radial-gradient(circle, #aebcc0 0%, transparent 40%);
-    animation-delay: -10s;
-  }
-  @keyframes rotate {
-    0% { transform: translate(-50%, -50%) rotate(0deg) translateX(10%); }
-    100% { transform: translate(-50%, -50%) rotate(360deg) translateX(10%); }
-  }
-
-  header.app-header{
-    position:sticky; top:0; z-index:20;
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    background: var(--header-bg);
-    border-bottom: 1px solid var(--border-color);
-    display:flex; align-items:center; gap:12px;
-    padding:10px 16px;
-  }
-  .logo {display:flex;align-items:center;gap:10px}
-  .logo svg{width:38px;height:38px}
-  .app-title{font-weight:700;font-size:17px}
-  .app-sub{font-size:12px;color:var(--muted); display: none;}
-  @media(min-width: 768px) { .app-sub { display: block; } }
-  .header-actions{margin-left:auto;display:flex;gap:10px;align-items:center}
-  
-  main{display:flex;flex-direction:column;gap:18px;padding:16px;max-width:1100px;margin:0 auto}
-
-  @keyframes card-fade-in {
-    from { opacity:0; transform: translateY(15px); }
-    to { opacity:1; transform: translateY(0); }
-  }
-  .grid {display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:14px}
-  .card{
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius:16px; padding:16px;
-    box-shadow: 0 6px 24px 0 var(--shadow-color);
-    display:flex; flex-direction:column; gap:8px;
-    cursor:pointer; user-select:none;
-    transition:all .2s ease, box-shadow .2s ease;
-    animation: card-fade-in .5s ease-out forwards;
-    opacity: 0;
-  }
-
-.card:hover {
-    border-color: #764ba2;
-    background: rgb(231, 239, 249);
-    scale: 1.05;
-    transform: translateY(-4px);
-}
-.card.active {
-    background: #764ba2;
-    color: white;
-    border-color: #764ba2;
-}
-
-  .card:hover { transform: translateY(-4px); }
-  .card:active{transform:translateY(0px) scale(0.97)}
-  .card .icon-wrapper{
-    width:48px; height:48px; border-radius:12px;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .card .icon-wrapper svg { width: 26px; height: 26px; }
-  .card h3{margin:4px 0 0;font-size:15px; color: var(--text);}
-  .card p{margin:0;font-size:12px;line-height:1.5;color:var(--muted)}
-  .a1 .icon-wrapper{background:var(--accent-1-light);}
-  .a2 .icon-wrapper{background:var(--accent-2-light);}
-  .a3 .icon-wrapper{background:var(--accent-3-light);}
-  .a4 .icon-wrapper{background:var(--accent-4-light);}
-  .a5 .icon-wrapper{background:var(--accent-5-light);}
-
-  .add-card{
-    background: transparent; border: 2px dashed var(--border-color);
-    justify-content:center; align-items:center; text-align:center;
-    color: var(--muted); box-shadow: none;
-  }
-  .add-card:hover { border-color: #764ba2; color: var(--text); }
-  
-  /* Feature View styles */
-  @keyframes feature-fade-in {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-  }
-  #feature-view-section {
-    background: var(--card-bg);
-    border-radius: 16px;
-    padding: 20px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 8px 32px 0 var(--shadow-color);
-    animation: feature-fade-in 0.4s ease-out;
-  }
-
-  /* Logic for switching between views */
-  body.viewing-feature #grid-section { display: none; }
-  body:not(.viewing-feature) #feature-view-section { display: none; }
-  body:not(.viewing-feature) .home-btn { display: none; }
-  body.viewing-feature .help-btn { display: none; }
-
-  /* Shared UI Elements */
-  .btn {
-    background:var(--card-bg); border: 1px solid var(--border-color);
-    padding:8px 12px; border-radius:10px; font-size:14px; font-weight: 600;
-    cursor: pointer; transition: all .2s ease; color: var(--text);
-  }
-  .btn:hover { border-color: #764ba2; background: rgba(128,90,213,0.1); }
-  .loader { margin: 100px auto; width: 48px; height: 48px; border: 5px solid; border-color: #667eea transparent; border-radius: 50%; animation: rotation 1s linear infinite;}
-  @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  
-  /* Form Elements in Feature View */
-  .row{display:flex;gap:12px;flex-wrap:wrap}
-  .field{flex:1;min-width:150px}
-  label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;font-weight:600;}
-  input, textarea, select {
-    width:70%;padding:12px;border-radius:10px;font-size:14px;
-    border:1px solid var(--border-color); background:var(--bg); color: var(--text);
-  }
-  input:focus { outline: 2px solid #764ba2; border-color: transparent; }
-  button.calc{background:linear-gradient(90deg,#667eea,#764ba2);color:white;border:0;padding:12px 16px;border-radius:10px;font-weight:600; cursor:pointer;}
-  .result{margin-top:12px;padding:12px;border-radius:10px;background:rgba(0,0,0,0.05);font-weight:600;font-size:15px;}
-  pre {background:rgba(0,0,0,0.05); padding:12px; border-radius:8px; font-size:13px; white-space:pre-wrap; line-height: 1.6;}
-
-
-@media (max-width: 768px) {
-      .card{
-    border-radius:30px;
-     padding:16px;
-    display:flex; 
-    flex-direction:column; gap:8px;
-  }
-
-
-   .card .icon-wrapper{
-    width:25px; height:25px; border-radius:50%;
-    padding: 8px;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .card .icon-wrapper svg { width: 26px; height: 26px; }
-  .card h3{margin:4px 0 0;font-size:15px; color: var(--text);}
-  .card p{margin:0;font-size:12px;line-height:1.5;color:var(--muted)}
-
- .app-title{font-weight:700;font-size:15px}
-  .app-sub{font-size:12px;color:var(--muted); display: none;}
-
-    input, textarea, select {
-    width:70%;padding:12px;border-radius:10px;font-size:14px;
-    border:1px solid var(--border-color); background:var(--bg); color: var(--text);
-  }
-
-
-    #feature-view-section {
-    background: var(--bg);
-    border-radius: 16px;
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 8px 32px 0 var(--shadow-color);
-
-  }
-  }
+:root{--bg:#f4f3fb;--sf:#fff;--ink:#1a1740;--mut:#64638a;--ln:rgba(26,23,64,.1);--pr:#5b3fd4;--pt:#e9e4ff;--ro:#17143a;--ok:#2fc46b;--warn:#f5a524;--bad:#f0506e;--info:#4aa8ff;--f1:'Bricolage Grotesque',system-ui,sans-serif;--f2:'Hanken Grotesk',system-ui,-apple-system,sans-serif}
+:root[data-e=dark]{--bg:#0e0d20;--sf:#181633;--ink:#ecebfa;--mut:#9d9bc4;--ln:rgba(255,255,255,.1);--pt:#2b2668;--ro:#0a0918;--pr:#8f78ff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.45 var(--f2);-webkit-font-smoothing:antialiased}
+#app{max-width:760px;margin:auto;min-height:100dvh;padding-bottom:calc(104px + env(safe-area-inset-bottom))}
+button,input,select{font:inherit;color:inherit}button{cursor:pointer;border:0;background:none}
+svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
+:focus-visible{outline:2.5px solid var(--pr);outline-offset:2px}
+.bar{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.bar h1{margin:0;font:600 19px var(--f1);letter-spacing:-.01em;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.logo{width:36px;height:36px;border-radius:11px;background:var(--pr);display:grid;place-items:center;position:relative;color:#fff}
+.logo:after{content:"";position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;background:#ffb454;border:1.5px solid var(--bg)}
+.ib{width:40px;height:40px;border-radius:14px;background:var(--sf);border:1px solid var(--ln);display:grid;place-items:center}
+.ib.on{color:#f5a524}.ib.on svg{fill:currentColor}
+.hero{padding:10px 16px 6px}.hero h2{margin:0 0 14px;font:600 32px/1.04 var(--f1);letter-spacing:-.025em;max-width:11em}
+.sb{width:100%;display:flex;align-items:center;gap:10px;padding:15px 16px;border-radius:20px;background:var(--sf);border:1px solid var(--ln);color:var(--mut);text-align:left;font-size:16px}
+.sh{display:flex;align-items:center;justify-content:space-between;padding:22px 16px 10px}
+.sh h3{margin:0;font:600 18px var(--f1)}.sh button{color:var(--pr);font-weight:600;font-size:14px;padding:6px 4px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:0 16px}
+@media(min-width:600px){.grid{grid-template-columns:repeat(3,1fr)}}
+.card{position:relative;display:flex;flex-direction:column;justify-content:space-between;gap:16px;min-height:140px;padding:14px;border-radius:24px;background:var(--sf);border:1px solid var(--ln);color:inherit;text-decoration:none;transition:transform .15s}
+.card:active{transform:scale(.97)}
+.ti{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 16%,var(--sf));color:var(--c);flex:none}
+.card b,.row b{display:block;font:600 16px/1.15 var(--f1);letter-spacing:-.005em}
+small{display:block;color:var(--mut);font-size:12.5px;line-height:1.35;margin-top:3px}
+.card .tag{position:absolute;top:16px;right:16px;width:8px;height:8px;border-radius:50%;background:var(--c)}
+.card.ed{animation:wig .35s ease-in-out infinite alternate}.card .mn{display:none;position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:var(--bad);color:#fff;place-items:center;font-weight:700}
+.card.ed .mn{display:grid}.card.ed .tag{display:none}
+@keyframes wig{from{transform:rotate(-.7deg)}to{transform:rotate(.7deg)}}
+.add{border-style:dashed;background:transparent;align-items:center;justify-content:center;text-align:center;color:var(--mut)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 16px 12px;scrollbar-width:none;scroll-snap-type:x proximity}.chips::-webkit-scrollbar{display:none}
+.chip{scroll-snap-align:start;white-space:nowrap;padding:9px 14px;border-radius:99px;background:var(--sf);border:1px solid var(--ln);font-weight:600;font-size:13.5px;color:var(--mut)}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.cats{margin:0 16px;background:var(--sf);border:1px solid var(--ln);border-radius:24px;overflow:hidden}
+.cats button{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;text-align:left;border-top:1px solid var(--ln)}.cats button:first-child{border-top:0}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--c)}.cats span{margin-left:auto;color:var(--mut);font-size:13px}
+.lst{margin:0 16px;display:flex;flex-direction:column;gap:8px}
+.row{display:flex;align-items:center;gap:12px;padding:12px;border-radius:20px;background:var(--sf);border:1px solid var(--ln);color:inherit;text-decoration:none}
+.row>div:nth-child(2){flex:1;min-width:0}.row .ti{width:42px;height:42px;border-radius:13px}
+.row .ib{width:36px;height:36px;border-radius:12px;border:0;background:none;color:var(--mut)}.row .ib.on{color:#f5a524}
+.srch{margin:6px 16px 10px;display:flex;align-items:center;gap:10px;padding:0 14px;border-radius:18px;background:var(--sf);border:1.5px solid var(--ln)}
+.srch:focus-within{border-color:var(--pr)}.srch input{flex:1;border:0;background:none;padding:14px 0;font-size:16px;outline:0;min-width:0}
+.empty{padding:36px 24px;text-align:center;color:var(--mut)}
+.tb{position:fixed;left:50%;bottom:calc(12px + env(safe-area-inset-bottom));transform:translateX(-50%);width:min(420px,calc(100% - 24px));height:66px;display:grid;grid-template-columns:repeat(4,1fr);padding:6px;border-radius:33px;background:color-mix(in srgb,var(--sf) 90%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--ln);box-shadow:0 12px 34px rgba(26,23,64,.18);z-index:20}
+.tb a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:11px;font-weight:600;color:var(--mut);text-decoration:none;border-radius:26px}
+.tb a.on{color:var(--pr);background:var(--pt)}body.kb .tb{display:none}
+.ro{margin:6px 16px 0;padding:18px;border-radius:28px;background:var(--ro);color:#fff;border:1px solid rgba(255,255,255,.08)}
+.ro .l{display:flex;align-items:center;justify-content:space-between;gap:8px;color:rgba(255,255,255,.65);font-size:13.5px;font-weight:600}
+.big{font:600 54px/1 var(--f1);letter-spacing:-.035em;margin:12px 0 2px;font-variant-numeric:tabular-nums;word-break:break-all}.big small{display:inline;font:500 15px var(--f2);letter-spacing:0;color:rgba(255,255,255,.6);margin-left:6px}
+.big.e{color:rgba(255,255,255,.28)}.err{color:#ff9aae;font-weight:600;margin:12px 0 2px}
+.pill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700;white-space:nowrap}
+.p-g{color:var(--ok);background:color-mix(in srgb,var(--ok) 18%,transparent)}.p-y{color:var(--warn);background:color-mix(in srgb,var(--warn) 18%,transparent)}.p-r{color:var(--bad);background:color-mix(in srgb,var(--bad) 20%,transparent)}.p-b{color:var(--info);background:color-mix(in srgb,var(--info) 18%,transparent)}
+.gw{position:relative;margin:16px 0 6px}.g{display:flex;height:8px;border-radius:5px;overflow:hidden}.g i{display:block;height:100%;opacity:.4}
+.t-g{background:var(--ok)}.t-y{background:var(--warn)}.t-r{background:var(--bad)}.t-b{background:var(--info)}
+.gw b{position:absolute;top:-4px;width:4px;height:16px;margin-left:-2px;border-radius:2px;background:#fff;box-shadow:0 0 0 2px var(--ro);transition:left .25s}
+.gs{display:flex;justify-content:space-between;font-size:11.5px;color:rgba(255,255,255,.5)}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.sg>div{padding:10px 12px;border-radius:16px;background:rgba(255,255,255,.07)}
+.sg em{display:block;font-style:normal;font-size:11.5px;color:rgba(255,255,255,.6)}.sg strong{font:600 19px var(--f1);font-variant-numeric:tabular-nums}.sg small{display:inline;color:rgba(255,255,255,.55);margin-left:3px}.sg .pill{margin-top:4px;display:table}
+.ac{display:flex;gap:8px;margin-top:14px}.ac button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 4px;border-radius:14px;background:rgba(255,255,255,.1);color:#fff;font-size:13px;font-weight:600}.ac button:disabled{opacity:.35}.ac svg{width:17px;height:17px}
+.fm{margin:12px 16px 0;padding:11px 14px;border-radius:16px;background:var(--pt);color:var(--pr);font-size:13.5px;font-weight:600;overflow-x:auto;white-space:nowrap}
+.fc{margin:12px 16px;padding:16px;border-radius:24px;background:var(--sf);border:1px solid var(--ln);display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fd{grid-column:span 2}.fd.h{grid-column:span 1}.fd[hidden]{display:none}
+.fd label{display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:var(--mut)}
+.in,select{display:flex;align-items:center;width:100%;background:var(--bg);border:1.5px solid transparent;border-radius:14px}
+.in:focus-within,select:focus{border-color:var(--pr);outline:0}
+.in input{flex:1;min-width:0;border:0;background:none;outline:0;padding:13px 14px;font-size:17px;font-weight:500}
+.in span{padding-right:12px;color:var(--mut);font-size:12.5px;white-space:nowrap}
+select{padding:13px 12px;font-size:16px;appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--mut) 50%),linear-gradient(135deg,var(--mut) 50%,transparent 50%);background-position:calc(100% - 20px) 52%,calc(100% - 15px) 52%;background-size:5px 5px;background-repeat:no-repeat}
+.nt{margin:0 20px 8px;color:var(--mut);font-size:13px}
+.hi{margin:0 16px;padding:14px;border-radius:20px;background:var(--sf);border:1px solid var(--ln);display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}.hi pre{flex:1;margin:0;font:inherit;font-size:13.5px;white-space:pre-wrap}.hi small{margin:0 0 4px}
+.seg{display:flex;padding:4px;border-radius:16px;background:var(--bg);gap:4px}.seg button{flex:1;padding:10px;border-radius:12px;font-weight:600;font-size:14px;color:var(--mut)}.seg .on{background:var(--sf);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.set{margin:0 16px 12px;padding:16px;border-radius:24px;background:var(--sf);border:1px solid var(--ln)}.set h4{margin:0 0 10px;font:600 15px var(--f1)}.set p{margin:0 0 8px;color:var(--mut);font-size:13.5px}
+.btn{padding:11px 14px;border-radius:14px;background:var(--pt);color:var(--pr);font-weight:700;font-size:13.5px}.btn.d{background:color-mix(in srgb,var(--bad) 14%,transparent);color:var(--bad)}
+.rr{padding:12px;border-radius:16px;background:var(--bg);display:grid;grid-template-columns:1fr 1fr 1fr 34px;gap:8px;margin-bottom:8px}.rr input{min-width:0;padding:10px;border-radius:10px;border:1.5px solid transparent;background:var(--sf);font-size:15px;outline:0}.rr input:focus{border-color:var(--pr)}.rr .w{grid-column:1/4}
+.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:99px;font-weight:600;font-size:14px;pointer-events:none;transition:.25s;z-index:30;white-space:nowrap}.toast.on{opacity:1;transform:translate(-50%,0)}
+.v{animation:vin .22s ease-out}@keyframes vin{from{opacity:0;transform:translateY(10px)}}
+#pr{display:none}
+.sheet{font:13px/1.5 Arial,sans-serif;color:#000;background:#fff;padding:24px}.sheet h2{margin:0 0 4px;font-size:20px}.sheet table{width:100%;border-collapse:collapse;margin-top:14px}.sheet td,.sheet th{border-bottom:1px solid #bbb;padding:6px 4px;text-align:left}
+@media print{#app,.toast{display:none!important}#pr{display:block}body{background:#fff}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-
-<header class="app-header">
-  <div class="logo">
-    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#764ba2"/><stop offset="100%" stop-color="#667eea"/></linearGradient></defs>
-      <rect x="2" y="2" width="44" height="44" rx="12" fill="url(#g)"/><path d="M24 12v24M12 24h24" stroke="white" stroke-width="3" stroke-linecap="round"/><circle cx="33" cy="15" r="4" fill="#ffb86b" stroke="white" stroke-width="1.5"/>
-    </svg>
-    <div>
-      <div id="app-title-display" class="app-title">LabGenie</div>
-      <div class="app-sub">Your Modern Lab Sidekick</div>
-    </div>
-  </div>
-  <div class="header-actions">
-    <button class="btn home-btn" onclick="showGrid()">🏠 Home</button>
-    <button class="btn help-btn" onclick="showFeature('dev-instructions', 'Developer Instructions')">Help</button>
-  </div>
-</header>
-
-<main>
-  <section id="grid-section">
-    <div style="margin-bottom:12px">
-      <h2 style="margin:0;font-size:20px">Core Features</h2>
-      <p style="margin:4px 0 0;font-size:14px;color:var(--muted)">Tap a feature to open its workspace.</p>
-    </div>
-
-    <div class="grid" id="cardGrid">
-        <div class="card a1" role="button" onclick="showFeature('dilution-calculator', 'Dilution Calculator')">
-            <div class="icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31"/><path d="M14 9.31V2"/><path d="M12 12.31v8.69"/><path d="m15 15-3 3-3-3"/><path d="M4.69 11.31h14.62"/></svg></div>
-            <h3>Dilution Calc</h3>
-            <p>Compute dilution volumes.</p>
-        </div>
-
-<div class="card a3" role="button" onclick="showFeature('anticoagulant-calculator', 'Anticoagulant Calc')">
-    <div class="icon-wrapper">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22a8 8 0 0 0 8-8c0-4.42-8-12-8-12S4 9.58 4 14a8 8 0 0 0 8 8z" />
-        </svg>
-    </div>
-    <h3>Anticoagulant Calc</h3>
-    <p>Adjust blood bag volumes.</p>
-</div>
-
-<div class="card a1" role="button" onclick="showFeature('LDL-calculator', 'LDL Calculator')">
-        <div class="icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></div>
-        <h3>LDL Calculator</h3>
-        <p>Calculate LDL levels.</p>
-    </div>
-
-<div class="card a4" role="button" onclick="showFeature('egfr-calculator', 'MDRD eGFR Calculator')">
-    <div class="icon-wrapper">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l.15-.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
-            <circle cx="12" cy="12" r="3"/>
-        </svg>
-    </div>
-    <h3>eGFR (MDRD)</h3>
-    <p>Estimate kidney function.</p>
-</div>
-
-<div class="card a3" role="button" onclick="showFeature('uacr-calculator', 'UACR Calculator')">
-    <div class="icon-wrapper">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3-3-3s-3 1-3 3-1 3-3 3-3-1-3-3 1-3 3-3a7 7 0 0 0 7 7Z"/>
-            <path d="M12 2l-4.5 4.5"/>
-            <path d="m16.5 6.5-1.4-1.4"/>
-        </svg>
-    </div>
-    <h3>UACR Calculator</h3>
-    <p>Albumin/Creatinine Ratio.</p>
-</div>
-    
-<div class="card a2" role="button" onclick="showFeature('electrolyte-verification', 'Electrolyte Verification')">
-    <div class="icon-wrapper">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-        </svg>
-    </div>
-    <h3>Electrolyte Check</h3>
-    <p>Verify ion panel consistency.</p>
-</div>
-
-<div class="card a5" role="button" onclick="showFeature('osmolality-calculator', 'Osmolality Calculator')">
-    <div class="icon-wrapper">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/>
-        </svg>
-    </div>
-    <h3>Osmolality Calc</h3>
-    <p>Calculate osmolal gap.</p>
-</div>
-
-        <div class="card a3" role="button" onclick="showFeature('manual-report-template', 'Manual Report Template')">
-            <div class="icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg></div>
-            <h3>Report Template</h3>
-            <p>Printable manual reports.</p>
-        </div>
-        <div class="card a4" role="button" onclick="showFeature('unit-conversion', 'Unit Conversion')">
-            <div class="icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11.6V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 12.4v2.6a4 4 0 0 1-4 4H3"/></svg></div>
-            <h3>Unit Converter</h3>
-            <p>Common lab conversions.</p>
-        </div>
-
-        <div class="card add-card" role="button" onclick="showFeature('dev-instructions', 'Developer Instructions')">
-            <div class="icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
-            <h3>Add Feature</h3>
-            <p>Extend LabGenie's tools.</p>
-        </div>
-    </div>
-  </section>
-
-  <section id="feature-view-section">
-      <!-- Feature content is loaded here by JavaScript -->
-  </section>
-</main>
-
+<div id="app"><header class="bar" id="bar"></header><main id="v"></main></div>
+<nav class="tb" id="tb"></nav><div class="toast" id="toast"></div><div id="pr"></div>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    // Service Worker Registration (FIXED: using relative path)
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./service-worker.js')
-                .then(registration => {
-                    console.log('✅ ServiceWorker registered successfully:', registration.scope);
-                })
-                .catch(error => {
-                    console.error('❌ ServiceWorker registration failed:', error);
-                });
-        });
-    }
-    
-    const body = document.body;
-    const featureContainer = document.getElementById('feature-view-section');
-    const titleDisplay = document.getElementById('app-title-display');
-    const defaultTitle = "LabGenie";
-
-    // Router and View Management
-    const handleRouteChange = () => {
-        const hash = window.location.hash.substring(1);
-        const card = document.querySelector(`.card[onclick*="'${hash}'"]`);
-        
-        if (hash && card) {
-            const title = card.getAttribute('onclick').split("', '")[1].replace("')", "");
-            renderFeatureView(hash, title);
-        } else if (hash === 'dev-instructions') {
-            renderFeatureView('dev-instructions', 'Developer Instructions');
-        } else {
-            renderGridView();
-        }
-    };
-
-    window.showFeature = (id, title) => {
-        window.location.hash = id;
-    };
-    
-    window.showGrid = () => {
-        history.pushState("", document.title, window.location.pathname + window.location.search);
-        renderGridView();
-    };
-
-    const renderGridView = () => {
-        body.classList.remove('viewing-feature');
-        document.title = defaultTitle;
-        titleDisplay.textContent = defaultTitle;
-        featureContainer.innerHTML = '';
-        window.scrollTo(0, 0);
-    };
-
-    const renderFeatureView = (id, title) => {
-        body.classList.add('viewing-feature');
-        document.title = `${title} | ${defaultTitle}`;
-        titleDisplay.textContent = title;
-        featureContainer.innerHTML = '<div class="loader"></div>';
-        window.scrollTo(0, 0);
-        loadFeatureContent(id, featureContainer);
-    };
-
-    // Content Loading
-    async function loadFeatureContent(id, container) {
-        if (id === 'dev-instructions') {
-            container.innerHTML = getDevInstructionsHTML();
-            return;
-        }
-
-        try {
-            const resp = await fetch(`./features/${id}.html`, { cache: "no-store" });
-            if (resp.ok) {
-                container.innerHTML = await resp.text();
-                runScriptsIn(container);
-            } else { throw new Error('Not found'); }
-        } catch (e) {
-            container.innerHTML = `<div style="text-align:center; padding: 40px 0;"><h3>Feature Not Found</h3><p>Could not load content for <code>${id}</code>.</p></div>`;
-        }
-    }
-
-    function runScriptsIn(container) {
-        container.querySelectorAll('script').forEach(oldScript => {
-            const newScript = document.createElement('script');
-            Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-            newScript.appendChild(document.createTextNode(oldScript.innerHTML));
-            oldScript.parentNode.replaceChild(newScript, oldScript);
-        });
-    }
-    
-    function getDevInstructionsHTML() {
-        return `
-            <h3>🛠️ How to Make This a PWA</h3>
-            <p>Your app is almost ready! Follow these steps to complete the PWA setup:</p>
-            <pre>
-<strong>1. Test Locally:</strong>
-   - You need to serve your app over HTTPS or localhost
-   - Use a local server like:
-     • Python: python -m http.server 8000
-     • Node: npx serve
-     • VS Code: Live Server extension
-
-<strong>2. Deploy to a Web Host:</strong>
-   Your PWA must be served over HTTPS. Free options:
-   • GitHub Pages (github.com/pages)
-   • Netlify (netlify.com)
-   • Vercel (vercel.com)
-   • Firebase Hosting (firebase.google.com)
-
-<strong>3. Install on Mobile:</strong>
-   <strong>Android (Chrome):</strong>
-   - Open your deployed site
-   - Tap the menu (⋮) → "Install app" or "Add to Home Screen"
-   
-   <strong>iOS (Safari):</strong>
-   - Open your deployed site
-   - Tap the Share button (⬆️)
-   - Scroll down and tap "Add to Home Screen"
-
-<strong>4. Add New Features:</strong>
-   a) Copy an existing card in index.html
-   b) Create a new HTML file in the features/ folder
-   c) Add the path to service-worker.js urlsToCache array
-   d) Increment the CACHE_NAME version (e.g., 'labgenie-v2')
-            </pre>
-            
-            <h3>✅ What's Already Done:</h3>
-            <ul style="line-height: 2;">
-                <li>✓ Manifest file configured</li>
-                <li>✓ Service worker with offline caching</li>
-                <li>✓ App icons (192x192, 512x512, maskable)</li>
-                <li>✓ Theme colors and Apple meta tags</li>
-                <li>✓ Responsive design</li>
-            </ul>
-            
-            <p><strong>Next Step:</strong> Deploy your app to start using it as a PWA!</p>`;
-    }
-
-    // Initial Setup
-    const cards = document.querySelectorAll('.card');
-    cards.forEach((card, index) => {
-        card.style.animationDelay = `${index * 0.05}s`;
-    });
-
-    window.addEventListener('hashchange', handleRouteChange);
-    handleRouteChange();
-});
+const $=s=>document.querySelector(s),ST={get(k,d){try{const v=localStorage.getItem('lg.'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('lg.'+k,JSON.stringify(v))}catch(e){}}};
+const P={home:'<path d="M3 11l9-8 9 8M5 9.5V20h14V9.5"/>',grid:'<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>',hist:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',more:'<circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/>',search:'<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',star:'<path d="m12 2.5 3 6.3 6.9.9-5 4.8 1.3 6.9L12 18l-6.2 3.4L7 14.5 2 9.7l6.9-.9z"/>',back:'<path d="m15 18-6-6 6-6"/>',copy:'<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>',save:'<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>',trash:'<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>',reset:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/>',share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/>',moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',plus:'<path d="M12 5v14M5 12h14"/>',print:'<path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M7 14h10v7H7z"/>',
+dil:'<path d="M10 2v7.3M14 9.3V2M12 12.3V21M15 15l-3 3-3-3M4.7 11.3h14.6"/>',drop:'<path d="M12 22a8 8 0 0 0 8-8c0-4.4-8-12-8-12S4 9.6 4 14a8 8 0 0 0 8 8z"/>',heart:'<path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.500 2-1.500-1.500-2.700-2-4.500-2A5.500 5.500 0 0 0 2 8.500c0 2.300 1.500 4 3 5.500l7 7z"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.900 4.900 7 7M17 17l2.100 2.100M2 12h3M19 12h3M4.900 19.100 7 17M17 7l2.100-2.100"/>',uri:'<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3-3-3s-3 1-3 3-1 3-3 3-3-1-3-3 1-3 3-3a7 7 0 0 0 7 7z"/><path d="M12 2 7.500 6.500"/>',bolt:'<path d="M13 2 3 14h9l-1 8 10-12h-9z"/>',pin:'<path d="M12 22s-8-4.500-8-11.800A8 8 0 0 1 12 2a8 8 0 0 1 8 8.200c0 7.300-8 11.800-8 11.800z"/><circle cx="12" cy="10" r="3"/>',file:'<path d="M14.500 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.500zM14 2v6h6M16 13H8M16 17H8"/>',swap:'<path d="m17 1 4 4-4 4M3 11.600V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 12.400V15a4 4 0 0 1-4 4H3"/>',flask:'<path d="M9 3h6M10 3v6L4.500 19a2 2 0 0 0 1.800 3h11.400a2 2 0 0 0 1.800-3L14 9V3"/>',act:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>'};
+const ic=n=>`<svg viewBox="0 0 24 24">${P[n]}</svg>`;
+const CAT={renal:['Renal & kidney','#d97706'],metabolic:['Metabolic & diabetic','#16a34a'],lipid:['Lipid & cardiac','#e11d74'],elec:['Electrolytes & fluids','#7c4dff'],gen:['General lab','#0e8fd8'],util:['Utilities','#0d9488']};
+/* ---------- tool registry ---------- */
+const n=(id,l,u,ph,o)=>({id,l,u,ph,...o}),s=(id,l,opts,o)=>({id,l,s:1,opts,...o}),Z=a=>a.map(([max,l,t])=>({max,l,t})),O=(l,v,u,d=1,z,sc,r)=>({l,v,u,d,z:z&&Z(z),sc,r}),W=(a,t)=>(a.n=t,a),I=Infinity;
+const LZ=[[100,'Optimal','g'],[130,'Near optimal','g'],[160,'Borderline high','y'],[190,'High','r'],[I,'Very high','r']],GZ=[[15,'G5 · Failure','r'],[30,'G4 · Severe','r'],[45,'G3b · Moderate','y'],[60,'G3a · Mild–mod.','y'],[90,'G2 · Mildly low','g'],[I,'G1 · Normal','g']];
+const lh=(a,b)=>[[a,'Low','y'],[b,'Normal','g'],[I,'High','y']];
+const TYP={Calcium:'100–300 mg/24 h',Phosphate:'400–1300 mg/24 h','Uric acid':'250–750 mg/24 h',Sodium:'40–220 mmol/24 h',Potassium:'25–125 mmol/24 h',Chloride:'110–250 mmol/24 h'};
+const T=[
+{id:'dilution-calculator',t:'Dilution Calc',d:'Compute dilution volumes.',g:'util',i:'dil',k:'c1v1 diluent factor ratio',f:'C1 · V1 = C2 · V2',
+F:[s('m','Solve for',[['v','Stock volume (C1V1 = C2V2)'],['r','Diluent for a 1 : N dilution'],['x','Correct a diluted result']]),s('vu','Volume unit',[['mL','mL'],['µL','µL'],['L','L']]),n('c1','Stock (C1)','conc.','100',{h:1,w:'m=v'}),n('c2','Target (C2)','conc.','10',{h:1,w:'m=v'}),n('v2','Final volume (V2)','','500',{w:'m=v'}),n('sv','Sample volume','','100',{w:'m=r'}),n('rd','Measured result','','45',{w:'m=x'}),n('n','Dilution factor N','×','10',{w:'m=r,x'})],
+c:v=>{const U=v.vu;if(v.m=='v'){if(v.c1==null||v.c2==null||v.v2==null)return;if(v.c1<=0||v.c2>v.c1)return{err:'Target (C2) must not exceed stock (C1)'};const a=v.c2*v.v2/v.c1;return[O('Stock to take',a,U,3),O('Diluent to add',v.v2-a,U,3),O('Dilution factor',v.c1/v.c2,'×',2)]}
+if(v.m=='r'){if(v.sv==null||v.n==null)return;if(v.n<1)return{err:'N must be at least 1'};return[O('Diluent to add',v.sv*(v.n-1),U,3),O('Total volume',v.sv*v.n,U,3)]}
+if(v.rd==null||v.n==null)return;return[O('Actual result',v.rd*v.n,'',2)]}},
+{id:'anticoagulant-calculator',t:'Anticoagulant Calc',d:'Adjust blood bag volumes.',g:'util',i:'drop',k:'cpda blood bag donation',f:'Needed = blood volume × ratio ÷ 100',
+F:[s('b','Blood bag',[['63','450 mL bag · 63 mL CPDA-1'],['49','350 mL bag · 49 mL CPDA-1'],['c','Custom bag']]),n('ab','Anticoagulant in bag','mL','63',{w:'b=c'}),n('vol','Blood collected','mL','e.g. 400',{h:1}),n('ra','Ratio','mL/100 mL','',{h:1,def:'14'})],
+c:v=>{const a=v.b=='c'?v.ab:+v.b;if(a==null||v.vol==null||v.ra==null)return;const q=v.vol*v.ra/100,d=a-q;return W([O(d>=0?'Anticoagulant to remove':'Anticoagulant to add',Math.abs(d),'mL',1),O('Needed for this volume',q,'mL',1),O('Bag suits up to',a/v.ra*100,'mL',0)],'Standard ratio is 14 mL CPDA-1 per 100 mL blood. Follow your blood bank SOP.')}},
+{id:'LDL-calculator',t:'LDL Calculator',d:'Calculate LDL levels.',g:'lipid',i:'heart',k:'cholesterol friedewald hdl triglycerides lipid',f:'LDL = TC − HDL − TG/5   ·   alt: ¾ × (TC − HDL)',
+F:[s('u','Units',[['1','mg/dL'],['2','mmol/L']]),n('tc','Total cholesterol','','200',{h:1}),n('hdl','HDL','','50',{h:1}),n('tg','Triglycerides','','150',{h:1})],
+c:v=>{if(v.tc==null||v.hdl==null||v.tg==null)return;const a=v.u=='2'?38.67:1,tc=v.tc*a,h=v.hdl*a,tg=v.tg*(v.u=='2'?88.57:1);if(h>tc)return{err:'HDL cannot exceed total cholesterol'};return W([O('LDL · Friedewald',tc-h-tg/5,'mg/dL',1,LZ,[40,220],'< 100 optimal'),O('LDL · ¾ × (TC−HDL)',.75*(tc-h),'mg/dL'),O('Non-HDL',tc-h,'mg/dL'),O('VLDL (TG/5)',tg/5,'mg/dL')],(tg>400?'Friedewald is unreliable when TG exceeds 400 mg/dL. ':'')+'Results shown in mg/dL.')}},
+{id:'egfr-calculator',t:'eGFR (MDRD)',d:'Estimate kidney function.',g:'renal',i:'gear',k:'gfr mdrd bsa ckd creatinine body surface',f:'175 × SCr^−1.154 × Age^−0.203 (× 0.742 if female)',
+F:[s('x','Sex',[['m','Male'],['f','Female']],{h:1}),s('u','Creatinine unit',[['1','mg/dL'],['88.4','µmol/L']],{h:1}),n('age','Age','yrs','50',{h:1}),n('scr','Serum creatinine','','1.0',{h:1}),n('ht','Height','cm','170',{h:1}),n('wt','Weight','kg','70',{h:1}),n('cc','CCR (optional)','mL/min','from CCR tool')],
+c:(v,S)=>{if(v.scr==null||v.age==null)return;const sc=v.scr/+v.u;if(sc<=0)return{err:'Creatinine must be above 0'};let g=175*sc**-1.154*v.age**-.203;if(v.x=='f')g*=.742;const r=[O('eGFR · MDRD',g,'mL/min/1.73 m²',1,GZ,[0,130],'≥ 90 normal')];if(v.ht!=null&&v.wt!=null){const b=Math.sqrt(v.ht*v.wt/3600),c=v.cc??S.ccr;r.push(O('Body surface area',b,'m²',2));if(c!=null)r.push(O('BSA-corrected GFR',c*1.73/b,'mL/min/1.73 m²'))}return r}},
+{id:'uacr-calculator',t:'UACR Calculator',d:'Albumin / creatinine ratio.',g:'renal',i:'uri',k:'microalbumin macr albumin creatinine ratio urine',f:'ACR = Albumin ÷ (Creatinine ÷ 100)',
+F:[n('al','Urinary albumin','mg/L','15'),s('u','Creatinine unit',[['1','mg/dL'],['11.31','mmol/L']],{h:1}),n('cr','Urinary creatinine','','100',{h:1})],
+c:v=>{if(v.al==null||v.cr==null)return;const c=v.cr*+v.u;if(c<=0)return{err:'Creatinine must be above 0'};const r=v.al*100/c;return[O('Albumin / creatinine',r,'mg/g',1,[[30,'A1 · Normal','g'],[300,'A2 · Moderate','y'],[I,'A3 · Severe','r']],[0,400],'< 30 mg/g'),O('Same ratio',r*.1131,'mg/mmol',2)]}},
+{id:'electrolyte-verification',t:'Electrolyte Check',d:'Verify ion panel consistency.',g:'elec',i:'bolt',k:'tco2 anion gap sodium potassium chloride bicarbonate balance',f:'TCO₂ = (Na + K − Cl) − 15.3',
+F:[n('na','Sodium (Na)','mEq/L','140',{h:1}),n('k','Potassium (K)','mEq/L','4.0',{h:1}),n('cl','Chloride (Cl)','mEq/L','100',{h:1}),n('hc','Measured HCO₃ (optional)','mEq/L','24',{h:1})],
+c:v=>{if(v.na==null||v.k==null||v.cl==null)return;const te=v.na+v.k-v.cl-15.3,r=[O('Estimated TCO₂',te,'mEq/L',1,lh(22,29.01),[10,40],'22–29')];if(v.hc!=null){const ag=v.na+v.k-v.cl-v.hc;r.unshift(O('Anion gap (with K)',ag,'mEq/L',1,[[12,'Low','y'],[20.01,'Normal','g'],[I,'High','r']],[0,32],'12–20'));r.push(O('Anion gap (no K)',ag-v.k,'mEq/L'),O('Estimate vs measured',Math.abs(te-v.hc),'mEq/L',1,[[3.01,'Consistent','g'],[5.01,'Borderline','y'],[I,'Recheck panel','r']],[0,8]))}return r}},
+{id:'osmolality-calculator',t:'Osmolality Calc',d:'Calculate osmolal gap.',g:'elec',i:'pin',k:'serum osmolarity gap tonicity',f:'1.86 × (Na + K) + Urea/6 + Glucose',
+F:[n('na','Sodium','mEq/L','140',{h:1}),n('k','Potassium','mEq/L','4.0',{h:1}),n('ur','Urea','mg/dL','30',{h:1}),s('gu','Glucose unit',[['1','mmol/L'],['0.0556','mg/dL']],{h:1}),n('gl','Glucose','','5.5',{h:1}),n('ms','Measured (optional)','mOsm/kg','',{h:1})],
+c:v=>{if(v.na==null||v.k==null||v.ur==null||v.gl==null)return;const g=v.gl*(v.gu=='1'?1:1/18),c=1.86*(v.na+v.k)+v.ur/6+g,sd=2*v.na+g+v.ur/6,r=[O('Calculated osmolarity',c,'mOsm/kg',1,lh(275,295.01),[240,340],'275–295')];if(v.ms!=null)r.push(O('Osmolal gap',v.ms-sd,'mOsm/kg',1,[[10,'Normal','g'],[20,'Elevated','y'],[I,'High','r']],[-10,40],'< 10'));return W(r,'Gap uses 2Na + glucose + urea/6.')}},
+{id:'manual-report-template',t:'Report Template',d:'Printable manual reports.',g:'util',i:'file',k:'print patient result sheet',x:'rep'},
+{id:'unit-conversion',t:'Unit Converter',d:'Common lab conversions.',g:'util',i:'swap',k:'glucose fluid mmol mg/dl creatinine hba1c convert',x:'cv'},
+{id:'homa-ir',t:'HOMA-IR',d:'Insulin resistance index.',g:'metabolic',i:'act',k:'insulin glucose resistance',f:'(Insulin × Glucose mg/dL) ÷ 405',F:[n('ins','Fasting insulin','µIU/mL','8.5'),s('gu','Glucose unit',[['1','mg/dL'],['18','mmol/L']],{h:1}),n('gl','Fasting glucose','','90',{h:1})],
+c:v=>{if(v.ins==null||v.gl==null)return;return[O('HOMA-IR',v.ins*v.gl*+v.gu/405,'',2,[[1,'Optimal','g'],[2,'Normal','g'],[3,'Early resistance','y'],[I,'Resistant','r']],[0,5],'< 1.0 optimal, > 2.9 high')]}},
+{id:'transferrin-saturation',t:'Transferrin Saturation',d:'Iron status evaluation.',g:'gen',i:'flask',k:'tsat iron tibc',f:'(Serum iron ÷ TIBC) × 100',F:[n('fe','Serum iron','µg/dL','90',{h:1}),n('tb','TIBC','µg/dL','300',{h:1})],
+c:v=>{if(v.fe==null||v.tb==null)return;if(v.tb<=0)return{err:'TIBC must be above 0'};return[O('Saturation',v.fe/v.tb*100,'%',1,lh(20,50.01),[0,80],'20–50 %'),O('UIBC',v.tb-v.fe,'µg/dL',0)]}},
+{id:'protein-creatinine-ratio',t:'Protein/Creatinine',d:'Proteinuria screening.',g:'renal',i:'uri',k:'pcr urine protein',f:'Urine protein ÷ Urine creatinine',F:[n('p','Urinary protein','mg/dL','10',{h:1}),n('c','Urinary creatinine','mg/dL','100',{h:1})],
+c:v=>{if(v.p==null||v.c==null)return;if(v.c<=0)return{err:'Creatinine must be above 0'};const r=v.p/v.c;return[O('PCR',r,'mg/mg',2,[[.2,'Normal','g'],[.5,'Increased','y'],[I,'Severe','r']],[0,1],'< 0.2 mg/mg'),O('Same ratio',r*1000,'mg/g',0)]}},
+{id:'creatinine-clearance',t:'Creatinine Clearance',d:'Timed urine clearance.',g:'renal',i:'hist',k:'ccr 24 hour urine',f:'(U.Creat × Volume) ÷ (S.Creat × minutes)',F:[n('uc','Urine creatinine','mg/dL','100',{h:1}),n('sc','Serum creatinine','mg/dL','1.0',{h:1}),n('vo','Urine volume','mL','1500',{h:1}),n('hr','Collection time','hours','',{h:1,def:'24'})],
+c:(v,S)=>{if(v.uc==null||v.sc==null||v.vo==null||v.hr==null)return;if(v.sc<=0||v.hr<=0)return{err:'Serum creatinine and time must be above 0'};const r=v.uc*v.vo/(v.sc*v.hr*60);S.ccr=r;return[O('Clearance',r,'mL/min',1,[[30,'Severely low','r'],[60,'Moderately low','y'],[90,'Mildly low','y'],[120.01,'Normal','g'],[I,'High','b']],[0,160],'90–120 mL/min')]}},
+{id:'urinary-ca-po4-ua',t:'Urinary Ca / PO₄ / UA',d:'Total excretion per sample.',g:'renal',i:'flask',k:'calcium phosphate uric acid urine',f:'(Result × Volume) ÷ 100',F:[s('an','Analyte',[['Calcium','Calcium'],['Phosphate','Phosphate'],['Uric acid','Uric acid']]),n('m','Machine result','mg/dL','15',{h:1}),n('vo','Urine volume','mL','1500',{h:1})],
+c:v=>{if(v.m==null||v.vo==null)return;return W([O(v.an+' in total volume',v.m*v.vo/100,'mg',1,null,null,TYP[v.an])],'Typical adult 24 h range: '+TYP[v.an]+'. Applies to a full 24 h collection.')}},
+{id:'urinary-electrolytes',t:'Urinary Electrolytes',d:'Excretion per sample.',g:'elec',i:'bolt',k:'sodium potassium chloride urine excretion',f:'(Result × Volume) ÷ 1000',F:[s('an','Analyte',[['Sodium','Sodium'],['Potassium','Potassium'],['Chloride','Chloride']]),n('m','Machine result','mmol/L','40',{h:1}),n('vo','Urine volume','mL','1500',{h:1})],
+c:v=>{if(v.m==null||v.vo==null)return;return W([O(v.an+' in total volume',v.m*v.vo/1000,'mmol',1)],'Typical adult 24 h range: '+TYP[v.an]+'. Applies to a full 24 h collection.')}},
+{id:'urine-osmolarity',t:'Urine Osmolarity',d:'Estimate urine concentration.',g:'elec',i:'pin',k:'urine osmolality sodium potassium urea',f:'1.86 × (U.Na + U.K) + U.Urea/6',F:[n('na','Urine Na','mEq/L','80',{h:1}),n('k','Urine K','mEq/L','30',{h:1}),n('ur','Urine urea','mg/dL','300')],
+c:v=>{if(v.na==null||v.k==null||v.ur==null)return;return[O('Urine osmolarity',1.86*(v.na+v.k)+v.ur/6,'mOsm/kg',1,lh(500,850.01),[0,1200],'500–850')]}},
+{id:'urine-protein-24h',t:'24 h Urine Protein',d:'Daily protein excretion.',g:'renal',i:'uri',k:'total protein urine daily',f:'(Result × Volume) ÷ 100,000',F:[n('m','Machine result','mg/dL','15',{h:1}),n('vo','24 h volume','mL','1800',{h:1})],
+c:v=>{if(v.m==null||v.vo==null)return;const g=v.m*v.vo/1e5;return[O('Protein excretion',g,'g/24 h',2,[[.15,'Normal','g'],[3.5,'Proteinuria','y'],[I,'Nephrotic range','r']],[0,5],'< 0.15 g/24 h'),O('Same value',g*1000,'mg/24 h',0)]}},
+{id:'urine-albumin-24h',t:'24 h Urine Albumin',d:'Daily albumin excretion.',g:'renal',i:'uri',k:'albumin microalbuminuria',f:'Albumin (mg/L) × Volume (mL) ÷ 1000',F:[n('m','Urine albumin','mg/L','20',{h:1}),n('vo','24 h volume','mL','1500',{h:1})],
+c:v=>{if(v.m==null||v.vo==null)return;return[O('Albumin excretion',v.m*v.vo/1000,'mg/24 h',1,[[30,'Normal','g'],[300,'Microalbuminuria','y'],[I,'Macroalbuminuria','r']],[0,400],'< 30 mg/24 h')]}},
+{id:'globulin-ag-ratio',t:'Globulin & A:G Ratio',d:'Protein panel assessment.',g:'gen',i:'act',k:'albumin total protein globulin liver',f:'Globulin = TP − Albumin;  A:G = Albumin ÷ Globulin',F:[n('tp','Total protein','g/dL','7.2',{h:1}),n('al','Albumin','g/dL','4.2',{h:1})],
+c:v=>{if(v.tp==null||v.al==null)return;const g=v.tp-v.al;if(g<=0)return{err:'Albumin must be lower than total protein'};return[O('A:G ratio',v.al/g,'',2,lh(1.1,2.51),[0,3.5],'1.1–2.5'),O('Globulin',g,'g/dL',2)]}},
+{id:'bun-calculator',t:'BUN',d:'Urea to BUN conversion.',g:'renal',i:'gear',k:'blood urea nitrogen',f:'BUN = Urea ÷ 2.14',F:[n('ur','Serum urea','mg/dL','30',{h:1}),n('cr','Creatinine (optional)','mg/dL','1.0',{h:1})],
+c:v=>{if(v.ur==null)return;const b=v.ur/2.14,r=[O('BUN',b,'mg/dL',1,lh(7,20.01),[0,60],'7–20 mg/dL'),O('Urea',v.ur*.1665,'mmol/L',2)];if(v.cr>0)r.push(O('BUN : creatinine',b/v.cr,'',1,lh(10,20.01),[0,40],'10–20'));return r}},
+{id:'ghb-hba1c',t:'GHb / HbA1c',d:'Glycated haemoglobin.',g:'metabolic',i:'drop',k:'a1c glycated hemoglobin eag',f:'GHb = HbA1c × 1.76',F:[n('a','HbA1c','%','6.5')],
+c:v=>{if(v.a==null)return;return[O('GHb',v.a*1.76,'%',2),O('HbA1c status',v.a,'%',1,[[5.7,'Normal','g'],[6.5,'Prediabetes','y'],[I,'Diabetes range','r']],[4,12]),O('Avg glucose (eAG)',28.7*v.a-46.7,'mg/dL',0),O('IFCC',(v.a-2.15)*10.929,'mmol/mol',0)]}},
+{id:'psa-ratio',t:'PSA Ratio',d:'Free / total PSA.',g:'gen',i:'act',k:'prostate free total psa',f:'(Free PSA ÷ Total PSA) × 100',F:[n('fp','Free PSA','ng/mL','0.8',{h:1}),n('tp','Total PSA','ng/mL','4.0',{h:1})],
+c:v=>{if(v.fp==null||v.tp==null)return;if(v.tp<=0)return{err:'Total PSA must be above 0'};return W([O('Free / total',v.fp/v.tp*100,'%',1,[[10,'Higher risk','r'],[25,'Intermediate','y'],[I,'Lower risk','g']],[0,50],'> 25 % lower risk')],'Most useful when total PSA is 4–10 ng/mL.')}}];
+const CV=[['Glucose','mg/dL','mmol/L',1/18],['Creatinine','mg/dL','µmol/L',88.4],['Urea','mg/dL','mmol/L',.1665],['BUN','mg/dL','mmol/L urea',.357],['Uric acid','mg/dL','µmol/L',59.48],['Cholesterol','mg/dL','mmol/L',.02586],['Triglycerides','mg/dL','mmol/L',.01129],['Calcium','mg/dL','mmol/L',.2495],['Magnesium','mg/dL','mmol/L',.4114],['Phosphate','mg/dL','mmol/L',.3229],['Bilirubin','mg/dL','µmol/L',17.1],['Iron','µg/dL','µmol/L',.1791],['Haemoglobin','g/dL','g/L',10],['Albumin / protein','g/dL','g/L',10],['Insulin','µIU/mL','pmol/L',6.945],['HbA1c','% NGSP','mmol/mol IFCC',x=>(x-2.15)*10.929,y=>y/10.929+2.15],['HbA1c → eAG','% NGSP','mg/dL',x=>28.7*x-46.7,y=>(y+46.7)/28.7]];
+const DEF=['dilution-calculator','anticoagulant-calculator','LDL-calculator','egfr-calculator','uacr-calculator','electrolyte-verification','osmolality-calculator','manual-report-template','unit-conversion'];
+const S={pins:ST.get('pins',DEF),hist:ST.get('hist',[]),th:ST.get('th','auto'),dec:ST.get('dec','a'),rec:ST.get('rec',[]),v:{},sh:{},cat:'all',q:'',edit:0,cv:{i:0,a:'',b:''},rp:ST.get('rp',{p:'',pid:'',dt:new Date().toISOString().slice(0,10),rows:[{n:'',r:'',u:'',g:''}]}),nav:0};
+const by=id=>T.find(t=>t.id==id||t.id.toLowerCase()==id.toLowerCase());
+const fm=(x,d)=>{if(S.dec!='a')d=+S.dec;return x.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d})};
+const toast=m=>{const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),1900)};
+const esc=x=>String(x??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* ---------- theme ---------- */
+const mq=matchMedia('(prefers-color-scheme:dark)');
+function theme(){const e=S.th=='auto'?(mq.matches?'dark':'light'):S.th;document.documentElement.dataset.e=e;$('#tc').content=e=='dark'?'#0e0d20':'#f4f3fb'}mq.addEventListener('change',theme);
+/* ---------- helpers ---------- */
+const num=x=>{const f=parseFloat(String(x).replace(',','.'));return isNaN(f)?null:f};
+function init(t){if(!S.v[t.id]){const o={};(t.F||[]).forEach(f=>o[f.id]=f.s?f.opts[0][0]:(f.def||''));S.v[t.id]=o}return S.v[t.id]}
+const V=t=>{const st=init(t),v={};t.F.forEach(f=>v[f.id]=f.s?st[f.id]:num(st[f.id]));return v};
+const vis=(f,t)=>{if(!f.w)return 1;const[k,a]=f.w.split('=');return a.split(',').includes(S.v[t.id][k])};
+const stat=o=>o.z&&o.z.find(z=>o.v<z.max);
+const pill=z=>z?`<span class="pill p-${z.t}">${z.l}</span>`:'';
+function gauge(o){const[a,b]=o.sc;let p=a,h='';o.z.forEach(z=>{const e=Math.min(Math.max(z.max,a),b);if(e>p){h+=`<i class="t-${z.t}" style="width:${(e-p)/(b-a)*100}%"></i>`;p=e}});const x=Math.min(1,Math.max(0,(o.v-a)/(b-a)))*100;return`<div class="gw"><div class="g">${h}</div><b style="left:${x}%"></b></div><div class="gs"><span>${a}</span><span>${b}</span></div>`}
+const line=o=>{const z=stat(o);return`${o.l}: ${fm(o.v,o.d)}${o.u?' '+o.u:''}${z?' ('+z.l+')':''}`};
+/* ---------- views ---------- */
+function card(t){const c=CAT[t.g];return`<a class="card${S.edit?' ed':''}" href="#${t.id}" data-id="${t.id}" style="--c:${c[1]}"><span class="tag"></span><span class="mn">−</span><div class="ti">${ic(t.i)}</div><div><b>${t.t}</b><small>${t.d}</small></div></a>`}
+function row(t){const c=CAT[t.g],on=S.pins.includes(t.id);return`<a class="row" href="#${t.id}" style="--c:${c[1]}"><div class="ti">${ic(t.i)}</div><div><b>${t.t}</b><small>${c[0]} · ${t.d}</small></div><button class="ib${on?' on':''}" data-a="pin" data-id="${t.id}" aria-label="${on?'Unpin':'Pin to home'}">${ic('star')}</button></a>`}
+function home(){const pins=S.pins.map(by).filter(Boolean),rec=S.rec.map(by).filter(Boolean);
+return`<div class="hero"><h2>What are you calculating?</h2><button class="sb" data-a="srch">${ic('search')}Search ${T.length} calculators</button></div>
+<div class="sh"><h3>Quick access</h3><button data-a="edit">${S.edit?'Done':'Edit'}</button></div>
+<div class="grid">${pins.map(card).join('')}<a class="card add" href="#tools">${ic('plus')}<small>Add more tools</small></a></div>
+${rec.length&&!S.edit?`<div class="sh"><h3>Recently used</h3></div><div class="chips">${rec.map(t=>`<a class="chip" href="#${t.id}" style="text-decoration:none">${t.t}</a>`).join('')}</div>`:''}
+<div class="sh"><h3>Browse by category</h3></div><div class="cats">${Object.entries(CAT).map(([k,c])=>`<button data-a="cat" data-k="${k}" style="--c:${c[1]}"><i class="dot"></i>${c[0]}<span>${T.filter(t=>t.g==k).length}</span></button>`).join('')}</div>
+<p class="nt" style="margin-top:18px">For professional reference only. Verify results against your laboratory's validated procedures.</p>`}
+function list(){const q=S.q.toLowerCase().split(/\s+/).filter(Boolean),r=T.filter(t=>(S.cat=='all'||t.g==S.cat)&&q.every(w=>(t.t+' '+t.d+' '+t.k+' '+CAT[t.g][0]).toLowerCase().includes(w)));return r.length?`<div class="lst">${r.map(row).join('')}</div>`:`<div class="empty">No calculators match “${esc(S.q)}”.</div>`}
+function tools(){return`<div class="hero"><h2 style="font-size:28px">All calculators</h2></div><label class="srch">${ic('search')}<input id="q" type="search" placeholder="Search name, test or formula" value="${esc(S.q)}" autocomplete="off"></label>
+<div class="chips"><button class="chip${S.cat=='all'?' on':''}" data-a="cat" data-k="all">All</button>${Object.entries(CAT).map(([k,c])=>`<button class="chip${S.cat==k?' on':''}" data-a="cat" data-k="${k}">${c[0]}</button>`).join('')}</div><div id="list">${list()}</div>`}
+function hist(){return`<div class="hero"><h2 style="font-size:28px">Saved results</h2></div>${S.hist.length?S.hist.map((h,i)=>`<div class="hi"><div style="flex:1"><small>${new Date(h.ts).toLocaleString([], {dateStyle:'medium',timeStyle:'short'})}</small><pre>${esc(h.tx)}</pre></div><button class="ib" data-a="hcopy" data-i="${i}" aria-label="Copy">${ic('copy')}</button><button class="ib" data-a="hdel" data-i="${i}" aria-label="Delete">${ic('trash')}</button></div>`).join('')+`<div style="padding:8px 16px"><button class="btn d" data-a="hclr">Clear all</button></div>`:`<div class="empty">Nothing saved yet.<br>Tap <b>Save</b> on any result to keep it here.</div>`}`}
+function more(){const sg=(k,a)=>`<div class="seg">${a.map(([v,l])=>`<button class="${S[k]==v?'on':''}" data-a="${k}" data-v="${v}">${l}</button>`).join('')}</div>`;
+return`<div class="hero"><h2 style="font-size:28px">Settings</h2></div><div class="set"><h4>Appearance</h4>${sg('th',[['auto','System'],['light','Light'],['dark','Dark']])}</div><div class="set"><h4>Decimal places</h4>${sg('dec',[['a','Auto'],['1','1'],['2','2'],['3','3']])}</div>
+<div class="set"><h4>Install on your phone</h4><p><b>Android (Chrome):</b> menu ⋮ → Install app.<br><b>iPhone (Safari):</b> Share → Add to Home Screen.</p></div>
+<div class="set"><h4>Your data</h4><p>Pins, saved results and settings stay on this device.</p><button class="btn" data-a="rst">Reset home shortcuts</button></div>
+<div class="set"><h4>About</h4><p>LabGenie · ${T.length} calculators. Includes formulas from Lab Calculator by ArRoni. For professional reference only; always verify with validated laboratory procedures.</p></div>`}
+/* ---------- tool page ---------- */
+function field(t,f){const st=S.v[t.id],id='i-'+f.id;return`<div class="fd${f.h?' h':''}" ${vis(f,t)?'':'hidden'}><label for="${id}">${f.l}</label>${f.s?`<select id="${id}" data-i="${f.id}">${f.opts.map(([v,l])=>`<option value="${v}"${st[f.id]==v?' selected':''}>${l}</option>`).join('')}</select>`:`<div class="in"><input id="${id}" data-i="${f.id}" inputmode="decimal" autocomplete="off" enterkeyhint="done" placeholder="${f.ph||''}" value="${esc(st[f.id])}">${f.u?`<span>${f.u}</span>`:''}</div>`}</div>`}
+function ro(t){const r=t.c(V(t),S.sh);S.out=r&&!r.err?r:null;const act=`<div class="ac"><button data-a="copy" ${S.out?'':'disabled'}>${ic('copy')}Copy</button><button data-a="save" ${S.out?'':'disabled'}>${ic('save')}Save</button>${navigator.share?`<button data-a="share" ${S.out?'':'disabled'}>${ic('share')}Share</button>`:''}<button data-a="reset">${ic('reset')}Reset</button></div>`;
+if(!r)return`<div class="l">Result</div><div class="big e">—</div><div class="gs" style="font-size:13px">Enter the values below</div>${act}`;
+if(r.err)return`<div class="l">Check your inputs</div><div class="err">${r.err}</div>${act}`;
+const p=r[0],z=stat(p);return`<div class="l"><span>${p.l}</span>${pill(z)}</div><div class="big">${fm(p.v,p.d)}<small>${p.u}</small></div>${p.z?gauge(p):''}${p.r?`<div class="gs" style="font-size:12.5px;margin-top:8px">Reference: ${p.r}</div>`:''}${r.length>1?`<div class="sg">${r.slice(1).map(o=>`<div><em>${o.l}</em><strong>${fm(o.v,o.d)}</strong><small>${o.u}</small>${pill(stat(o))}</div>`).join('')}</div>`:''}${r.n?`<div class="gs" style="font-size:12.5px;margin-top:12px;display:block;line-height:1.4">${r.n}</div>`:''}${act}`}
+const upd=()=>{const t=S.cur;if(t&&t.F)$('#ro').innerHTML=ro(t)};
+function tool(t){const c=CAT[t.g];S.cur=t;if(t.x=='rep')return rep();if(t.x=='cv')return conv();init(t);
+return`<div style="--c:${c[1]}"><section class="ro" id="ro">${ro(t)}</section><div class="fm">${t.f}</div><div class="fc" id="fc">${t.F.map(f=>field(t,f)).join('')}</div></div>`}
+/* converter */
+function conv(){const c=CV[S.cv.i];return`<div class="fc" style="margin-top:6px"><div class="fd"><label for="cs">Test</label><select id="cs">${CV.map((x,i)=>`<option value="${i}"${i==S.cv.i?' selected':''}>${x[0]}</option>`).join('')}</select></div><div class="fd"><label for="ca">${c[1]}</label><div class="in"><input id="ca" data-cv="a" inputmode="decimal" value="${esc(S.cv.a)}" placeholder="Enter value"><span>${c[1]}</span></div></div><div class="fd" style="text-align:center"><button class="btn" data-a="swp" style="padding:8px 18px">${ic('swap')}</button></div><div class="fd"><label for="cb">${c[2]}</label><div class="in"><input id="cb" data-cv="b" inputmode="decimal" value="${esc(S.cv.b)}" placeholder="Result"><span>${c[2]}</span></div></div></div><p class="nt">${typeof c[3]=='number'?`1 ${c[1]} = ${c[3]} ${c[2]}`:'Formula-based conversion'}. Type in either box.</p>`}
+function cvset(w){const c=CV[S.cv.i],x=num(S.cv[w]),o=w=='a'?'b':'a';if(x==null){S.cv[o]='';}else{const f=w=='a'?(typeof c[3]=='number'?x*c[3]:c[3](x)):(typeof c[3]=='number'?x/c[3]:c[4](x));S.cv[o]=String(+f.toPrecision(5))}const e=$('#c'+o);if(e)e.value=S.cv[o]}
+/* report */
+const flag=(r,g)=>{const x=num(r),m=String(g).match(/([\d.]+)\s*[-–]\s*([\d.]+)/),l=String(g).match(/<\s*([\d.]+)/),h=String(g).match(/>\s*([\d.]+)/);if(x==null)return'';if(m)return x<+m[1]?'L':x>+m[2]?'H':'';if(l)return x>=+l[1]?'H':'';if(h)return x<=+h[1]?'L':'';return''};
+const QA=[['Glucose','mg/dL','70–100'],['Urea','mg/dL','15–40'],['Creatinine','mg/dL','0.6–1.3'],['Sodium','mEq/L','135–145'],['Potassium','mEq/L','3.5–5.1'],['Cholesterol','mg/dL','< 200'],['Triglycerides','mg/dL','< 150'],['Hemoglobin','g/dL','12–16']];
+function rtext(){const r=S.rp;return`LABORATORY REPORT\nPatient: ${r.p}  ID: ${r.pid}  Date: ${r.dt}\n`+r.rows.filter(x=>x.n).map(x=>`${x.n}: ${x.r} ${x.u} ${flag(x.r,x.g)} (ref ${x.g})`).join('\n')}
+function rhtml(){const r=S.rp;return`<div class="sheet"><h2>Laboratory Report</h2><div>Patient: <b>${esc(r.p)}</b> &nbsp; ID: ${esc(r.pid)} &nbsp; Date: ${esc(r.dt)}</div><table><tr><th>Test</th><th>Result</th><th>Unit</th><th>Reference</th></tr>${r.rows.filter(x=>x.n).map(x=>`<tr><td>${esc(x.n)}</td><td><b>${esc(x.r)} ${flag(x.r,x.g)}</b></td><td>${esc(x.u)}</td><td>${esc(x.g)}</td></tr>`).join('')}</table></div>`}
+const rrows=()=>S.rp.rows.map((x,i)=>`<div class="rr"><input class="w" data-r="n" data-i="${i}" placeholder="Test name" value="${esc(x.n)}"><button class="ib" data-a="rdel" data-i="${i}" aria-label="Remove row">${ic('trash')}</button><input data-r="r" data-i="${i}" placeholder="Result" inputmode="decimal" value="${esc(x.r)}"><input data-r="u" data-i="${i}" placeholder="Unit" value="${esc(x.u)}"><input data-r="g" data-i="${i}" placeholder="Range" value="${esc(x.g)}"></div>`).join('');
+function rep(){const r=S.rp;return`<div class="fc" style="margin-top:6px"><div class="fd"><label>Patient name</label><div class="in"><input data-p="p" value="${esc(r.p)}"></div></div><div class="fd h"><label>ID</label><div class="in"><input data-p="pid" value="${esc(r.pid)}"></div></div><div class="fd h"><label>Date</label><div class="in"><input type="date" data-p="dt" value="${esc(r.dt)}"></div></div></div>
+<div class="sh" style="padding-top:6px"><h3>Results</h3></div><div class="chips">${QA.map((q,i)=>`<button class="chip" data-a="radd" data-i="${i}">+ ${q[0]}</button>`).join('')}</div><div class="fc" style="display:block" id="rr">${rrows()}<button class="btn" data-a="radd" data-i="-1">+ Add row</button></div>
+<div class="ac" style="margin:0 16px"><button class="btn" style="flex:1" data-a="rprint">Print report</button><button class="btn" style="flex:1" data-a="rcopy">Copy text</button><button class="btn d" style="flex:0 0 auto" data-a="rclr">Clear</button></div>`}
+/* ---------- shell ---------- */
+function bar(tab,t){$('#bar').innerHTML=t?`<button class="ib" data-a="back" aria-label="Back">${ic('back')}</button><h1>${t.t}</h1><button class="ib${S.pins.includes(t.id)?' on':''}" data-a="pin" data-id="${t.id}" aria-label="Pin to home">${ic('star')}</button>`:`<div class="logo"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke-width:2.6"><path d="M12 5v14M5 12h14"/></svg></div><h1>LabGenie</h1><button class="ib" data-a="srch" aria-label="Search">${ic('search')}</button><button class="ib" data-a="tgl" aria-label="Toggle theme">${ic('moon')}</button>`}
+function nav(tab){$('#tb').innerHTML=[['home','Home','home'],['tools','Tools','grid'],['history','Saved','hist'],['more','More','more']].map(([h,l,i])=>`<a href="#${h}" class="${tab==h?'on':''}">${ic(i)}${l}</a>`).join('')}
+function render(){const h=decodeURIComponent(location.hash.slice(1)),t=h&&by(h);let tab=h||'home',html;S.cur=null;S.edit=t?0:S.edit;
+if(t){tab='tool';html=tool(t);S.rec=[t.id,...S.rec.filter(x=>x!=t.id)].slice(0,6);ST.set('rec',S.rec)}
+else if(h=='tools')html=tools();else if(h=='history')html=hist();else if(h=='more'||h=='help'||h=='dev-instructions'){tab='more';html=more()}else{tab='home';html=home()}
+bar(tab,t);nav(tab=='tool'?'':tab);const v=$('#v');v.className='v';v.innerHTML=html;void v.offsetWidth;window.scrollTo(0,0);document.title=t?t.t+' | LabGenie':'LabGenie';if(t&&t.x=='cv')cvset('a')}
+const re=()=>{const y=scrollY,v=$('#v');v.innerHTML=({home,tools,history:hist,more}[location.hash.slice(1)||'home']||home)();scrollTo(0,y)};
+addEventListener('hashchange',()=>{S.nav++;render()});
+/* ---------- events ---------- */
+document.addEventListener('click',e=>{
+const cd=e.target.closest('a.card[data-id]');if(S.edit&&cd){e.preventDefault();S.pins=S.pins.filter(x=>x!=cd.dataset.id);ST.set('pins',S.pins);return re()}
+const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,d=b.dataset;if(b.closest('a'))e.preventDefault();
+const A={back:()=>S.nav?history.back():(location.hash='home'),
+srch:()=>{location.hash='tools';setTimeout(()=>{const q=$('#q');q&&q.focus()},60)},
+tgl:()=>{S.th=document.documentElement.dataset.e=='dark'?'light':'dark';ST.set('th',S.th);theme()},
+edit:()=>{S.edit=!S.edit;re()},
+cat:()=>{S.cat=d.k;if(location.hash!='#tools')location.hash='tools';else re()},
+pin:()=>{const i=S.pins.indexOf(d.id);i<0?S.pins.push(d.id):S.pins.splice(i,1);ST.set('pins',S.pins);toast(i<0?'Pinned to Home':'Removed from Home');if(S.cur)bar('tool',S.cur);else re()},
+copy:()=>cp(sumry()),save:()=>{S.hist.unshift({ts:Date.now(),tx:sumry()});S.hist=S.hist.slice(0,100);ST.set('hist',S.hist);toast('Saved to history')},
+share:()=>navigator.share({title:S.cur.t,text:sumry()}).catch(()=>{}),
+reset:()=>{delete S.v[S.cur.id];$('#v').innerHTML=tool(S.cur)},
+hcopy:()=>cp(S.hist[d.i].tx),hdel:()=>{S.hist.splice(d.i,1);ST.set('hist',S.hist);re()},hclr:()=>{S.hist=[];ST.set('hist',[]);re()},
+th:()=>{S.th=d.v;ST.set('th',S.th);theme();re()},dec:()=>{S.dec=d.v;ST.set('dec',S.dec);re()},rst:()=>{S.pins=[...DEF];ST.set('pins',S.pins);toast('Shortcuts reset')},
+swp:()=>{const c=CV[S.cv.i];CV[S.cv.i]=[c[0],c[2],c[1],typeof c[3]=='number'?1/c[3]:c[4],c[3]];S.cv.a=S.cv.b;cvset('a');$('#v').innerHTML=conv()},
+radd:()=>{const q=QA[d.i];S.rp.rows=S.rp.rows.filter(x=>x.n||x.r);S.rp.rows.push(q?{n:q[0],r:'',u:q[1],g:q[2]}:{n:'',r:'',u:'',g:''});sv();$('#rr').innerHTML=rrows()+'<button class="btn" data-a="radd" data-i="-1">+ Add row</button>'},
+rdel:()=>{S.rp.rows.splice(d.i,1);sv();$('#rr').innerHTML=rrows()+'<button class="btn" data-a="radd" data-i="-1">+ Add row</button>'},
+rprint:()=>{$('#pr').innerHTML=rhtml();print()},rcopy:()=>cp(rtext()),rclr:()=>{S.rp.rows=[{n:'',r:'',u:'',g:''}];S.rp.p=S.rp.pid='';sv();$('#v').innerHTML=rep()}};A[a]&&A[a]()});
+const sv=()=>ST.set('rp',S.rp);
+function sumry(){return S.cur.t+'\n'+S.out.map(line).join('\n')}
+function cp(x){const f=()=>{const t=document.createElement('textarea');t.value=x;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(e){}t.remove()};(navigator.clipboard?navigator.clipboard.writeText(x).catch(f):f());toast('Copied')}
+document.addEventListener('input',e=>{const el=e.target;
+if(el.id=='q'){S.q=el.value;$('#list').innerHTML=list()}
+else if(el.dataset.cv){S.cv[el.dataset.cv]=el.value;cvset(el.dataset.cv)}
+else if(el.dataset.p){S.rp[el.dataset.p]=el.value;sv()}
+else if(el.dataset.r){S.rp.rows[el.dataset.i][el.dataset.r]=el.value;sv()}
+else if(el.dataset.i&&S.cur){S.v[S.cur.id][el.dataset.i]=el.value;upd()}});
+document.addEventListener('change',e=>{const el=e.target;if(el.id=='cs'){S.cv={i:+el.value,a:'',b:''};$('#v').innerHTML=conv()}
+else if(el.dataset.i&&S.cur&&el.tagName=='SELECT'){S.v[S.cur.id][el.dataset.i]=el.value;$('#fc').innerHTML=S.cur.F.map(f=>field(S.cur,f)).join('');upd()}});
+document.addEventListener('keydown',e=>{if(e.key=='Enter'&&e.target.tagName=='INPUT')e.target.blur()});
+document.addEventListener('focusin',e=>{if(/INPUT|SELECT/.test(e.target.tagName)&&S.cur)document.body.classList.add('kb')});
+document.addEventListener('focusout',()=>setTimeout(()=>{if(!/INPUT|SELECT/.test(document.activeElement.tagName))document.body.classList.remove('kb')},120));
+/* ---------- boot ---------- */
+theme();render();
+if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
 </script>
-
 </body>
 </html>
