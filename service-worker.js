@@ -1,4 +1,4 @@
-const CACHE_NAME = 'labgenie-v4';
+const CACHE_NAME = 'labgenie-v5';
 
 const urlsToCache = [
   './',
