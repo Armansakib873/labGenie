@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -16,6 +15,7 @@
 <style>
 :root{--bg:#f4f3fb;--sf:#fff;--ink:#1a1740;--mut:#64638a;--ln:rgba(26,23,64,.1);--pr:#5b3fd4;--pt:#e9e4ff;--ro:#17143a;--ok:#2fc46b;--warn:#f5a524;--bad:#f0506e;--info:#4aa8ff;--f1:'Bricolage Grotesque',system-ui,sans-serif;--f2:'Hanken Grotesk',system-ui,-apple-system,sans-serif}
 :root[data-e=dark]{--bg:#0e0d20;--sf:#181633;--ink:#ecebfa;--mut:#9d9bc4;--ln:rgba(255,255,255,.1);--pt:#2b2668;--ro:#0a0918;--pr:#8f78ff}
+:root[data-e=dark] .ro{box-shadow:0 18px 38px -18px color-mix(in srgb,var(--st) 55%,transparent),inset 0 1px 0 rgba(255,255,255,.08)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.45 var(--f2);-webkit-font-smoothing:antialiased}
 #app{max-width:760px;margin:auto;min-height:100dvh;padding-bottom:calc(104px + env(safe-area-inset-bottom))}
@@ -60,22 +60,52 @@ small{display:block;color:var(--mut);font-size:12.5px;line-height:1.35;margin-to
 .tb{position:fixed;left:50%;bottom:calc(12px + env(safe-area-inset-bottom));transform:translateX(-50%);width:min(420px,calc(100% - 24px));height:66px;display:grid;grid-template-columns:repeat(4,1fr);padding:6px;border-radius:33px;background:color-mix(in srgb,var(--sf) 90%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--ln);box-shadow:0 12px 34px rgba(26,23,64,.18);z-index:20}
 .tb a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:11px;font-weight:600;color:var(--mut);text-decoration:none;border-radius:26px}
 .tb a.on{color:var(--pr);background:var(--pt)}body.kb .tb{display:none}
-.ro{margin:6px 16px 0;padding:18px;border-radius:28px;background:var(--ro);color:#fff;border:1px solid rgba(255,255,255,.08)}
-.ro .l{display:flex;align-items:center;justify-content:space-between;gap:8px;color:rgba(255,255,255,.65);font-size:13.5px;font-weight:600}
-.big{font:600 54px/1 var(--f1);letter-spacing:-.035em;margin:12px 0 2px;font-variant-numeric:tabular-nums;word-break:break-all}.big small{display:inline;font:500 15px var(--f2);letter-spacing:0;color:rgba(255,255,255,.6);margin-left:6px}
-.big.e{color:rgba(255,255,255,.28)}.err{color:#ff9aae;font-weight:600;margin:12px 0 2px}
+/* ===== result panel: light, status-tinted ===== */
+.ro{--st:var(--pr);position:relative;overflow:hidden;margin:12px 16px 0;padding:22px 18px 18px;border-radius:28px;color:var(--ink);border:1px solid color-mix(in srgb,var(--st) 32%,var(--ln));background:radial-gradient(130% 90% at 100% 0,color-mix(in srgb,var(--st) 22%,transparent),transparent 62%),radial-gradient(90% 70% at 0 100%,color-mix(in srgb,var(--info) 13%,transparent),transparent 65%),linear-gradient(165deg,var(--sf),var(--pt));box-shadow:0 18px 38px -18px color-mix(in srgb,var(--st) 62%,transparent),inset 0 1px 0 rgba(255,255,255,.55);transition:border-color .3s,box-shadow .3s}
+.ro:before{content:"";position:absolute;inset:0 0 auto;height:5px;background:linear-gradient(90deg,var(--st),color-mix(in srgb,var(--st) 35%,#ff7ad9))}
+.ro .l{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--mut);font-size:13.5px;font-weight:600}
+.big{font:600 54px/1 var(--f1);letter-spacing:-.035em;margin:12px 0 2px;font-variant-numeric:tabular-nums;word-break:break-all;background:linear-gradient(100deg,var(--ink) 25%,var(--st) 115%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.big small{display:inline;font:500 15px var(--f2);letter-spacing:0;color:var(--mut);margin-left:6px}
+.big.e{background:none;color:color-mix(in srgb,var(--mut) 55%,transparent)}.err{color:var(--bad);font-weight:700;margin:12px 0 2px}
 .pill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700;white-space:nowrap}
-.p-g{color:var(--ok);background:color-mix(in srgb,var(--ok) 18%,transparent)}.p-y{color:var(--warn);background:color-mix(in srgb,var(--warn) 18%,transparent)}.p-r{color:var(--bad);background:color-mix(in srgb,var(--bad) 20%,transparent)}.p-b{color:var(--info);background:color-mix(in srgb,var(--info) 18%,transparent)}
-.gw{position:relative;margin:16px 0 6px}.g{display:flex;height:8px;border-radius:5px;overflow:hidden}.g i{display:block;height:100%;opacity:.4}
+.p-g{color:color-mix(in srgb,var(--ok) 55%,var(--ink));background:color-mix(in srgb,var(--ok) 20%,transparent)}.p-y{color:color-mix(in srgb,var(--warn) 50%,var(--ink));background:color-mix(in srgb,var(--warn) 22%,transparent)}.p-r{color:color-mix(in srgb,var(--bad) 70%,var(--ink));background:color-mix(in srgb,var(--bad) 18%,transparent)}.p-b{color:color-mix(in srgb,var(--info) 55%,var(--ink));background:color-mix(in srgb,var(--info) 20%,transparent)}
+.gw{position:relative;margin:16px 0 6px}.g{display:flex;height:9px;border-radius:5px;overflow:hidden}.g i{display:block;height:100%;opacity:.85}
 .t-g{background:var(--ok)}.t-y{background:var(--warn)}.t-r{background:var(--bad)}.t-b{background:var(--info)}
-.gw b{position:absolute;top:-4px;width:4px;height:16px;margin-left:-2px;border-radius:2px;background:#fff;box-shadow:0 0 0 2px var(--ro);transition:left .25s}
-.gs{display:flex;justify-content:space-between;font-size:11.5px;color:rgba(255,255,255,.5)}
-.sg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.sg>div{padding:10px 12px;border-radius:16px;background:rgba(255,255,255,.07)}
-.sg em{display:block;font-style:normal;font-size:11.5px;color:rgba(255,255,255,.6)}.sg strong{font:600 19px var(--f1);font-variant-numeric:tabular-nums}.sg small{display:inline;color:rgba(255,255,255,.55);margin-left:3px}.sg .pill{margin-top:4px;display:table}
-.ac{display:flex;gap:8px;margin-top:14px}.ac button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 4px;border-radius:14px;background:rgba(255,255,255,.1);color:#fff;font-size:13px;font-weight:600}.ac button:disabled{opacity:.35}.ac svg{width:17px;height:17px}
+.gw b{position:absolute;top:-4px;width:5px;height:17px;margin-left:-2.5px;border-radius:3px;background:var(--ink);box-shadow:0 0 0 2.5px var(--sf);transition:left .25s}
+.gs{display:flex;justify-content:space-between;font-size:11.5px;color:var(--mut)}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.sg>div{padding:10px 12px;border-radius:16px;background:color-mix(in srgb,var(--sf) 75%,transparent);border:1px solid var(--ln)}
+.sg em{display:block;font-style:normal;font-size:11.5px;color:var(--mut)}.sg strong{font:600 19px var(--f1);font-variant-numeric:tabular-nums}.sg small{display:inline;color:var(--mut);margin-left:3px}.sg .pill{margin-top:4px;display:table}
+.ac{display:flex;gap:8px;margin-top:14px}.ac button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 4px;border-radius:14px;background:color-mix(in srgb,var(--sf) 80%,transparent);border:1px solid var(--ln);color:var(--pr);font-size:13px;font-weight:700}.ac button:disabled{opacity:.35}.ac svg{width:17px;height:17px}
+/* ===== classic LabGenie tool pages ===== */
+.fc.o{margin-top:6px}.fh h4{margin:0;font:600 17px var(--f1)}.fh p{margin:3px 0 0;color:var(--mut);font-size:13px}
+.ub{display:flex;gap:8px}.ub button,.pg button{flex:1;padding:11px 8px;border-radius:12px;border:1.5px solid var(--ln);background:var(--bg);font-weight:600;font-size:14px;color:var(--ink);transition:background .15s,color .15s,border-color .15s}
+.ub .on,.pg .on{background:var(--pr);border-color:var(--pr);color:#fff}
+.pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px}.pg button{padding:9px 4px;font-size:13px}
+.fd.ar{display:flex;gap:10px}.calc{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:16px;background:linear-gradient(100deg,var(--pr),color-mix(in srgb,var(--pr) 55%,#ff6ea6));color:#fff;font-weight:700;font-size:16px;box-shadow:0 10px 22px -10px var(--pr)}.calc:active{transform:scale(.98)}
+.fd.ar .btn{display:grid;place-items:center;padding:0 16px}.fd.ar .btn svg{width:19px;height:19px}
+.p2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:14px}
+.pv{position:relative;padding:13px 14px;border-radius:20px;background:color-mix(in srgb,var(--sf) 78%,transparent);border:1.5px solid var(--ln)}
+.pv em{display:block;font-style:normal;font-size:12.5px;font-weight:600;color:var(--mut);line-height:1.25}
+.pv strong{display:block;font:600 32px/1.1 var(--f1);letter-spacing:-.02em;margin-top:6px;font-variant-numeric:tabular-nums;word-break:break-all}
+.pv strong small{display:inline;font:500 13px var(--f2);letter-spacing:0;color:var(--mut);margin:0 0 0 5px}.pv .pill{margin-top:8px}
+.pv.hl{border-color:color-mix(in srgb,var(--pr) 45%,transparent);background:color-mix(in srgb,var(--pr) 10%,var(--sf))}
+.pv.rec{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,var(--sf))}
+.pv .bd{position:absolute;top:-9px;right:12px;background:var(--ok);color:#fff;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:3px 9px;border-radius:99px}
+.mix{height:10px;border-radius:6px;background:color-mix(in srgb,var(--info) 38%,transparent);overflow:hidden;margin:16px 0 6px}.mix i{display:block;height:100%;min-width:5px;background:var(--pr);border-radius:6px}
+.bn{margin-top:14px;padding:13px 14px;border-radius:16px;font-weight:700;font-size:15px;line-height:1.35;text-align:center}.bn.sm{text-align:left;font-weight:600;font-size:14px}
+.b-g{background:color-mix(in srgb,var(--ok) 18%,transparent);color:color-mix(in srgb,var(--ok) 55%,var(--ink))}.b-y{background:color-mix(in srgb,var(--warn) 22%,transparent);color:color-mix(in srgb,var(--warn) 50%,var(--ink))}.b-r{background:color-mix(in srgb,var(--bad) 17%,transparent);color:color-mix(in srgb,var(--bad) 70%,var(--ink))}.b-b{background:color-mix(in srgb,var(--info) 20%,transparent);color:color-mix(in srgb,var(--info) 55%,var(--ink))}
+.nb,.nl{margin:12px 0 0;padding:11px 13px;border-radius:14px;background:color-mix(in srgb,var(--sf) 65%,transparent);border:1px dashed var(--ln);font-size:13px;color:var(--mut);line-height:1.5}.nl{padding-left:30px}.nl li+li{margin-top:3px}.nl b,.nb b{color:var(--ink)}.hx{color:var(--bad);font-weight:800}
+.gp{margin-top:12px;padding:12px 14px;border-radius:18px;background:color-mix(in srgb,var(--sf) 78%,transparent);border:1px solid var(--ln)}.gp h5{margin:0 0 4px;font:600 13.5px var(--f1);color:var(--mut)}
+.rw{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--ln);font-size:14px}.gp h5+.rw{border-top:0}.rw>span{font-weight:600}.rw>div{display:flex;align-items:center;flex-wrap:wrap;justify-content:flex-end}.rw b{font:600 19px var(--f1);font-variant-numeric:tabular-nums}.rw i{font-style:normal;color:var(--mut);font-size:12px;margin:0 8px 0 4px}.gp p{margin:6px 0 0;color:var(--mut);font-size:12.5px;line-height:1.4}
+.stg{margin-top:12px;display:grid;gap:3px}.stg div{display:grid;grid-template-columns:62px 62px 1fr;gap:8px;padding:7px 10px;border-radius:12px;font-size:12.5px;color:var(--mut)}.stg b{color:var(--ink)}.stg .on{background:color-mix(in srgb,var(--st) 20%,transparent);color:var(--ink);font-weight:700}
+.sl{display:none;margin-bottom:12px;padding:7px 12px;border-radius:99px;background:color-mix(in srgb,var(--warn) 22%,transparent);color:color-mix(in srgb,var(--warn) 50%,var(--ink));font-size:12.5px;font-weight:700;text-align:center}
+#rw.stale .sl{display:block}#rw.stale .ro>*:not(.sl){opacity:.38}#rw.stale .ac{pointer-events:none}
+.cvm{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}.cvc{flex:1;min-width:200px;display:flex;flex-direction:column;gap:8px}.cvc .in input{font-size:20px;font-weight:700;padding:16px 14px}
+.swapb{width:46px;height:46px;border-radius:50%;background:var(--pt);color:var(--pr);display:grid;place-items:center;flex:none;transition:transform .25s}.swapb:active{transform:rotate(180deg)}
+@media(max-width:600px){.cvm{flex-direction:column}.cvc{width:100%;min-width:0}.swapb svg{transform:rotate(90deg)}}
 .fm{margin:12px 16px 0;padding:11px 14px;border-radius:16px;background:var(--pt);color:var(--pr);font-size:13.5px;font-weight:600;overflow-x:auto;white-space:nowrap}
-.fc{margin:12px 16px;padding:16px;border-radius:24px;background:var(--sf);border:1px solid var(--ln);display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.fd{grid-column:span 2}.fd.h{grid-column:span 1}.fd[hidden]{display:none}
+.fc{margin:12px 16px;padding:16px;border-radius:24px;background:var(--sf);border:1px solid var(--ln);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.fd{grid-column:span 2;min-width:0}.fd.h{grid-column:span 1}.fd[hidden]{display:none}
 .fd label{display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:var(--mut)}
 .in,select{display:flex;align-items:center;width:100%;background:var(--bg);border:1.5px solid transparent;border-radius:14px}
 .in:focus-within,select:focus{border-color:var(--pr);outline:0}
@@ -111,29 +141,59 @@ const LZ=[[100,'Optimal','g'],[130,'Near optimal','g'],[160,'Borderline high','y
 const lh=(a,b)=>[[a,'Low','y'],[b,'Normal','g'],[I,'High','y']];
 const TYP={Calcium:'100–300 mg/24 h',Phosphate:'400–1300 mg/24 h','Uric acid':'250–750 mg/24 h',Sodium:'40–220 mmol/24 h',Potassium:'25–125 mmol/24 h',Chloride:'110–250 mmol/24 h'};
 const T=[
-{id:'dilution-calculator',t:'Dilution Calc',d:'Compute dilution volumes.',g:'util',i:'dil',k:'c1v1 diluent factor ratio',f:'C1 · V1 = C2 · V2',
-F:[s('m','Solve for',[['v','Stock volume (C1V1 = C2V2)'],['r','Diluent for a 1 : N dilution'],['x','Correct a diluted result']]),s('vu','Volume unit',[['mL','mL'],['µL','µL'],['L','L']]),n('c1','Stock (C1)','conc.','100',{h:1,w:'m=v'}),n('c2','Target (C2)','conc.','10',{h:1,w:'m=v'}),n('v2','Final volume (V2)','','500',{w:'m=v'}),n('sv','Sample volume','','100',{w:'m=r'}),n('rd','Measured result','','45',{w:'m=x'}),n('n','Dilution factor N','×','10',{w:'m=r,x'})],
-c:v=>{const U=v.vu;if(v.m=='v'){if(v.c1==null||v.c2==null||v.v2==null)return;if(v.c1<=0||v.c2>v.c1)return{err:'Target (C2) must not exceed stock (C1)'};const a=v.c2*v.v2/v.c1;return[O('Stock to take',a,U,3),O('Diluent to add',v.v2-a,U,3),O('Dilution factor',v.c1/v.c2,'×',2)]}
-if(v.m=='r'){if(v.sv==null||v.n==null)return;if(v.n<1)return{err:'N must be at least 1'};return[O('Diluent to add',v.sv*(v.n-1),U,3),O('Total volume',v.sv*v.n,U,3)]}
-if(v.rd==null||v.n==null)return;return[O('Actual result',v.rd*v.n,'',2)]}},
-{id:'anticoagulant-calculator',t:'Anticoagulant Calc',d:'Adjust blood bag volumes.',g:'util',i:'drop',k:'cpda blood bag donation',f:'Needed = blood volume × ratio ÷ 100',
-F:[s('b','Blood bag',[['63','450 mL bag · 63 mL CPDA-1'],['49','350 mL bag · 49 mL CPDA-1'],['c','Custom bag']]),n('ab','Anticoagulant in bag','mL','63',{w:'b=c'}),n('vol','Blood collected','mL','e.g. 400',{h:1}),n('ra','Ratio','mL/100 mL','',{h:1,def:'14'})],
-c:v=>{const a=v.b=='c'?v.ab:+v.b;if(a==null||v.vol==null||v.ra==null)return;const q=v.vol*v.ra/100,d=a-q;return W([O(d>=0?'Anticoagulant to remove':'Anticoagulant to add',Math.abs(d),'mL',1),O('Needed for this volume',q,'mL',1),O('Bag suits up to',a/v.ra*100,'mL',0)],'Standard ratio is 14 mL CPDA-1 per 100 mL blood. Follow your blood bank SOP.')}},
-{id:'LDL-calculator',t:'LDL Calculator',d:'Calculate LDL levels.',g:'lipid',i:'heart',k:'cholesterol friedewald hdl triglycerides lipid',f:'LDL = TC − HDL − TG/5   ·   alt: ¾ × (TC − HDL)',
-F:[s('u','Units',[['1','mg/dL'],['2','mmol/L']]),n('tc','Total cholesterol','','200',{h:1}),n('hdl','HDL','','50',{h:1}),n('tg','Triglycerides','','150',{h:1})],
-c:v=>{if(v.tc==null||v.hdl==null||v.tg==null)return;const a=v.u=='2'?38.67:1,tc=v.tc*a,h=v.hdl*a,tg=v.tg*(v.u=='2'?88.57:1);if(h>tc)return{err:'HDL cannot exceed total cholesterol'};return W([O('LDL · Friedewald',tc-h-tg/5,'mg/dL',1,LZ,[40,220],'< 100 optimal'),O('LDL · ¾ × (TC−HDL)',.75*(tc-h),'mg/dL'),O('Non-HDL',tc-h,'mg/dL'),O('VLDL (TG/5)',tg/5,'mg/dL')],(tg>400?'Friedewald is unreliable when TG exceeds 400 mg/dL. ':'')+'Results shown in mg/dL.')}},
-{id:'egfr-calculator',t:'eGFR (MDRD)',d:'Estimate kidney function.',g:'renal',i:'gear',k:'gfr mdrd bsa ckd creatinine body surface',f:'175 × SCr^−1.154 × Age^−0.203 (× 0.742 if female)',
-F:[s('x','Sex',[['m','Male'],['f','Female']],{h:1}),s('u','Creatinine unit',[['1','mg/dL'],['88.4','µmol/L']],{h:1}),n('age','Age','yrs','50',{h:1}),n('scr','Serum creatinine','','1.0',{h:1}),n('ht','Height','cm','170',{h:1}),n('wt','Weight','kg','70',{h:1}),n('cc','CCR (optional)','mL/min','from CCR tool')],
-c:(v,S)=>{if(v.scr==null||v.age==null)return;const sc=v.scr/+v.u;if(sc<=0)return{err:'Creatinine must be above 0'};let g=175*sc**-1.154*v.age**-.203;if(v.x=='f')g*=.742;const r=[O('eGFR · MDRD',g,'mL/min/1.73 m²',1,GZ,[0,130],'≥ 90 normal')];if(v.ht!=null&&v.wt!=null){const b=Math.sqrt(v.ht*v.wt/3600),c=v.cc??S.ccr;r.push(O('Body surface area',b,'m²',2));if(c!=null)r.push(O('BSA-corrected GFR',c*1.73/b,'mL/min/1.73 m²'))}return r}},
-{id:'uacr-calculator',t:'UACR Calculator',d:'Albumin / creatinine ratio.',g:'renal',i:'uri',k:'microalbumin macr albumin creatinine ratio urine',f:'ACR = Albumin ÷ (Creatinine ÷ 100)',
-F:[n('al','Urinary albumin','mg/L','15'),s('u','Creatinine unit',[['1','mg/dL'],['11.31','mmol/L']],{h:1}),n('cr','Urinary creatinine','','100',{h:1})],
-c:v=>{if(v.al==null||v.cr==null)return;const c=v.cr*+v.u;if(c<=0)return{err:'Creatinine must be above 0'};const r=v.al*100/c;return[O('Albumin / creatinine',r,'mg/g',1,[[30,'A1 · Normal','g'],[300,'A2 · Moderate','y'],[I,'A3 · Severe','r']],[0,400],'< 30 mg/g'),O('Same ratio',r*.1131,'mg/mmol',2)]}},
-{id:'electrolyte-verification',t:'Electrolyte Check',d:'Verify ion panel consistency.',g:'elec',i:'bolt',k:'tco2 anion gap sodium potassium chloride bicarbonate balance',f:'TCO₂ = (Na + K − Cl) − 15.3',
-F:[n('na','Sodium (Na)','mEq/L','140',{h:1}),n('k','Potassium (K)','mEq/L','4.0',{h:1}),n('cl','Chloride (Cl)','mEq/L','100',{h:1}),n('hc','Measured HCO₃ (optional)','mEq/L','24',{h:1})],
-c:v=>{if(v.na==null||v.k==null||v.cl==null)return;const te=v.na+v.k-v.cl-15.3,r=[O('Estimated TCO₂',te,'mEq/L',1,lh(22,29.01),[10,40],'22–29')];if(v.hc!=null){const ag=v.na+v.k-v.cl-v.hc;r.unshift(O('Anion gap (with K)',ag,'mEq/L',1,[[12,'Low','y'],[20.01,'Normal','g'],[I,'High','r']],[0,32],'12–20'));r.push(O('Anion gap (no K)',ag-v.k,'mEq/L'),O('Estimate vs measured',Math.abs(te-v.hc),'mEq/L',1,[[3.01,'Consistent','g'],[5.01,'Borderline','y'],[I,'Recheck panel','r']],[0,8]))}return r}},
-{id:'osmolality-calculator',t:'Osmolality Calc',d:'Calculate osmolal gap.',g:'elec',i:'pin',k:'serum osmolarity gap tonicity',f:'1.86 × (Na + K) + Urea/6 + Glucose',
-F:[n('na','Sodium','mEq/L','140',{h:1}),n('k','Potassium','mEq/L','4.0',{h:1}),n('ur','Urea','mg/dL','30',{h:1}),s('gu','Glucose unit',[['1','mmol/L'],['0.0556','mg/dL']],{h:1}),n('gl','Glucose','','5.5',{h:1}),n('ms','Measured (optional)','mOsm/kg','',{h:1})],
-c:v=>{if(v.na==null||v.k==null||v.ur==null||v.gl==null)return;const g=v.gl*(v.gu=='1'?1:1/18),c=1.86*(v.na+v.k)+v.ur/6+g,sd=2*v.na+g+v.ur/6,r=[O('Calculated osmolarity',c,'mOsm/kg',1,lh(275,295.01),[240,340],'275–295')];if(v.ms!=null)r.push(O('Osmolal gap',v.ms-sd,'mOsm/kg',1,[[10,'Normal','g'],[20,'Elevated','y'],[I,'High','r']],[-10,40],'< 10'));return W(r,'Gap uses 2Na + glucose + urea/6.')}},
+{id:'dilution-calculator',t:'Dilution Calc',d:'Compute dilution volumes.',g:'util',i:'dil',k:'c1v1 diluent factor ratio',o:{init:1,b:'Calculate',
+F:[{t:'p',id:'df',l:'Select Common Dilution (1:X)',o:[2,3,4,5,10,20,50,100,200,500]},{t:'n',id:'df',h:1,l:'Dilution Factor',ph:'e.g., 20',def:'2'},{t:'n',id:'tv',h:1,l:'Final Volume (µL)',ph:'e.g., 1000',def:'1000'}],
+go:(v,st)=>{const f=parseInt(v.df);if(f>=2)st.cd=f;const df=f||st.cd||2;if(df<2)return{err:'Dilution factor must be 2 or greater.'};const tv=v.tv||0,sm=tv/df,dl=tv-sm;
+return{st:null,tx:`1:${df} dilution, final volume ${fm(tv,2)} µL\nSample volume (serum/plasma): ${fm(sm,2)} µL\nDiluent volume (normal saline): ${fm(dl,2)} µL`,
+html:hd('Dilution 1 : '+df,`<span class="pill p-b">Final ${fm(tv,2)} µL</span>`)+pr2(tl('Sample Volume (Serum/Plasma)',fm(sm,2),'µL',{c:'hl'}),tl('Diluent Volume (Normal Saline)',fm(dl,2),'µL'))+`<div class="mix"><i style="width:${100/df}%"></i></div><div class="gs"><span>Sample · 1 part</span><span>Diluent · ${df-1} part${df-1>1?'s':''}</span></div>`+nl(['All volumes are in microliters (µL).','Minimum dilution factor is 1:2.','Results are rounded to 2 decimal places.','Press <b>Enter</b> in fields to calculate.'])}}}},
+{id:'anticoagulant-calculator',t:'Anticoagulant Calc',d:'Adjust blood bag volumes.',g:'util',i:'drop',k:'cpda blood bag donation',o:{init:1,auto:1,
+F:[{t:'h',l:'Standard Bag Parameters',s:'Based on a standard 450 ml blood bag containing 63 ml of anticoagulant.'},{t:'n',id:'vol',l:'Target Blood Collection Volume (ml)',ph:'e.g., 300',def:'450'}],
+go:v=>{const tv=v.vol||0,rq=tv*(63/450),rm=63-rq;let g,k,sc;
+if(tv<=0){g='Please enter a target blood volume to see the guidance.';k='b';sc=null}
+else if(rm<-.1){g='Warning: Target volume exceeds the standard 450 ml. The standard anticoagulant amount is insufficient.';k='r';sc='r'}
+else if(rm<.1){g='No adjustment needed. The standard anticoagulant volume is correct for this blood volume.';k='g';sc='g'}
+else{g=`For a collection of ${tv} ml, first remove ${rm.toFixed(1)} ml of anticoagulant from the bag (Only if the bag contain 63 ml).`;k='y';sc='y'}
+const a=Math.max(0,rq),b=Math.max(0,rm);
+return{st:sc,tx:`Target blood volume: ${tv} ml\nRequired anticoagulant: ${fm(a,1)} ml\nAnticoagulant to remove: ${fm(b,1)} ml\n${g}`,
+html:hd('Results & Guidance')+pr2(tl('Required Anticoagulant for Target Volume',fm(a,1),'ml'),tl('Anticoagulant to REMOVE from Bag',fm(b,1),'ml',{c:b>=.1?'hl':''}))+bn(k+' sm',g)+nl(['The standard ratio is 14 ml of anticoagulant per 100 ml of blood.','This tool calculates how much anticoagulant to remove for partial draws.'])}}}},
+{id:'LDL-calculator',t:'LDL Calculator',d:'Calculate LDL levels.',g:'lipid',i:'heart',k:'cholesterol friedewald hdl triglycerides lipid',o:{b:'Calculate LDL',
+F:[{t:'h',l:'Lipid Panel Inputs'},{t:'n',id:'tc',l:'Total Cholesterol (mg/dL)',ph:'e.g., 200'},{t:'n',id:'hdl',l:'HDL Cholesterol (mg/dL)',ph:'e.g., 50'},{t:'n',id:'tg',l:'Triglycerides (mg/dL)',ph:'e.g., 150'}],
+go:v=>{const{tc,hdl,tg}=v;if(tc==null||hdl==null||tg==null||tc<=0||hdl<=0||tg<=0)return{err:'Please enter valid, positive numbers for all fields.'};if(tc<hdl)return{err:'Total Cholesterol cannot be less than HDL Cholesterol.'};
+const nh=tc-hdl,fr=nh-tg/5,al=nh*.75,hi=tg>=400;
+return{st:null,tx:`LDL (Friedewald): ${fm(fr,1)} mg/dL\nLDL (Alternative, high TG): ${fm(al,1)} mg/dL\nRecommended: ${hi?'Alternative formula':'Friedewald formula'}`,
+html:hd('LDL Cholesterol')+pr2(tl('LDL (Friedewald Formula)',fm(fr,1),'mg/dL',{c:hi?'':'rec',b:hi?'':'Recommended'}),tl('LDL (Alternative Formula for High TG)',fm(al,1),'mg/dL',{c:hi?'rec':'',b:hi?'Recommended':''}))+nb(hi?'Triglycerides are 400 mg/dL or higher, making the Friedewald formula unreliable. The alternative calculation is recommended.':'Triglycerides are below 400 mg/dL, so the Friedewald formula is the recommended method for estimation.')}}}},
+{id:'egfr-calculator',t:'eGFR (MDRD)',d:'Estimate kidney function.',g:'renal',i:'gear',k:'gfr mdrd bsa ckd creatinine body surface',o:{b:'Calculate eGFR',
+F:[{t:'h',l:'Patient Data'},{t:'n',id:'scr',l:'Serum Creatinine (mg/dL)',ph:'e.g., 1.2'},{t:'n',id:'age',l:'Age (Years)',ph:'e.g., 55'},{t:'b',id:'sx',l:'Sex',o:[['male','Male'],['female','Female']]},{t:'b',id:'rc',l:'Race',o:[['nonblack','Non-Black'],['black','Black']]}],
+go:v=>{const{scr,age,sx,rc}=v;if(scr==null||age==null||scr<=0||age<=0)return{err:'Please enter valid, positive numbers for Creatinine and Age.'};
+let g=175*Math.pow(scr,-1.154)*Math.pow(age,-.203);if(sx=='female')g*=.742;if(rc=='black')g*=1.212;
+const s=g>=90?[0,'CKD Stage 1','g']:g>=60?[1,'CKD Stage 2','g']:g>=45?[2,'CKD Stage 3a','y']:g>=30?[3,'CKD Stage 3b','y']:g>=15?[4,'CKD Stage 4','r']:[5,'CKD Stage 5','r'];
+const R=[['Stage 1','≥ 90','Normal or high GFR'],['Stage 2','60 – 89','Mildly decreased GFR'],['Stage 3a','45 – 59','Mild-moderately decreased'],['Stage 3b','30 – 44','Moderate-severely decreased'],['Stage 4','15 – 29','Severely decreased GFR'],['Stage 5','&lt; 15','Kidney failure']];
+return{st:s[2],tx:`Estimated GFR (MDRD): ${fm(g,0)} mL/min/1.73 m²\n${s[1]}`,
+html:hd('Estimated GFR (MDRD)')+big(fm(g,0),'mL/min/1.73 m²')+gauge({sc:[0,120],z:Z([[15,'Stage 5','r'],[30,'Stage 4','r'],[45,'Stage 3b','y'],[60,'Stage 3a','y'],[90,'Stage 2','g'],[I,'Stage 1','g']]),v:g})+bn(s[2],s[1])+`<div class="stg">${R.map((r,i)=>`<div class="${i==s[0]?'on':''}"><b>${r[0]}</b><span>${r[1]}</span><span>${r[2]}</span></div>`).join('')}</div>`+nb('<b>Note:</b> This calculator uses the original MDRD formula, which includes a race-based variable. Modern guidelines often recommend the CKD-EPI 2021 equation, which omits race.')}}}},
+{id:'uacr-calculator',t:'UACR Calculator',d:'Albumin / creatinine ratio.',g:'renal',i:'uri',k:'microalbumin macr albumin creatinine ratio urine',o:{b:'Calculate UACR',
+F:[{t:'h',l:'Urine Sample Values'},{t:'n',id:'al',l:'Urine Albumin (mg/L)',ph:'e.g., 15'},{t:'b',id:'u',l:'Select Unit for Urine Creatinine',o:[['mg/dL','mg/dL'],['mmol/L','mmol/L']]},{t:'n',id:'cr',l:v=>`Urine Creatinine (${v.u})`,ph:v=>v.u=='mg/dL'?'e.g., 120':'e.g., 10.6'}],
+go:v=>{let{al,cr,u}=v;if(al==null||cr==null)return{err:'Please fill in all required fields.'};if(u=='mmol/L')cr*=113.12/10;const cg=cr/100;if(cg<=0)return{err:'Urine creatinine must be a positive value.'};
+const r=al/cg,k=r<30?0:r<=300?1:2,L=['Normal to Mildly Increased','Moderately Increased','Severely Increased'],T=['g','y','r'];
+return{st:T[k],tx:`Albumin/Creatinine Ratio (UACR): ${fm(r,2)} mg/g\n${L[k]}`,
+html:hd('Albumin/Creatinine Ratio (UACR)')+big(fm(r,2),'mg/g')+gauge({sc:[0,400],z:Z([[30,L[0],'g'],[300,L[1],'y'],[I,L[2],'r']]),v:r})+bn(T[k],L[k])+`<ul class="nl"><li style="list-style:none;margin-left:-16px"><b>KDIGO Categories for Albuminuria</b></li>${[['&lt; 30 mg/g','Normal to Mildly Increased'],['30 - 300 mg/g','Moderately Increased'],['&gt; 300 mg/g','Severely Increased']].map((x,i)=>i==k?`<li><b>${x[0]}: ${x[1]}</b></li>`:`<li>${x[0]}: ${x[1]}</li>`).join('')}</ul>`}}}},
+{id:'electrolyte-verification',t:'Electrolyte Check',d:'Verify ion panel consistency.',g:'elec',i:'bolt',k:'tco2 anion gap sodium potassium chloride bicarbonate balance',o:{b:'Verify Electrolytes',
+F:[{t:'h',l:'Patient Values'},{t:'n',id:'na',h:1,l:'Na⁺ (mmol/L)'},{t:'n',id:'k',h:1,l:'K⁺ (mmol/L)'},{t:'n',id:'cl',h:1,l:'Cl⁻ (mmol/L)'},{t:'n',id:'hco3',h:1,l:'HCO₃⁻ (Optional)'},{t:'n',id:'co2',l:'Total CO₂ (Optional)'},{t:'n',id:'glucose',h:1,l:'Glucose (Optional) mmol/L'},{t:'n',id:'albumin',h:1,l:'Albumin (Optional) g/dL'}],
+go:v=>{const V={};for(const k in v)V[k]=v[k]||null;if(!V.na||!V.k||!V.cl)return{err:'Please enter required values: Na⁺, K⁺, and Cl⁻.'};
+let hc=V.hco3,est=false;if(hc==null){hc=V.na-V.cl-12;est=true}
+const eco=hc+2,cna=V.glucose?V.na+2.4*((V.glucose-5.5)/5.5):null,ag=V.na-(V.cl+hc),cag=V.albumin?ag+2.5*(4.4-V.albumin):null,nd=V.na-V.cl;
+const sz=(x,lo,hi)=>x<lo?{l:'LOW',t:'y'}:x>hi?{l:'HIGH',t:'r'}:{l:'NORMAL',t:'g'},za=sz(cag??ag,8,16),f=x=>fm(x,1);
+let calc='';if(est)calc+=rowx('Estimated HCO₃⁻',f(hc),'mmol/L');if(!V.co2)calc+=rowx('Estimated Total CO₂',f(eco),'mmol/L');if(cna!=null)calc+=rowx('Corrected Sodium',f(cna),'mmol/L');
+return{st:za.t,tx:`Anion gap: ${f(ag)} mmol/L (${sz(ag,8,16).l})`+(cag!=null?`\nAlbumin-corrected AG: ${f(cag)} mmol/L (${sz(cag,8,16).l})`:'')+`\nNa-Cl differential: ${f(nd)} mmol/L (${sz(nd,32,40).l})`+(est?`\nEstimated HCO3: ${f(hc)} mmol/L`:'')+(cna!=null?`\nCorrected Na: ${f(cna)} mmol/L`:''),
+html:hd('Anion Gap (AG)',pill(sz(ag,8,16)))+big(f(ag),'mmol/L')+gauge({sc:[0,32],z:Z([[8,'Low','y'],[16,'Normal','g'],[I,'High','r']]),v:ag})+`<div class="gs" style="margin-top:8px;font-size:12.5px;display:block">Normal Range: 8-16 mmol/L.</div>`+(est?bn('y sm','HCO₃⁻ was not entered, so it is estimated as Na − Cl − 12 and the anion gap will always read 12. Enter a measured HCO₃⁻ for a meaningful anion gap.'):'')
++(cag!=null?grp('Anion Gap Analysis',rowx('Albumin-Corrected AG',f(cag),'mmol/L',sz(cag,8,16)),'Albumin-corrected AG is the recommended value for interpretation. Normal: 8-16 mmol/L.'):'')
++(calc?grp('Calculated Values',calc):'')+grp('Electrolyte Balance Checks',rowx('Sodium-Chloride Differential',f(nd),'mmol/L',sz(nd,32,40)),'A normal Na-Cl difference is typically 32-40 mmol/L.')}}}},
+{id:'osmolality-calculator',t:'Osmolality Calc',d:'Calculate osmolal gap.',g:'elec',i:'pin',k:'serum osmolarity gap tonicity',o:{b:'Calculate',
+F:[{t:'h',l:'Analyte Values'},{t:'b',id:'u',l:'Select Units for Glucose & Urea',o:[['mmol/L','mmol/L'],['mg/dL','mg/dL']]},{t:'n',id:'na',l:'Sodium (Na⁺)',ph:'mmol/L'},{t:'n',id:'gl',l:v=>`Glucose (${v.u})`,ph:v=>v.u=='mmol/L'?'e.g., 5.5':'e.g., 100'},{t:'n',id:'ur',l:v=>v.u=='mmol/L'?'Urea (mmol/L)':'Blood Urea Nitrogen (BUN) (mg/dL)',ph:v=>v.u=='mmol/L'?'e.g., 5':'e.g., 15'},{t:'n',id:'ms',l:'Measured Osmolality (Optional)',ph:'mOsm/kg'}],
+go:v=>{let{na,gl,ur,ms,u}=v;if(na==null||gl==null||ur==null)return{err:'Please fill in all required fields (Na, Glucose, Urea).'};if(u=='mg/dL'){gl/=18;ur/=2.8}
+const c=2*na+gl+ur,gap=ms!=null&&ms>0?ms-c:null,hi=gap!=null&&gap>15;
+return{st:gap==null?null:hi?'r':'g',tx:`Calculated osmolality: ${fm(c,1)} mOsm/kg`+(gap!=null?`\nOsmolal gap: ${fm(gap,1)} mOsm/kg (${hi?'HIGH':'normal'})`:''),
+html:hd('Calculated Osmolality')+big(fm(c,1),'mOsm/kg')+(gap!=null?pr2(tl('Osmolal Gap',fm(gap,1),'mOsm/kg',{p:pill({l:hi?'HIGH':'Normal',t:hi?'r':'g'})})):'')
++nb(gap==null?'A normal osmolal gap is typically &lt; 10-15. Enter a measured osmolality to calculate the gap.':hi?`An osmolal gap of <span class="hx">${fm(gap,1)}</span> is considered HIGH. This suggests the presence of unmeasured, osmotically active substances (e.g., ethanol, methanol, ethylene glycol).`:`An osmolal gap of ${fm(gap,1)} is within the normal range (&lt;15).`)}}}},
 {id:'manual-report-template',t:'Report Template',d:'Printable manual reports.',g:'util',i:'file',k:'print patient result sheet',x:'rep'},
 {id:'unit-conversion',t:'Unit Converter',d:'Common lab conversions.',g:'util',i:'swap',k:'glucose fluid mmol mg/dl creatinine hba1c convert',x:'cv'},
 {id:'homa-ir',t:'HOMA-IR',d:'Insulin resistance index.',g:'metabolic',i:'act',k:'insulin glucose resistance',f:'(Insulin × Glucose mg/dL) ÷ 405',F:[n('ins','Fasting insulin','µIU/mL','8.5'),s('gu','Glucose unit',[['1','mg/dL'],['18','mmol/L']],{h:1}),n('gl','Fasting glucose','','90',{h:1})],
@@ -162,9 +222,24 @@ c:v=>{if(v.ur==null)return;const b=v.ur/2.14,r=[O('BUN',b,'mg/dL',1,lh(7,20.01),
 c:v=>{if(v.a==null)return;return[O('GHb',v.a*1.76,'%',2),O('HbA1c status',v.a,'%',1,[[5.7,'Normal','g'],[6.5,'Prediabetes','y'],[I,'Diabetes range','r']],[4,12]),O('Avg glucose (eAG)',28.7*v.a-46.7,'mg/dL',0),O('IFCC',(v.a-2.15)*10.929,'mmol/mol',0)]}},
 {id:'psa-ratio',t:'PSA Ratio',d:'Free / total PSA.',g:'gen',i:'act',k:'prostate free total psa',f:'(Free PSA ÷ Total PSA) × 100',F:[n('fp','Free PSA','ng/mL','0.8',{h:1}),n('tp','Total PSA','ng/mL','4.0',{h:1})],
 c:v=>{if(v.fp==null||v.tp==null)return;if(v.tp<=0)return{err:'Total PSA must be above 0'};return W([O('Free / total',v.fp/v.tp*100,'%',1,[[10,'Higher risk','r'],[25,'Intermediate','y'],[I,'Lower risk','g']],[0,50],'> 25 % lower risk')],'Most useful when total PSA is 4–10 ng/mL.')}}];
-const CV=[['Glucose','mg/dL','mmol/L',1/18],['Creatinine','mg/dL','µmol/L',88.4],['Urea','mg/dL','mmol/L',.1665],['BUN','mg/dL','mmol/L urea',.357],['Uric acid','mg/dL','µmol/L',59.48],['Cholesterol','mg/dL','mmol/L',.02586],['Triglycerides','mg/dL','mmol/L',.01129],['Calcium','mg/dL','mmol/L',.2495],['Magnesium','mg/dL','mmol/L',.4114],['Phosphate','mg/dL','mmol/L',.3229],['Bilirubin','mg/dL','µmol/L',17.1],['Iron','µg/dL','µmol/L',.1791],['Haemoglobin','g/dL','g/L',10],['Albumin / protein','g/dL','g/L',10],['Insulin','µIU/mL','pmol/L',6.945],['HbA1c','% NGSP','mmol/mol IFCC',x=>(x-2.15)*10.929,y=>y/10.929+2.15],['HbA1c → eAG','% NGSP','mg/dL',x=>28.7*x-46.7,y=>(y+46.7)/28.7]];
+const CONV={
+volume:{name:'Volume',baseUnit:'l',units:{'l':{name:'Liters (L)',factor:1},'ml':{name:'Milliliters (mL)',factor:1e-3},'µl':{name:'Microliters (µL)',factor:1e-6},'dl':{name:'Deciliters (dL)',factor:.1}}},
+concentration:{name:'Concentration (Molarity)',baseUnit:'m',units:{'m':{name:'Molar (M)',factor:1},'mm':{name:'Millimolar (mM)',factor:1e-3},'µm':{name:'Micromolar (µM)',factor:1e-6},'nm':{name:'Nanomolar (nM)',factor:1e-9}}},
+mass:{name:'Mass',baseUnit:'g',units:{'kg':{name:'Kilograms (kg)',factor:1e3},'g':{name:'Grams (g)',factor:1},'mg':{name:'Milligrams (mg)',factor:1e-3},'µg':{name:'Micrograms (µg)',factor:1e-6},'ng':{name:'Nanograms (ng)',factor:1e-9}}},
+glucose:{name:'🩸 Glucose (Blood Sugar)',units:{'mgdl':{name:'mg/dL'},'mmoll':{name:'mmol/L'}},convert:(v,f,t)=>f===t?v:f==='mgdl'&&t==='mmoll'?v/18.018:f==='mmoll'&&t==='mgdl'?v*18.018:v},
+cholesterol:{name:'💊 Cholesterol (Total/LDL/HDL)',units:{'mgdl':{name:'mg/dL'},'mmoll':{name:'mmol/L'}},convert:(v,f,t)=>f===t?v:f==='mgdl'&&t==='mmoll'?v/38.67:f==='mmoll'&&t==='mgdl'?v*38.67:v},
+triglycerides:{name:'🫀 Triglycerides',units:{'mgdl':{name:'mg/dL'},'mmoll':{name:'mmol/L'}},convert:(v,f,t)=>f===t?v:f==='mgdl'&&t==='mmoll'?v/88.57:f==='mmoll'&&t==='mgdl'?v*88.57:v},
+creatinine:{name:'🫘 Creatinine (Kidney Function)',units:{'mgdl':{name:'mg/dL'},'µmoll':{name:'µmol/L'}},convert:(v,f,t)=>f===t?v:f==='mgdl'&&t==='µmoll'?v*88.42:f==='µmoll'&&t==='mgdl'?v/88.42:v},
+bilirubin:{name:'🟡 Bilirubin (Liver Function)',units:{'mgdl':{name:'mg/dL'},'µmoll':{name:'µmol/L'}},convert:(v,f,t)=>f===t?v:f==='mgdl'&&t==='µmoll'?v*17.1:f==='µmoll'&&t==='mgdl'?v/17.1:v},
+calcium:{name:'🦴 Calcium',units:{'mgdl':{name:'mg/dL'},'mmoll':{name:'mmol/L'}},convert:(v,f,t)=>f===t?v:f==='mgdl'&&t==='mmoll'?v/4.008:f==='mmoll'&&t==='mgdl'?v*4.008:v},
+hemoglobin:{name:'🩸 Hemoglobin',units:{'gdl':{name:'g/dL'},'gl':{name:'g/L'},'mmoll':{name:'mmol/L'}},convert:(v,f,t)=>{if(f===t)return v;const g=f==='gl'?v/10:f==='mmoll'?v*1.611:v;return t==='gl'?g*10:t==='mmoll'?g/1.611:g}},
+urea:{name:'🫘 BUN/Urea (Kidney Function)',units:{'mgdl':{name:'mg/dL (BUN)'},'mmoll':{name:'mmol/L (Urea)'}},convert:(v,f,t)=>f===t?v:f==='mgdl'&&t==='mmoll'?v*.357:f==='mmoll'&&t==='mgdl'?v/.357:v},
+iron:{name:'⚙️ Iron (Serum)',units:{'µgdl':{name:'µg/dL'},'µmoll':{name:'µmol/L'}},convert:(v,f,t)=>f===t?v:f==='µgdl'&&t==='µmoll'?v*.1791:f==='µmoll'&&t==='µgdl'?v/.1791:v},
+vitaminD:{name:'☀️ Vitamin D',units:{'ngml':{name:'ng/mL'},'nmoll':{name:'nmol/L'}},convert:(v,f,t)=>f===t?v:f==='ngml'&&t==='nmoll'?v*2.496:f==='nmoll'&&t==='ngml'?v/2.496:v},
+temperature:{name:'🌡️ Temperature',units:{'c':{name:'Celsius (°C)'},'f':{name:'Fahrenheit (°F)'},'k':{name:'Kelvin (K)'}},convert:(v,f,t)=>{if(f===t)return v;const c=f==='f'?(v-32)*5/9:f==='k'?v-273.15:v;return t==='f'?c*9/5+32:t==='k'?c+273.15:c}}
+};
 const DEF=['dilution-calculator','anticoagulant-calculator','LDL-calculator','egfr-calculator','uacr-calculator','electrolyte-verification','osmolality-calculator','manual-report-template','unit-conversion'];
-const S={pins:ST.get('pins',DEF),hist:ST.get('hist',[]),th:ST.get('th','auto'),dec:ST.get('dec','a'),rec:ST.get('rec',[]),v:{},sh:{},cat:'all',q:'',edit:0,cv:{i:0,a:'',b:''},rp:ST.get('rp',{p:'',pid:'',dt:new Date().toISOString().slice(0,10),rows:[{n:'',r:'',u:'',g:''}]}),nav:0};
+const S={pins:ST.get('pins',DEF),hist:ST.get('hist',[]),th:ST.get('th','auto'),dec:ST.get('dec','a'),rec:ST.get('rec',[]),v:{},sh:{},cat:'all',q:'',edit:0,cv:{k:'volume',u1:'l',u2:'ml',a:'',b:''},rp:ST.get('rp',{p:'',pid:'',dt:new Date().toISOString().slice(0,10),rows:[{n:'',r:'',u:'',g:''}]}),nav:0};
 const by=id=>T.find(t=>t.id==id||t.id.toLowerCase()==id.toLowerCase());
 const fm=(x,d)=>{if(S.dec!='a')d=+S.dec;return x.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d})};
 const toast=m=>{const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),1900)};
@@ -206,12 +281,38 @@ function ro(t){const r=t.c(V(t),S.sh);S.out=r&&!r.err?r:null;const act=`<div cla
 if(!r)return`<div class="l">Result</div><div class="big e">—</div><div class="gs" style="font-size:13px">Enter the values below</div>${act}`;
 if(r.err)return`<div class="l">Check your inputs</div><div class="err">${r.err}</div>${act}`;
 const p=r[0],z=stat(p);return`<div class="l"><span>${p.l}</span>${pill(z)}</div><div class="big">${fm(p.v,p.d)}<small>${p.u}</small></div>${p.z?gauge(p):''}${p.r?`<div class="gs" style="font-size:12.5px;margin-top:8px">Reference: ${p.r}</div>`:''}${r.length>1?`<div class="sg">${r.slice(1).map(o=>`<div><em>${o.l}</em><strong>${fm(o.v,o.d)}</strong><small>${o.u}</small>${pill(stat(o))}</div>`).join('')}</div>`:''}${r.n?`<div class="gs" style="font-size:12.5px;margin-top:12px;display:block;line-height:1.4">${r.n}</div>`:''}${act}`}
-const upd=()=>{const t=S.cur;if(t&&t.F)$('#ro').innerHTML=ro(t)};
-function tool(t){const c=CAT[t.g];S.cur=t;if(t.x=='rep')return rep();if(t.x=='cv')return conv();init(t);
-return`<div style="--c:${c[1]}"><section class="ro" id="ro">${ro(t)}</section><div class="fm">${t.f}</div><div class="fc" id="fc">${t.F.map(f=>field(t,f)).join('')}</div></div>`}
-/* converter */
-function conv(){const c=CV[S.cv.i];return`<div class="fc" style="margin-top:6px"><div class="fd"><label for="cs">Test</label><select id="cs">${CV.map((x,i)=>`<option value="${i}"${i==S.cv.i?' selected':''}>${x[0]}</option>`).join('')}</select></div><div class="fd"><label for="ca">${c[1]}</label><div class="in"><input id="ca" data-cv="a" inputmode="decimal" value="${esc(S.cv.a)}" placeholder="Enter value"><span>${c[1]}</span></div></div><div class="fd" style="text-align:center"><button class="btn" data-a="swp" style="padding:8px 18px">${ic('swap')}</button></div><div class="fd"><label for="cb">${c[2]}</label><div class="in"><input id="cb" data-cv="b" inputmode="decimal" value="${esc(S.cv.b)}" placeholder="Result"><span>${c[2]}</span></div></div></div><p class="nt">${typeof c[3]=='number'?`1 ${c[1]} = ${c[3]} ${c[2]}`:'Formula-based conversion'}. Type in either box.</p>`}
-function cvset(w){const c=CV[S.cv.i],x=num(S.cv[w]),o=w=='a'?'b':'a';if(x==null){S.cv[o]='';}else{const f=w=='a'?(typeof c[3]=='number'?x*c[3]:c[3](x)):(typeof c[3]=='number'?x/c[3]:c[4](x));S.cv[o]=String(+f.toPrecision(5))}const e=$('#c'+o);if(e)e.value=S.cv[o]}
+const ZM={g:'ok',y:'warn',r:'bad',b:'info'},stc=()=>{const o=S.out&&S.out[0],z=o&&stat(o);return z?`var(--${ZM[z.t]})`:'var(--pr)'};
+const upd=()=>{const t=S.cur;if(t&&t.F){const h=ro(t),e=$('#ro');e.innerHTML=h;e.style.setProperty('--st',stc())}};
+function tool(t){const c=CAT[t.g];S.cur=t;if(t.x=='rep')return rep();if(t.x=='cv')return conv();if(t.o)return otool(t);init(t);const h=ro(t);
+return`<div style="--c:${c[1]}"><section class="ro" id="ro" style="--st:${stc()}">${h}</section><div class="fm">${t.f}</div><div class="fc" id="fc">${t.F.map(f=>field(t,f)).join('')}</div></div>`}
+/* ---------- classic LabGenie tools (inputs + logic from the original features) ---------- */
+const OS={},tl=(l,v,u,x={})=>`<div class="pv${x.c?' '+x.c:''}">${x.b?`<span class="bd">${x.b}</span>`:''}<em>${l}</em><strong>${v}<small>${u}</small></strong>${x.p||''}</div>`,
+pr2=(...a)=>`<div class="p2">${a.join('')}</div>`,bn=(t,x)=>`<div class="bn b-${t}">${x}</div>`,nl=a=>`<ul class="nl">${a.map(x=>`<li>${x}</li>`).join('')}</ul>`,nb=x=>`<div class="nb">${x}</div>`,
+hd=(l,p)=>`<div class="l"><span>${l}</span>${p||''}</div>`,big=(v,u)=>`<div class="big">${v}<small>${u}</small></div>`,
+rowx=(l,v,u,z)=>`<div class="rw"><span>${l}</span><div><b>${v}</b><i>${u}</i>${pill(z)}</div></div>`,grp=(h,r,n)=>`<div class="gp"><h5>${h}</h5>${r}${n?`<p>${n}</p>`:''}</div>`;
+function ost(t){if(!OS[t.id]){const v={};t.o.F.forEach(f=>{if(f.t=='b')v[f.id]=f.o[0][0];else if(f.t=='n')v[f.id]=f.def||''});const st={v,r:null};OS[t.id]=st;if(t.o.init)st.r=t.o.go(ov(t),st)}return OS[t.id]}
+const ov=t=>{const st=ost(t),v={};t.o.F.forEach(f=>{if(f.t=='p'||f.t=='h')return;v[f.id]=f.t=='n'?num(st.v[f.id]):st.v[f.id]});return v};
+function ofield(t,f,st){const v=st.v,g=x=>typeof x=='function'?x(v):x,L=g(f.l);
+if(f.t=='h')return`<div class="fd fh"><h4>${f.l}</h4>${f.s?`<p>${f.s}</p>`:''}</div>`;
+if(f.t=='b')return`<div class="fd"><label>${L}</label><div class="ub" role="group" aria-label="${L}">${f.o.map(([k,l])=>`<button type="button" class="${v[f.id]==k?'on':''}" aria-pressed="${v[f.id]==k}" data-a="ob" data-f="${f.id}" data-v="${k}">${l}</button>`).join('')}</div></div>`;
+if(f.t=='p')return`<div class="fd"><label>${L}</label><div class="pg">${f.o.map(k=>`<button type="button" class="${parseInt(v[f.id])==k?'on':''}" data-a="op" data-f="${f.id}" data-v="${k}">1:${k}</button>`).join('')}</div></div>`;
+return`<div class="fd${f.h?' h':''}"><label for="o-${f.id}">${L}</label><div class="in"><input id="o-${f.id}" data-o="${f.id}" inputmode="decimal" autocomplete="off" enterkeyhint="done" placeholder="${g(f.ph)||''}" value="${esc(v[f.id])}"></div></div>`}
+const ofields=t=>{const st=ost(t);return t.o.F.map(f=>ofield(t,f,st)).join('')+(t.o.auto?'':`<div class="fd ar"><button class="calc" data-a="calc">${t.o.b}</button><button class="btn" data-a="reset" aria-label="Reset">${ic('reset')}</button></div>`)};
+function opanel(t){const r=ost(t).r,ok=r&&!r.err;let h,c='var(--pr)';
+if(!r)h=`<div class="l">Result</div><div class="big e">—</div><div class="gs" style="font-size:13px">Fill in the values above, then tap ${t.o.b}</div>`;
+else if(r.err){h=`<div class="l">Check your inputs</div><div class="err">${r.err}</div>`;c='var(--bad)'}
+else{h=r.html;if(r.st)c=`var(--${ZM[r.st]})`}
+return`<section class="ro" style="--st:${c}"><div class="sl">Inputs changed — tap ${t.o.b} to refresh</div>${h}<div class="ac"><button data-a="copy" ${ok?'':'disabled'}>${ic('copy')}Copy</button><button data-a="save" ${ok?'':'disabled'}>${ic('save')}Save</button>${navigator.share?`<button data-a="share" ${ok?'':'disabled'}>${ic('share')}Share</button>`:''}</div></section>`}
+function otool(t){const c=CAT[t.g],st=ost(t);S.out=null;S.otx=st.r&&!st.r.err?st.r.tx:null;
+return`<div style="--c:${c[1]}"><section class="fc o" id="of">${ofields(t)}</section><div id="rw">${opanel(t)}</div></div>`}
+function ocalc(sc){const t=S.cur,st=ost(t);st.r=t.o.go(ov(t),st);S.otx=st.r&&!st.r.err?st.r.tx:null;const w=$('#rw');w.innerHTML=opanel(t);w.classList.remove('stale');if(sc&&w.scrollIntoView)w.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'nearest'})}
+function ostale(){const w=$('#rw');if(w&&ost(S.cur).r)w.classList.add('stale')}
+/* classic unit converter */
+function conv(){const c=CONV[S.cv.k],us=Object.entries(c.units),op=s=>us.map(([k,u])=>`<option value="${k}"${k==s?' selected':''}>${u.name}</option>`).join(''),im=S.cv.k=='temperature'?'text':'decimal';
+return`<div class="fc o"><div class="fd"><label for="cs">Select Conversion Category</label><select id="cs">${Object.entries(CONV).map(([k,x])=>`<option value="${k}"${k==S.cv.k?' selected':''}>${x.name}</option>`).join('')}</select></div><div class="fd"><div class="cvm"><div class="cvc"><div class="in"><input id="ca" data-cv="a" inputmode="${im}" autocomplete="off" placeholder="0" value="${esc(S.cv.a)}"></div><select id="cu1" aria-label="From unit">${op(S.cv.u1)}</select></div><button class="swapb" data-a="swp" aria-label="Swap units">${ic('swap')}</button><div class="cvc"><div class="in"><input id="cb" data-cv="b" inputmode="${im}" autocomplete="off" placeholder="0" value="${esc(S.cv.b)}"></div><select id="cu2" aria-label="To unit">${op(S.cv.u2)}</select></div></div></div></div><p class="nt" style="text-align:center;margin-top:4px">Type in either box to convert in real-time.</p>`}
+function cvgo(w){const c=CONV[S.cv.k],x=num(S.cv[w]),o=w=='a'?'b':'a',su=w=='a'?S.cv.u1:S.cv.u2,tu=w=='a'?S.cv.u2:S.cv.u1;let r='';
+if(x!=null){const y=c.convert?c.convert(x,su,tu):x*c.units[su].factor/c.units[tu].factor;if(isFinite(y))r=String(parseFloat(y.toPrecision(6)))}
+S.cv[o]=r;const e=$('#c'+o);if(e)e.value=r}
 /* report */
 const flag=(r,g)=>{const x=num(r),m=String(g).match(/([\d.]+)\s*[-–]\s*([\d.]+)/),l=String(g).match(/<\s*([\d.]+)/),h=String(g).match(/>\s*([\d.]+)/);if(x==null)return'';if(m)return x<+m[1]?'L':x>+m[2]?'H':'';if(l)return x>=+l[1]?'H':'';if(h)return x<=+h[1]?'L':'';return''};
 const QA=[['Glucose','mg/dL','70–100'],['Urea','mg/dL','15–40'],['Creatinine','mg/dL','0.6–1.3'],['Sodium','mEq/L','135–145'],['Potassium','mEq/L','3.5–5.1'],['Cholesterol','mg/dL','< 200'],['Triglycerides','mg/dL','< 150'],['Hemoglobin','g/dL','12–16']];
@@ -227,7 +328,7 @@ function nav(tab){$('#tb').innerHTML=[['home','Home','home'],['tools','Tools','g
 function render(){const h=decodeURIComponent(location.hash.slice(1)),t=h&&by(h);let tab=h||'home',html;S.cur=null;S.edit=t?0:S.edit;
 if(t){tab='tool';html=tool(t);S.rec=[t.id,...S.rec.filter(x=>x!=t.id)].slice(0,6);ST.set('rec',S.rec)}
 else if(h=='tools')html=tools();else if(h=='history')html=hist();else if(h=='more'||h=='help'||h=='dev-instructions'){tab='more';html=more()}else{tab='home';html=home()}
-bar(tab,t);nav(tab=='tool'?'':tab);const v=$('#v');v.className='v';v.innerHTML=html;void v.offsetWidth;window.scrollTo(0,0);document.title=t?t.t+' | LabGenie':'LabGenie';if(t&&t.x=='cv')cvset('a')}
+bar(tab,t);nav(tab=='tool'?'':tab);const v=$('#v');v.className='v';v.innerHTML=html;void v.offsetWidth;window.scrollTo(0,0);document.title=t?t.t+' | LabGenie':'LabGenie';}
 const re=()=>{const y=scrollY,v=$('#v');v.innerHTML=({home,tools,history:hist,more}[location.hash.slice(1)||'home']||home)();scrollTo(0,y)};
 addEventListener('hashchange',()=>{S.nav++;render()});
 /* ---------- events ---------- */
@@ -242,25 +343,28 @@ cat:()=>{S.cat=d.k;if(location.hash!='#tools')location.hash='tools';else re()},
 pin:()=>{const i=S.pins.indexOf(d.id);i<0?S.pins.push(d.id):S.pins.splice(i,1);ST.set('pins',S.pins);toast(i<0?'Pinned to Home':'Removed from Home');if(S.cur)bar('tool',S.cur);else re()},
 copy:()=>cp(sumry()),save:()=>{S.hist.unshift({ts:Date.now(),tx:sumry()});S.hist=S.hist.slice(0,100);ST.set('hist',S.hist);toast('Saved to history')},
 share:()=>navigator.share({title:S.cur.t,text:sumry()}).catch(()=>{}),
-reset:()=>{delete S.v[S.cur.id];$('#v').innerHTML=tool(S.cur)},
+reset:()=>{delete S.v[S.cur.id];if(S.cur.o)delete OS[S.cur.id];$('#v').innerHTML=tool(S.cur)},
+ob:()=>{const t=S.cur,st=ost(t);st.v[d.f]=d.v;$('#of').innerHTML=ofields(t);t.o.auto?ocalc():ostale()},op:()=>A.ob(),calc:()=>ocalc(1),
 hcopy:()=>cp(S.hist[d.i].tx),hdel:()=>{S.hist.splice(d.i,1);ST.set('hist',S.hist);re()},hclr:()=>{S.hist=[];ST.set('hist',[]);re()},
 th:()=>{S.th=d.v;ST.set('th',S.th);theme();re()},dec:()=>{S.dec=d.v;ST.set('dec',S.dec);re()},rst:()=>{S.pins=[...DEF];ST.set('pins',S.pins);toast('Shortcuts reset')},
-swp:()=>{const c=CV[S.cv.i];CV[S.cv.i]=[c[0],c[2],c[1],typeof c[3]=='number'?1/c[3]:c[4],c[3]];S.cv.a=S.cv.b;cvset('a');$('#v').innerHTML=conv()},
+swp:()=>{[S.cv.u1,S.cv.u2]=[S.cv.u2,S.cv.u1];cvgo('a');$('#v').innerHTML=conv()},
 radd:()=>{const q=QA[d.i];S.rp.rows=S.rp.rows.filter(x=>x.n||x.r);S.rp.rows.push(q?{n:q[0],r:'',u:q[1],g:q[2]}:{n:'',r:'',u:'',g:''});sv();$('#rr').innerHTML=rrows()+'<button class="btn" data-a="radd" data-i="-1">+ Add row</button>'},
 rdel:()=>{S.rp.rows.splice(d.i,1);sv();$('#rr').innerHTML=rrows()+'<button class="btn" data-a="radd" data-i="-1">+ Add row</button>'},
 rprint:()=>{$('#pr').innerHTML=rhtml();print()},rcopy:()=>cp(rtext()),rclr:()=>{S.rp.rows=[{n:'',r:'',u:'',g:''}];S.rp.p=S.rp.pid='';sv();$('#v').innerHTML=rep()}};A[a]&&A[a]()});
 const sv=()=>ST.set('rp',S.rp);
-function sumry(){return S.cur.t+'\n'+S.out.map(line).join('\n')}
+function sumry(){return S.cur.t+'\n'+(S.cur.o?S.otx:S.out.map(line).join('\n'))}
 function cp(x){const f=()=>{const t=document.createElement('textarea');t.value=x;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(e){}t.remove()};(navigator.clipboard?navigator.clipboard.writeText(x).catch(f):f());toast('Copied')}
 document.addEventListener('input',e=>{const el=e.target;
 if(el.id=='q'){S.q=el.value;$('#list').innerHTML=list()}
-else if(el.dataset.cv){S.cv[el.dataset.cv]=el.value;cvset(el.dataset.cv)}
+else if(el.dataset.cv){S.cv[el.dataset.cv]=el.value;cvgo(el.dataset.cv)}
+else if(el.dataset.o!=null&&S.cur&&S.cur.o){ost(S.cur).v[el.dataset.o]=el.value;S.cur.o.auto?ocalc():ostale()}
 else if(el.dataset.p){S.rp[el.dataset.p]=el.value;sv()}
 else if(el.dataset.r){S.rp.rows[el.dataset.i][el.dataset.r]=el.value;sv()}
 else if(el.dataset.i&&S.cur){S.v[S.cur.id][el.dataset.i]=el.value;upd()}});
-document.addEventListener('change',e=>{const el=e.target;if(el.id=='cs'){S.cv={i:+el.value,a:'',b:''};$('#v').innerHTML=conv()}
+document.addEventListener('change',e=>{const el=e.target;if(el.id=='cs'){const us=Object.keys(CONV[el.value].units);S.cv={k:el.value,u1:us[0],u2:us[Math.min(1,us.length-1)],a:'',b:''};$('#v').innerHTML=conv()}
+else if(el.id=='cu1'){S.cv.u1=el.value;cvgo('a')}else if(el.id=='cu2'){S.cv.u2=el.value;cvgo('b')}
 else if(el.dataset.i&&S.cur&&el.tagName=='SELECT'){S.v[S.cur.id][el.dataset.i]=el.value;$('#fc').innerHTML=S.cur.F.map(f=>field(S.cur,f)).join('');upd()}});
-document.addEventListener('keydown',e=>{if(e.key=='Enter'&&e.target.tagName=='INPUT')e.target.blur()});
+document.addEventListener('keydown',e=>{if(e.key=='Enter'&&e.target.tagName=='INPUT'){if(S.cur&&S.cur.o&&!S.cur.o.auto&&e.target.dataset.o!=null)ocalc(1);e.target.blur()}});
 document.addEventListener('focusin',e=>{if(/INPUT|SELECT/.test(e.target.tagName)&&S.cur)document.body.classList.add('kb')});
 document.addEventListener('focusout',()=>setTimeout(()=>{if(!/INPUT|SELECT/.test(document.activeElement.tagName))document.body.classList.remove('kb')},120));
 /* ---------- boot ---------- */
@@ -269,5 +373,3 @@ if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWork
 </script>
 </body>
 </html>
-
-
