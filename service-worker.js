@@ -1,32 +1,22 @@
-const CACHE_NAME = 'labgenie-v6';
+const CACHE_NAME = 'labgenie-v7';
 
 const urlsToCache = [
   './',
   './index.html',
-
+  './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './icons/icon-maskable-512.png',
-
-  './features/dilution-calculator.html',
-  './features/anticoagulant-calculator.html',
-  './features/LDL-calculator.html',
-  './features/egfr-calculator.html',
-  './features/uacr-calculator.html',
-  './features/electrolyte-verification.html',
-  './features/osmolality-calculator.html',
-  './features/qc-westgard-helper.html',
-  './features/manual-report-template.html',
-  './features/unit-conversion.html',
-  './features/molarity-calculator.html'
+  './icons/icon-maskable-512.png'
 ];
 
 self.addEventListener('install', event => {
   console.log('Service Worker installing...');
+  // Force the waiting service worker to become the active service worker immediately
+  self.skipWaiting();
+  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(urlsToCache))
-      .then(() => self.skipWaiting())
       .catch(err => console.error('Caching failed: ', err))
   );
 });
@@ -34,31 +24,43 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   console.log('Service Worker activating...');
   const whitelist = [CACHE_NAME];
+  
   event.waitUntil(
     caches.keys()
       .then(keys => Promise.all(
-        keys.map(key =>
-          whitelist.includes(key) ? null : caches.delete(key)
-        )
+        keys.map(key => {
+          if (!whitelist.includes(key)) {
+            console.log('Deleting old cache:', key);
+            return caches.delete(key);
+          }
+        })
       ))
       .then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', event => {
+  // Only handle GET requests
+  if (event.request.method !== 'GET') return;
+
   event.respondWith(
-    caches.match(event.request).then(res => {
-      return res || fetch(event.request)
+    caches.match(event.request).then(cachedRes => {
+      return cachedRes || fetch(event.request)
         .then(networkRes => {
-          if (networkRes.ok &&
-              networkRes.type === 'basic') {
-            let clone = networkRes.clone();
+          // Check if we received a valid response from our own origin
+          if (networkRes && networkRes.status === 200 && networkRes.type === 'basic') {
+            const clone = networkRes.clone();
             caches.open(CACHE_NAME)
               .then(cache => cache.put(event.request, clone));
           }
           return networkRes;
         })
-        .catch(() => caches.match('./index.html'));
+        .catch(() => {
+          // Offline fallback for page navigation
+          if (event.request.mode === 'navigate') {
+            return caches.match('./index.html');
+          }
+        });
     })
   );
 });
