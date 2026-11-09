@@ -322,10 +322,14 @@ addEventListener('hashchange',()=>{S.nav++;render()});
 document.addEventListener('click',e=>{
 const cd=e.target.closest('a.card[data-id]');if(S.edit&&cd){e.preventDefault();S.pins=S.pins.filter(x=>x!=cd.dataset.id);ST.set('pins',S.pins);return re()}
 const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,d=b.dataset;if(b.closest('a'))e.preventDefault();
+let DP=null;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();DP=e;re()});
+addEventListener('appinstalled',()=>{DP=null;re()});
 const A={back:()=>S.nav?history.back():(location.hash='home'),
 srch:()=>{location.hash='tools';setTimeout(()=>{const q=$('#q');q&&q.focus()},60)},
 tgl:()=>{S.th=document.documentElement.dataset.e=='dark'?'light':'dark';ST.set('th',S.th);theme()},
 edit:()=>{S.edit=!S.edit;re()},
+inst:async()=>{if(!DP)return;DP.prompt();await DP.userChoice;DP=null;re()},
 cat:()=>{S.cat=d.k;if(location.hash!='#tools')location.hash='tools';else re()},
 pin:()=>{const i=S.pins.indexOf(d.id);i<0?S.pins.push(d.id):S.pins.splice(i,1);ST.set('pins',S.pins);toast(i<0?'Pinned to Home':'Removed from Home');if(S.cur)bar('tool',S.cur);else re()},
 copy:()=>cp(sumry()),
@@ -537,7 +541,8 @@ return`<div class="hero"><h2 style="font-size:28px">${tr('settings')}</h2></div>
 <div class="set"><h4>Privacy &amp; safety</h4><p>Don’t store patient names</p>${sg('priv',oo)}<p style="margin:10px 0 6px">Audit log of calculations</p>${sg('audit',oo)}<p style="margin:10px 0 6px">Disclaimer</p>${sg('disc',[['short','Short'],['std','Standard'],['strict','Strict']])}<p style="margin:10px 0 6px">App PIN ${S.pin?'(set)':'(off)'}</p><button class="btn" data-a="pinset">${S.pin?'Change PIN':'Set PIN'}</button> ${S.pin?'<button class="btn d" data-a="pinclr">Remove PIN</button>':''}${S.audit&&S.aud.length?`<p style="margin-top:12px;font-size:12.5px">${S.aud.slice(0,12).map(a=>new Date(a.ts).toLocaleTimeString()+' · '+esc(a.a)).join('<br>')}</p>`:''}</div>
 <div class="set"><h4>Data</h4><p>Everything stays on this device.</p><div class="ac" style="margin:0;flex-wrap:wrap"><button data-a="exp">Export JSON</button><button data-a="imp">Import JSON</button><button data-a="csv">History CSV</button></div><div class="ac" style="margin:8px 0 0"><button data-a="rst">Reset home shortcuts</button></div></div>
 <div class="set"><h4>Tools</h4><div class="ac" style="margin:0"><a class="btn" href="#batch" style="flex:1;text-align:center;text-decoration:none">Batch mode</a><a class="btn" href="#selftest" style="flex:1;text-align:center;text-decoration:none">Self-test</a></div></div>
-<div class="set"><h4>Install on your phone</h4><p><b>Android (Chrome):</b> menu ⋮ → Install app.<br><b>iPhone (Safari):</b> Share → Add to Home Screen.</p></div><div class="set"><h4>About</h4><p>LabGenie v${VER} · ${T.length} calculators · Includes formulas from Lab Calculator by ArRoni. ${DISC[S.disc]}</p></div>`};
+<div class="set"><h4>Install on your phone</h4>${DP?'<button class="btn" data-a="inst">Install LabGenie</button>':'<p><b>Android (Chrome):</b> menu → Install app.<br><b>iPhone (Safari):</b> Share → Add to Home Screen.</p>'}</div>
+<div class="set"><h4>About</h4><p>LabGenie v${VER} · ${T.length} calculators · Includes formulas from Lab Calculator by ArRoni. ${DISC[S.disc]}</p></div>`};
 const BT=()=>T.filter(x=>x.F&&x.c);
 window.batch=function(){const x=by(S.bt)&&by(S.bt).c?by(S.bt):BT()[0];S.bt=x.id;return`<div class="hero"><h2 style="font-size:28px">Batch mode</h2></div><div class="fc o"><div class="fd"><label>Calculator</label><select data-bt="1">${BT().map(y=>`<option value="${y.id}"${y==x?' selected':''}>${y.t}</option>`).join('')}</select></div><div class="fd"><label>Paste a table — first row = column ids: ${x.F.map(f=>f.id).join(', ')}</label><textarea id="bta" placeholder="${x.F.filter(f=>!f.s).map(f=>f.id).join(',')}"></textarea></div><div class="fd"><button class="calc" style="width:100%" data-a="bgo">Calculate all rows</button></div></div><p class="nt">Values are read in conventional units (the units shown on each tool when SI is off).</p><div id="bo"></div>`};
 const TESTS=[['CKD-EPI 2021 · M, 50 y, Cr 1.0',()=>FX.ckd(1,50,'male'),91.7,.5],['Cockcroft-Gault · M, 50 y, 70 kg',()=>FX.cg(1,50,'male',70),87.5,.01],['Sampson LDL · 200/50/150',()=>FX.samp(200,50,150),123.4,.2],['Creatinine 1 mg/dL → µmol/L',()=>K.cr,88.4,.01],['BUN↔urea factors agree (14 mg/dL)',()=>14*K.bunMmol-14*K.bun*K.ureaMmol,0,.05],['MCV (Hct 40, RBC 5)',()=>40*10/5,80,.01],['INR (PT 15, MNPT 12, ISI 1)',()=>Math.pow(15/12,1),1.25,.01],['FeNa',()=>20*1/(140*100)*100,.143,.001],['SD of 1–5',()=>FX.sd([1,2,3,4,5]),1.581,.001],['Centrifuge 10 cm @ 3000 rpm',()=>1.118e-5*10*3000*3000,1006.2,.5]];
