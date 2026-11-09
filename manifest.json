@@ -1,8 +1,10 @@
 {
+  "id": "/labGenie/?v=7",
   "name": "LabGenie",
   "short_name": "LabGenie",
   "description": "Your Modern Lab Sidekick for essential calculations and tools.",
-  "start_url": ".",
+  "start_url": "/labGenie/index.html",
+  "scope": "/labGenie/",
   "display": "standalone",
   "background_color": "#f3f6ff",
   "theme_color": "#764ba2",
@@ -11,12 +13,14 @@
     {
       "src": "icons/icon-192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any"
     },
     {
       "src": "icons/icon-512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any"
     },
     {
       "src": "icons/icon-maskable-512.png",
