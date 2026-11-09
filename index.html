@@ -319,12 +319,12 @@ function rtext(){const r=S.rp;return`LABORATORY REPORT\nPatient: ${r.p}  ID: ${r
 function bar(tab,t){$('#bar').innerHTML=t?`<button class="ib" data-a="back" aria-label="Back">${ic('back')}</button><h1>${t.t}</h1><button class="ib${S.pins.includes(t.id)?' on':''}" data-a="pin" data-id="${t.id}" aria-label="Pin to home">${ic('star')}</button>`:`<div class="logo"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke-width:2.6"><path d="M12 5v14M5 12h14"/></svg></div><h1>LabGenie</h1><button class="ib" data-a="srch" aria-label="Search">${ic('search')}</button><button class="ib" data-a="tgl" aria-label="Toggle theme">${ic('moon')}</button>`}
 const re=()=>{const y=scrollY,v=$('#v'),h=window.hid?hid():(location.hash.slice(1)||'home');v.innerHTML=((window.VW&&VW[h])||home)();scrollTo(0,y)};
 addEventListener('hashchange',()=>{S.nav++;render()});
-document.addEventListener('click',e=>{
-const cd=e.target.closest('a.card[data-id]');if(S.edit&&cd){e.preventDefault();S.pins=S.pins.filter(x=>x!=cd.dataset.id);ST.set('pins',S.pins);return re()}
-const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,d=b.dataset;if(b.closest('a'))e.preventDefault();
 let DP=null;
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();DP=e;re()});
 addEventListener('appinstalled',()=>{DP=null;re()});
+document.addEventListener('click',e=>{
+const cd=e.target.closest('a.card[data-id]');if(S.edit&&cd){e.preventDefault();S.pins=S.pins.filter(x=>x!=cd.dataset.id);ST.set('pins',S.pins);return re()}
+const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,d=b.dataset;if(b.closest('a'))e.preventDefault();
 const A={back:()=>S.nav?history.back():(location.hash='home'),
 srch:()=>{location.hash='tools';setTimeout(()=>{const q=$('#q');q&&q.focus()},60)},
 tgl:()=>{S.th=document.documentElement.dataset.e=='dark'?'light':'dark';ST.set('th',S.th);theme()},
