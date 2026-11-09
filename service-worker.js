@@ -1,4 +1,4 @@
-const CACHE_NAME = 'labgenie-v7';
+const CACHE_NAME = 'labgenie-v8';
 
 const urlsToCache = [
   './',
@@ -42,6 +42,12 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   // Only handle GET requests
   if (event.request.method !== 'GET') return;
+
+  // Always fetch the manifest fresh so install metadata never goes stale
+  if (new URL(event.request.url).pathname.endsWith('/manifest.json')) {
+    event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then(cachedRes => {
