@@ -53,7 +53,7 @@
 
 /* detail header */
 .sp-dh { margin-top: 6px; padding: 16px; border-radius: 24px; background: linear-gradient(135deg, color-mix(in srgb, var(--c, var(--pr)) 22%, var(--sf)), var(--sf) 70%); border: 1px solid color-mix(in srgb, var(--c, var(--pr)) 30%, var(--ln)); }
-.sp-dh.g { --c: var(--pr); }
+.sp-dh.sp-dg { --c: var(--pr); }
 .sp-dh h2 { margin: 8px 0 12px; font: 600 22px/1.2 var(--f1); letter-spacing: -.015em; }
 .sp-dh h2 i { font-style: normal; }
 .sp-tags { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -86,10 +86,10 @@
 .sp-hl { display: grid; gap: 10px; }
 @media (min-width: 620px) { .sp-hl { grid-template-columns: 1fr 1fr; } .sp-quick { grid-template-columns: repeat(8, minmax(0, 1fr)); } }
 .sp-hl > div { padding: 10px 12px; border-radius: 14px; }
-.sp-hl .hi { background: color-mix(in srgb, var(--bad) 9%, var(--bg)); }
-.sp-hl .lo { background: color-mix(in srgb, var(--info) 11%, var(--bg)); }
+.sp-hl .sp-up { background: color-mix(in srgb, var(--bad) 9%, var(--bg)); }
+.sp-hl .sp-dn { background: color-mix(in srgb, var(--info) 11%, var(--bg)); }
 .sp-hl h4 { margin: 0 0 4px; display: flex; align-items: center; gap: 6px; font: 700 13.5px var(--f1); }
-.sp-hl .hi h4 { color: var(--bad); } .sp-hl .lo h4 { color: color-mix(in srgb, var(--info) 70%, var(--ink)); }
+.sp-hl .sp-up h4 { color: var(--bad); } .sp-hl .sp-dn h4 { color: color-mix(in srgb, var(--info) 70%, var(--ink)); }
 .sp-hl svg { width: 16px; height: 16px; }
 .sp-tw { overflow-x: auto; margin-top: 4px; border-radius: 12px; border: 1px solid var(--ln); }
 .sp-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -123,9 +123,9 @@
 .sp-res.sm b { font-size: 16px; }
 .sp-verdict { padding: 13px 14px; border-radius: 16px; font: 700 16px var(--f1); }
 .sp-verdict small { display: block; margin-top: 3px; font: 500 12.5px var(--f2); color: var(--mut); }
-.sp-verdict.g { background: color-mix(in srgb, var(--ok) 18%, var(--sf)); color: color-mix(in srgb, var(--ok) 60%, var(--ink)); }
-.sp-verdict.w { background: color-mix(in srgb, var(--warn) 22%, var(--sf)); color: color-mix(in srgb, var(--warn) 55%, var(--ink)); }
-.sp-verdict.r { background: color-mix(in srgb, var(--bad) 18%, var(--sf)); color: var(--bad); }
+.sp-verdict.vg { background: color-mix(in srgb, var(--ok) 18%, var(--sf)); color: color-mix(in srgb, var(--ok) 60%, var(--ink)); }
+.sp-verdict.vw { background: color-mix(in srgb, var(--warn) 22%, var(--sf)); color: color-mix(in srgb, var(--warn) 55%, var(--ink)); }
+.sp-verdict.vr { background: color-mix(in srgb, var(--bad) 18%, var(--sf)); color: var(--bad); }
 .sp-rule { margin-top: 6px; padding: 9px 12px; border-radius: 12px; font-size: 13px; line-height: 1.4; background: var(--sf); border-left: 4px solid var(--warn); }
 .sp-rule.r { border-left-color: var(--bad); }
 .sp-rule b { margin-right: 8px; font-family: var(--f1); }
@@ -145,3 +145,16 @@
 .sp-draw b { font-size: 14px; } .sp-draw small { margin: 1px 0 0; }
 .sp-cap { flex: none; width: 16px; height: 40px; border-radius: 5px 5px 8px 8px; background: linear-gradient(var(--c) 0 30%, color-mix(in srgb, var(--c) 15%, #fff) 30% 100%); border: 1px solid color-mix(in srgb, var(--c) 60%, #999); }
 @media (max-width: 380px) { .sp-quick { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; } .sp-quick span { font-size: 10.5px; } .sp-facts { grid-template-columns: 1fr; } .sp-kpi { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* test methods + department shortcuts */
+.sp-p { margin: 0 0 8px; }
+.sp-mt { display: grid; gap: 8px; }
+.sp-mt > div { padding: 10px 12px; border-radius: 14px; background: var(--bg); border: 1px solid var(--ln); }
+.sp-mt b { font: 600 14px var(--f1); }
+.sp-mt span { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 99px; background: var(--pt); color: var(--pr); font-size: 11px; font-weight: 700; vertical-align: 1px; }
+.sp-mt p { margin: 4px 0 0; font-size: 13px; color: var(--mut); line-height: 1.45; }
+.sp-dep { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 10px 0 4px; }
+.sp-dep button { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 12px; border-radius: 18px; background: var(--sf); border: 1px solid var(--ln); text-align: left; color: var(--ink); }
+.sp-dep i { font-style: normal; font-size: 22px; }
+.sp-dep b { font: 600 14px var(--f1); }
+.sp-dep small { font-size: 11.5px; color: var(--mut); }

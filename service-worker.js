@@ -1,4 +1,4 @@
-const CACHE_NAME = 'labgenie-v19';
+const CACHE_NAME = 'labgenie-v20';
 
 const urlsToCache = [
   './',
@@ -7,6 +7,8 @@ const urlsToCache = [
   './css/report.css',
   './css/sop.css',
   './js/sop/tests.js',
+  './js/sop/methods.js',
+  './js/sop/visuals.js',
   './js/sop/guides.js',
   './js/sop/sop.js',
   './js/report/catalog.js',

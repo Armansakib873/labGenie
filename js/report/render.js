@@ -74,12 +74,13 @@
 .rxp .rq-ss b{font-size:11.4px}
 .rxp .rq-si{height:48px;display:flex;align-items:flex-end;justify-content:center}
 .rxp .rq-si img{display:block;margin-bottom:-4px}
-.rxp .rq-sl{border-top:1px solid #111;width:62%;margin:0 auto 4px}
+.rxp .rq-si{margin-bottom:3px}
 .rxp .rq-es{font-size:8.3px;color:#444;margin-top:1px}
-.rxp .rq-sc{flex:1;display:flex;justify-content:center}
+.rxp .rq-sc{flex:1;display:flex;justify-content:center;gap:10px}
+.rxp .rq-dup{transform:rotate(7deg)}.rxp .rq-dup b{font-size:17px}
 .rxp .rq-seal{width:92px;height:92px;border:2px solid #111;border-radius:50%;outline:1px solid #111;outline-offset:-6px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font:700 8.2px/1.25 Arial,sans-serif;letter-spacing:.4px;transform:rotate(-8deg)}
 .rxp .rq-seal b{font-size:19px;line-height:1}
-.rxp .rq-eo{text-align:center;margin-top:12px;font-size:9.8px;letter-spacing:.5px}
+.rxp .rq-eo{text-align:center;margin-top:10px;position:relative;z-index:1;font-size:9.8px;letter-spacing:.5px}
 .rxp .rq-ft{margin-top:8px;padding-top:4px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:2px 12px;font-size:9.6px;color:#222;position:relative;z-index:1}
 .rxp .rq-ft .rq-ds{flex-basis:100%;text-align:center;font-style:italic;color:#444}
 .rxp.d1 .rq-t td{padding:3.8px 6px}.rxp.d1 .rq-t .rq-ph td{padding:8px 6px 3px}.rxp.d1 .rq-t .rq-sb td{padding:4px 6px 1px}.rxp.d1 .rq-sg{margin-top:14px}.rxp.d1 .rq-cm{margin-top:7px}.rxp.d1 .rq-eo{margin-top:8px}
@@ -167,7 +168,7 @@
     const code = c.pt.lno || c.pt.pid;
     const bc = lab.bc && code ? `<div class="rq-bc">${R.barcode(code)}<div>${E(String(code).toUpperCase())}</div></div>` : '<div></div>';
     const ttl = pg.ttl || (pg.dept ? pg.dept.replace(/^Serology \/ /, '') + ' Report' : 'Laboratory Report');
-    return `<div class="rq-tr">${bc}<div class="rq-tt">${E(ttl)}${contd ? '<small>(continued)</small>' : ''}</div><div class="rq-sp"><b>${E(pg.nm)}</b><br/><span class="rq-st">${E(String(pg.st || 'Completed').toUpperCase())}</span></div></div>${pg.mn && !contd ? `<div class="rq-mn">${E(pg.mn)}</div>` : ''}`;
+    return `<div class="rq-tr">${bc}<div class="rq-tt">${E(ttl)}${contd ? '<small>(continued)</small>' : ''}</div><div class="rq-sp">${R.pageSpecLabel(pg) ? `Sample type: <b>${E(R.pageSpecLabel(pg))}</b>` : ''}</div></div>${pg.mn && !contd ? `<div class="rq-mn">${E(pg.mn)}</div>` : ''}`;
   };
   const rowHTML = (x, c, pg, lab) => {
     const sx = R.sexOf(c);
@@ -185,7 +186,7 @@
     if (s.m === 'img' && s.img) img = s.img;
     else if (s.m === 'font' && (s.t || s.n)) img = R.sig.typed(s.t || s.n, s.f || R.sig.FONTS[1]);
     const z = img ? R.sig.printSize(img, 190, 50) : null;
-    return `<div class="rq-ss"><div class="rq-si">${img ? `<img src="${img.u}" alt="" style="width:${z.w}px;height:${z.h}px"/>` : ''}</div><div class="rq-sl"></div><b>${E(s.n)}</b>${s.d ? `<div>${E(s.d)}</div>` : ''}${s.q ? `<div>${E(s.q)}</div>` : ''}${s.h ? `<div>${E(s.h)}</div>` : ''}${img ? `<div class="rq-es">Electronically signed${c.pt.deliv ? ' · ' + E(fdt(c.pt.deliv)) : ''}</div>` : ''}</div>`;
+    return `<div class="rq-ss"><div class="rq-si">${img ? `<img src="${img.u}" alt="" style="width:${z.w}px;height:${z.h}px"/>` : ''}</div><b>${E(s.n)}</b>${s.d ? `<div>${E(s.d)}</div>` : ''}${s.q ? `<div>${E(s.q)}</div>` : ''}${s.h ? `<div>${E(s.h)}</div>` : ''}${img ? `<div class="rq-es">Electronically signed${c.pt.deliv ? ' · ' + E(fdt(c.pt.deliv)) : ''}</div>` : ''}</div>`;
   };
   /* tail blocks: "last" = comment, notes, legend, signatures, end line;
      "mid" = continued note, legend, signatures (signatures repeat on every sheet) */
@@ -194,9 +195,11 @@
     const notes = lab.nts ? [...new Set(pg.rows.filter(x => x.h && x.note && rows.includes(x)).map(x => x.note))] : [];
     const cm = String(pg.cm || '').trim();
     const legend = anyF ? `<div class="rq-lgd">${lab.flg === 'ar' ? '↑ High · ↓ Low' : 'H High · L Low'} · A Abnormal${anyC ? (lab.flg === 'ar' ? ' · ↑↑/↓↓ Critical value' : ' · * Critical value') : ''}</div>` : '';
-    const sg = c.sig, sig = sg.l.on || sg.r.on || lab.seal ? `<div class="rq-sg">${sigSlot(sg.l, c)}<div class="rq-sc">${lab.seal ? '<div class="rq-seal"><span>MACHINE</span><span>GENERATED</span><b>✓</b><span>COPY</span></div>' : ''}</div>${sigSlot(sg.r, c)}</div>` : '';
+    const seals = (lab.seal ? '<div class="rq-seal"><span>MACHINE</span><span>GENERATED</span><b>✓</b><span>COPY</span></div>' : '') + (lab.dup ? '<div class="rq-seal rq-dup"><span>DUPLICATE</span><b>⧉</b><span>COPY</span></div>' : '');
+    const sg = c.sig, sig = sg.l.on || sg.r.on || seals ? `<div class="rq-sg">${sigSlot(sg.l, c)}<div class="rq-sc">${seals}</div>${sigSlot(sg.r, c)}</div>` : '';
     return {
-      last: `<div class="rq-tail">${cm ? `<div class="rq-cm"><b>Comment / Interpretation</b>${E(cm)}</div>` : ''}${notes.length ? `<div class="rq-nt"><b>Notes:</b> ${notes.map(E).join(' ')}</div>` : ''}${legend}${sig}${lab.eor ? '<div class="rq-eo">*** End of report ***</div>' : ''}</div>`,
+      last: `<div class="rq-tail">${cm ? `<div class="rq-cm"><b>Comment / Interpretation</b>${E(cm)}</div>` : ''}${notes.length ? `<div class="rq-nt"><b>Notes:</b> ${notes.map(E).join(' ')}</div>` : ''}${legend}${sig}</div>`,
+      eor: lab.eor ? '<div class="rq-eo">*** End of report ***</div>' : '',
       mid: `<div class="rq-tail"><div class="rq-ct">Continued on next page…</div>${legend}${sig}</div>`
     };
   };
@@ -226,10 +229,10 @@
   /* one layout attempt at density d → array of row-index chunks (one per sheet) */
   const plan = (c, pg, lab, d, rows, rowsH, T, ft) => {
     const top0 = header(c, lab) + infoBox(c, pg) + titleRow(c, pg, lab, 0);
-    const el = measure(sheetOpen(lab, pg, d).replace('class="rxp', 'class="rxp rxm') + top0 + `<table class="rq-t">${thead}<tbody>${rowsH.join('')}</tbody></table>` + T.mid + T.last + ft + '</div>');
+    const el = measure(sheetOpen(lab, pg, d).replace('class="rxp', 'class="rxp rxm') + top0 + `<table class="rq-t">${thead}<tbody>${rowsH.join('')}</tbody></table>` + T.mid + T.eor + T.last + ft + '</div>');
     const rect = e => e.getBoundingClientRect(), sR = rect(el), th = el.querySelector('thead'), trs = [...el.querySelectorAll('tbody tr')], tl = el.querySelectorAll('.rq-tail'), ftE = el.querySelector('.rq-ft');
     const topH = rect(th).top - sR.top - PT, theadH = rect(th).height, rh = trs.map(t => rect(t).height);
-    const midH = rect(tl[0]).height, lastH = rect(tl[1]).height, ftH = rect(ftE).bottom - rect(tl[1]).bottom;
+    const midH = rect(tl[0]).height, eoE = el.querySelector('.rq-eo'), lastH = rect(tl[1]).height + (eoE ? rect(eoE).height + 10 : 0), ftH = rect(ftE).bottom - rect(tl[1]).bottom;
     probe.innerHTML = '';
     const room = SH - PT - PB - topH - theadH - ftH - 8, aMid = room - midH, aLast = room - lastH;
     // groups = one panel (heading + its rows); rows before the first heading form their own group
@@ -291,7 +294,7 @@
     return best.map((idx, k) => {
       const last = k === best.length - 1;
       const body = idx.length ? `<table class="rq-t">${thead}<tbody>${idx.map(i => rowsH[i]).join('')}</tbody></table>` : '';
-      return sheetOpen(lab, pg, bd) + (k ? top1 : top0) + body + (last ? T.last : T.mid) + ft + '</div>';
+      return sheetOpen(lab, pg, bd) + (k ? top1 : top0) + body + (last ? T.eor + T.last : T.mid) + ft + '</div>';
     });
   };
 
@@ -323,17 +326,18 @@
       const sgw = s => {
         if (!s || !s.on) return '<td width="38%"></td>';
         const img = s.m === 'img' && s.img ? s.img : s.m === 'font' && (s.t || s.n) ? R.sig.typed(s.t || s.n, s.f || R.sig.FONTS[1]) : null, z = img && R.sig.printSize(img, 170, 46);
-        return `<td width="38%" align="center" style="font-size:9pt">${img ? `<img src="${img.u}" width="${z.w}" height="${z.h}"/>` : '<br/><br/>'}<div style="border-top:1pt solid #000;width:60%;margin:0 auto"></div><b>${E(s.n)}</b><br/>${E(s.d || '')}<br/>${E(s.q || '')}${s.h ? '<br/>' + E(s.h) : ''}</td>`;
+        return `<td width="38%" align="center" style="font-size:9pt">${img ? `<img src="${img.u}" width="${z.w}" height="${z.h}"/>` : '<br/><br/>'}<br/><b>${E(s.n)}</b><br/>${E(s.d || '')}<br/>${E(s.q || '')}${s.h ? '<br/>' + E(s.h) : ''}</td>`;
       };
       const head = lab.hdr === 'gap' ? `<div style="height:${Math.round((+lab.gap || 40) * 2.83)}pt"></div>` : lab.hdr === 'img' && lab.himg ? `<p align="center"><img src="${lab.himg.u}" width="640"/></p>` : `<table width="100%" style="border-bottom:2pt solid #000"><tr>${lab.logo ? `<td width="90"><img src="${lab.logo.u}" height="60"/></td>` : ''}<td align="${lab.logo ? 'left' : 'center'}"><span style="font:bold 20pt Georgia">${E(L.n || 'Clinical Laboratory')}</span>${lab.tag ? `<br/><i style="font-size:9pt">${E(lab.tag)}</i>` : ''}<br/><span style="font-size:9pt">${E(L.a || '')}${L.t ? ' · Tel ' + E(L.t) : ''}${lab.em ? ' · ' + E(lab.em) : ''}</span></td></tr></table>`;
       const ttl = pg.ttl || (pg.dept ? pg.dept + ' Report' : 'Laboratory Report');
       return `${head}<table width="100%" style="border:1.2pt solid #000;margin-top:8pt;border-collapse:collapse">${ir.join('')}<tr><td colspan="3" style="padding:1pt 5pt;font-size:9.5pt">Referred By : <b>${E(c.pt.rb)}</b></td></tr></table>
-<table width="100%" style="margin-top:8pt"><tr><td width="30%">${lab.bc && code ? `<img src="${R.barcodePng(code)}" width="150" height="30"/><br/><span style="font:7pt Courier New">${E(code)}</span>` : ''}</td><td width="40%" align="center" style="border:1.5pt solid #000;padding:5pt;font:bold 15pt Arial">${E(ttl)}</td><td width="30%" align="right" style="font-size:9pt"><b>${E(pg.nm)}</b><br/>${E(pg.st || '')}</td></tr></table>
+<table width="100%" style="margin-top:8pt"><tr><td width="30%">${lab.bc && code ? `<img src="${R.barcodePng(code)}" width="150" height="30"/><br/><span style="font:7pt Courier New">${E(code)}</span>` : ''}</td><td width="40%" align="center" style="border:1.5pt solid #000;padding:5pt;font:bold 15pt Arial">${E(ttl)}</td><td width="30%" align="right" style="font-size:9pt">${R.pageSpecLabel(pg) ? 'Sample type: <b>' + E(R.pageSpecLabel(pg)) + '</b>' : ''}</td></tr></table>
 ${pg.mn ? `<p align="center" style="font:italic bold 9.5pt Arial">${E(pg.mn)}</p>` : ''}
 <table width="100%" style="margin-top:8pt;border-collapse:collapse"><tr>${th('Test Name')}${th('Result')}${th('Flag')}${th('Unit')}${th('Reference Range')}</tr>${body}</table>
+${lab.eor ? '<p align="center" style="font-size:9pt;margin-top:8pt">*** End of report ***</p>' : ''}
 ${pg.cm ? `<p style="font-size:10pt;margin-top:10pt"><b>Comment / Interpretation:</b><br/>${E(pg.cm).replace(/\n/g, '<br/>')}</p>` : ''}
 ${c.sig.l.on || c.sig.r.on ? `<table width="100%" style="margin-top:22pt"><tr>${sgw(c.sig.l)}<td></td>${sgw(c.sig.r)}</tr></table>` : ''}
-${lab.eor ? '<p align="center" style="font-size:9pt;margin-top:12pt">*** End of report ***</p>' : ''}${lab.disc ? `<p align="center" style="font-size:8pt"><i>${E(lab.disc)}</i></p>` : ''}`;
+${lab.disc ? `<p align="center" style="font-size:8pt"><i>${E(lab.disc)}</i></p>` : ''}`;
     };
     const body = idxs.map(i => page(c.pages[i])).join('<br clear="all" style="page-break-before:always"/>');
     return `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Report</title><!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View></w:WordDocument></xml><![endif]--><style>@page{size:A4;margin:12mm 13mm}body{font:10.5pt Arial,sans-serif;color:#000}table{border-collapse:collapse}</style></head><body>${body}</body></html>`;

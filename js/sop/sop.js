@@ -28,7 +28,7 @@
   /* ---------------- search index ---------------- */
   const flat = o => (o == null ? '' : typeof o === 'string' ? o : Array.isArray(o) ? o.map(flat).join(' ') : typeof o === 'object' ? Object.values(o).map(flat).join(' ') : String(o));
   const IDX = [
-    ...G.TESTS.map(t => ({ k: 't:' + t.id, t, name: t.n.toLowerCase(), aka: (t.aka || '').toLowerCase(), all: flat(t).toLowerCase() })),
+    ...G.TESTS.map(t => ({ k: 't:' + t.id, t, name: t.n.toLowerCase(), aka: (t.aka || '').toLowerCase(), all: (flat(t) + ' ' + flat((G.METHODS || {})[t.id])).toLowerCase() })),
     ...G.GUIDES.map(g => ({ k: 'g:' + g.id, g, name: g.n.toLowerCase(), aka: (g.aka || '').toLowerCase(), all: flat(g).toLowerCase() }))
   ];
   const search = q => {
@@ -55,12 +55,13 @@
 
   /* ---------------- shared bits ---------------- */
   const testCard = (t, q) => `<a class="sp-card" href="#sop?t=${t.id}" style="--c:${tube(t.tube)[1]}"><i class="sp-tb"></i><span><b>${E(t.n)}</b><small>${E(t.dept)} · ${E(t.sp)}</small>${q ? `<em>${snippet(IDX.find(x => x.k === 't:' + t.id), q)}</em>` : ''}</span>${isFav('t:' + t.id) ? '<i class="sp-fv">★</i>' : ''}${ico('chev')}</a>`;
-  const guideCard = (g, q) => `<a class="sp-card g" href="#sop?g=${g.id}"><i class="sp-gi">${g.ic}</i><span><b>${E(g.n)}</b><small>${E(g.cat)}${g.tool ? ' · interactive tool' : ''}</small>${q ? `<em>${snippet(IDX.find(x => x.k === 'g:' + g.id), q)}</em>` : ''}</span>${isFav('g:' + g.id) ? '<i class="sp-fv">★</i>' : ''}${ico('chev')}</a>`;
+  const guideCard = (g, q) => `<a class="sp-card" href="#sop?g=${g.id}"><i class="sp-gi">${g.ic}</i><span><b>${E(g.n)}</b><small>${E(g.cat)}${g.tool ? ' · interactive tool' : ''}</small>${q ? `<em>${snippet(IDX.find(x => x.k === 'g:' + g.id), q)}</em>` : ''}</span>${isFav('g:' + g.id) ? '<i class="sp-fv">★</i>' : ''}${ico('chev')}</a>`;
   const chips = (list, cur, attr) => `<div class="sp-chips">${list.map(([v, l, n]) => `<button class="sp-chip${cur === v ? ' on' : ''}" data-sa="${attr}" data-v="${E(v)}">${E(l)}${n != null ? ` <i>${n}</i>` : ''}</button>`).join('')}</div>`;
   const seg = (list, cur, attr) => `<div class="sp-seg">${list.map(([v, l]) => `<button class="${cur === v ? 'on' : ''}" data-sa="${attr}" data-v="${v}">${l}</button>`).join('')}</div>`;
 
   /* ---------------- home ---------------- */
   const QUICK = [['westgard', '🚦', 'Westgard checker'], ['iqc', '📈', 'QC statistics'], ['centri', '🌀', 'RPM ⇄ RCF'], ['draw', '🧪', 'Order of draw'], ['conv', '🔁', 'Unit converter'], ['critical', '🚨', 'Critical values'], ['spill', '🧯', 'Needle-stick / spill'], ['reject', '⛔', 'Rejection criteria']];
+  const DEPS = [['Staining & microscopy', '🔬', 'Staining', 'Gram · ZN · Leishman · mounts'], ['Microbiology', '🧫', 'Microbiology', 'Media · ID · biochem · AST'], ['Blood bank', '🩸', 'Blood bank', 'Donor · storage · reactions'], ['Haematology atlas', '🧬', 'PBF atlas', 'RBC · WBC · disease films']];
   const listBody = () => {
     if (U.q.trim()) {
       const r = search(U.q.trim());
@@ -87,7 +88,7 @@
     return h;
   };
   const home = () => `<div class="sp" id="sp">
-<section class="sp-hero"><div class="sp-ht"><span class="sp-hi">${ico('book')}</span><div><h2>SOP Guidebook</h2><p>${G.TESTS.length} test guides · ${G.GUIDES.length} SOP, QC & safety guides</p></div></div>
+<section class="sp-hero"><div class="sp-ht"><span class="sp-hi">${ico('book')}</span><div><h2>SOP Guidebook</h2><p>${G.TESTS.length} test guides · ${G.GUIDES.length} SOP, atlas & QC guides</p></div></div>
 <label class="sp-q">${ico('search')}<input id="spq" data-sx="q" placeholder="Search tests, SOPs, QC, keywords…" value="${E(U.q)}" autocomplete="off" enterkeyhint="search">${U.q ? `<button data-sa="qclr" aria-label="Clear search">${ico('x')}</button>` : ''}</label></section>
 ${U.q ? '' : `<div class="sp-quick">${QUICK.map(([id, i, l]) => `<a href="#sop?g=${id}"><i>${i}</i><span>${l}</span></a>`).join('')}</div>`}
 ${U.q ? '' : seg([['tests', '🔬 Tests'], ['guides', '📘 SOP & QC'], ['saved', '★ Saved']], U.tab, 'tab')}
@@ -102,6 +103,7 @@ ${U.q ? '' : seg([['tests', '🔬 Tests'], ['guides', '📘 SOP & QC'], ['saved'
     const two = r.r.some(x => x[2]);
     return `${two ? seg([[0, E(r.u[0])], [1, E(r.u[1])], [2, 'Both']], U.u, 'u') : ''}<div class="sp-tw"><table class="sp-tbl"><thead><tr><th>Group</th>${U.u !== 1 || !two ? `<th>${E(r.u[0])}</th>` : ''}${two && U.u !== 0 ? `<th>${E(r.u[1])}</th>` : ''}</tr></thead><tbody>${r.r.map(x => `<tr><td>${E(x[0])}</td>${U.u !== 1 || !two ? `<td><b>${E(x[1])}</b></td>` : ''}${two && U.u !== 0 ? `<td><b>${E(x[2] || '—')}</b></td>` : ''}</tr>`).join('')}</tbody></table></div><p class="sp-note">Approximate adult values unless stated. Verify with your method / kit insert.</p>`;
   };
+  const methods = m => `<div class="sp-mt">${m.map(([n, tag, d]) => `<div><b>${E(n)}</b>${tag ? `<span>${E(tag)}</span>` : ''}<p>${E(d)}</p></div>`).join('')}</div>`;
   const testView = t => {
     const tb = tube(t.tube), list = G.TESTS, i = list.indexOf(t), prev = list[i - 1], next = list[i + 1];
     const rel = list.filter(x => x !== t && (x.cat === t.cat || x.dept === t.dept)).slice(0, 8);
@@ -110,10 +112,11 @@ ${U.q ? '' : seg([['tests', '🔬 Tests'], ['guides', '📘 SOP & QC'], ['saved'
 <div class="sp-act"><button data-sa="fav" data-k="t:${t.id}" class="${isFav('t:' + t.id) ? 'on' : ''}">${ico('star')}${isFav('t:' + t.id) ? 'Saved' : 'Save'}</button><button data-sa="copy" data-k="t:${t.id}">${ico('copy')}Copy</button></div></section>
 <div class="sp-facts"><div><em>Specimen</em><b>${E(t.sp)}</b></div><div><em>Container</em><b><i class="sp-dot" style="background:${tb[1]}"></i>${E(tb[0])}</b></div><div><em>Volume</em><b>${E(t.vol)}</b></div><div class="w"><em>Best collection time / preparation</em><b>${E(t.time)}</b></div></div>
 ${t.crit ? `<div class="sp-crit"><b>🚨 Critical values</b>${E(t.crit)}</div>` : ''}
+${G.METHODS && G.METHODS[t.id] ? sec('🧬', 'Test methods (principles)', methods(G.METHODS[t.id]), 1) : ''}
 ${sec('🧑‍⚕️', 'Collection precautions', ul(t.pre), 1)}
 ${sec('🌀', 'Sample processing & stability', ul(t.proc), 1)}
 ${sec('📏', 'Reference values (age / sex / units)', refTable(t), 1)}
-${t.hi || t.lo ? sec('📊', 'Result interpretation', `<div class="sp-hl">${t.hi ? `<div class="hi"><h4>${ico('up')} Increased</h4>${ul(t.hi)}</div>` : ''}${t.lo ? `<div class="lo"><h4>${ico('dn')} Decreased</h4>${ul(t.lo)}</div>` : ''}</div>`, 1) : ''}
+${t.hi || t.lo ? sec('📊', 'Result interpretation', `<div class="sp-hl">${t.hi ? `<div class="sp-up"><h4>${ico('up')} Increased</h4>${ul(t.hi)}</div>` : ''}${t.lo ? `<div class="sp-dn"><h4>${ico('dn')} Decreased</h4>${ul(t.lo)}</div>` : ''}</div>`, 1) : ''}
 ${sec('🔗', 'Correlation with other parameters', ul(t.corr), 1)}
 ${sec('🗂️', 'Patient history to check', ul(t.hx), 0)}
 ${sec('⚠️', 'Interferences & pitfalls', ul(t.int), 0)}
@@ -124,16 +127,19 @@ ${rel.length ? `<h3 class="sp-h3">Related tests</h3><div class="sp-rel">${rel.ma
 
   /* ---------------- detail: guide ---------------- */
   const block = s => {
-    if (s.li) return ul(s.li);
-    if (s.st) return `<ol class="sp-ol">${s.st.map(x => `<li>${E(x)}</li>`).join('')}</ol>`;
-    if (s.tb) return `<div class="sp-tw"><table class="sp-tbl"><thead><tr>${s.tb.hd.map(h => `<th>${E(h)}</th>`).join('')}</tr></thead><tbody>${s.tb.r.map(r => `<tr>${r.map((c, i) => `<td>${i ? E(c) : `<b>${E(c)}</b>`}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
-    if (s.tip) return `<p class="sp-tip">💡 ${E(s.tip)}</p>`;
-    return '';
+    let h = '';
+    if (s.p) h += `<p class="sp-p">${E(s.p)}</p>`;
+    if (s.v && G.VIS && G.VIS[s.v]) h += G.VIS[s.v](s.d);
+    if (s.li) h += ul(s.li);
+    if (s.st) h += `<ol class="sp-ol">${s.st.map(x => `<li>${E(x)}</li>`).join('')}</ol>`;
+    if (s.tb) h += `<div class="sp-tw"><table class="sp-tbl"><thead><tr>${s.tb.hd.map(x => `<th>${E(x)}</th>`).join('')}</tr></thead><tbody>${s.tb.r.map(r => `<tr>${r.map((c, i) => `<td>${i ? E(c) : `<b>${E(c)}</b>`}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+    if (s.tip) h += `<p class="sp-tip">💡 ${E(s.tip)}</p>`;
+    return h;
   };
   const guideView = g => {
     const list = G.GUIDES, i = list.indexOf(g), prev = list[i - 1], next = list[i + 1];
     return `<div class="sp sp-d" id="sp">
-<section class="sp-dh g"><div class="sp-tags"><span>${E(g.cat)}</span>${g.tool ? '<span>Interactive</span>' : ''}</div><h2><i>${g.ic}</i> ${E(g.n)}</h2>
+<section class="sp-dh sp-dg"><div class="sp-tags"><span>${E(g.cat)}</span>${g.tool ? '<span>Interactive</span>' : ''}</div><h2><i>${g.ic}</i> ${E(g.n)}</h2>
 <div class="sp-act"><button data-sa="fav" data-k="g:${g.id}" class="${isFav('g:' + g.id) ? 'on' : ''}">${ico('star')}${isFav('g:' + g.id) ? 'Saved' : 'Save'}</button><button data-sa="copy" data-k="g:${g.id}">${ico('copy')}Copy</button></div></section>
 ${g.tool ? `<section class="sp-tool" id="sp-tool">${TOOLS[g.tool]()}</section>` : ''}
 ${g.sec.map((s, k) => sec('§', E(s.h), block(s), k < 3 || g.sec.length <= 4)).join('')}
@@ -173,7 +179,7 @@ ${g.sec.map((s, k) => sec('§', E(s.h), block(s), k < 3 || g.sec.length <= 4)).j
       return `<h3>🚦 Westgard rule checker</h3><p class="sp-sub">Enter your control’s target mean and SD, then QC results in date order (oldest first). The latest value is judged.</p>
 <div class="sp-in2"><label>Mean<input data-sx="ts.mean" inputmode="decimal" value="${E(TS.mean)}"></label><label>SD<input data-sx="ts.sd" inputmode="decimal" value="${E(TS.sd)}"></label></div>
 <label class="sp-in1">QC values<textarea data-sx="ts.vals" rows="3">${E(TS.vals)}</textarea></label>
-<div id="sp-wg">${ok ? `<div class="sp-verdict ${rej ? 'r' : warn ? 'w' : 'g'}">${rej ? '⛔ REJECT RUN' : warn ? '⚠️ WARNING (1-2s) — accept if no other rule fails' : '✅ ACCEPT RUN'}<small>Last value ${v[v.length - 1]} · z = ${r.z[r.z.length - 1].toFixed(2)} SD · CV of target ${(s / m * 100).toFixed(2)} %</small></div>${r.out.map(o => `<div class="sp-rule ${o.rej ? 'r' : 'w'}"><b>${o.rule}</b>${E(o.desc)}</div>`).join('')}${ljSVG(v, m, s, r.bad)}<p class="sp-note">Limits: ±1 SD ${(m - s).toFixed(2)}–${(m + s).toFixed(2)} · ±2 SD ${(m - 2 * s).toFixed(2)}–${(m + 2 * s).toFixed(2)} · ±3 SD ${(m - 3 * s).toFixed(2)}–${(m + 3 * s).toFixed(2)}</p>` : '<p class="sp-note">Enter a mean, a positive SD and at least one value.</p>'}</div>`;
+<div id="sp-wg">${ok ? `<div class="sp-verdict ${rej ? 'vr' : warn ? 'vw' : 'vg'}">${rej ? '⛔ REJECT RUN' : warn ? '⚠️ WARNING (1-2s) — accept if no other rule fails' : '✅ ACCEPT RUN'}<small>Last value ${v[v.length - 1]} · z = ${r.z[r.z.length - 1].toFixed(2)} SD · CV of target ${(s / m * 100).toFixed(2)} %</small></div>${r.out.map(o => `<div class="sp-rule ${o.rej ? 'r' : 'w'}"><b>${o.rule}</b>${E(o.desc)}</div>`).join('')}${ljSVG(v, m, s, r.bad)}<p class="sp-note">Limits: ±1 SD ${(m - s).toFixed(2)}–${(m + s).toFixed(2)} · ±2 SD ${(m - 2 * s).toFixed(2)}–${(m + 2 * s).toFixed(2)} · ±3 SD ${(m - 3 * s).toFixed(2)}–${(m + 3 * s).toFixed(2)}</p>` : '<p class="sp-note">Enter a mean, a positive SD and at least one value.</p>'}</div>`;
     },
     stats: () => {
       const v = nums(TS.st), n = v.length, m = n ? v.reduce((a, b) => a + b, 0) / n : 0, sd = n > 1 ? Math.sqrt(v.reduce((a, b) => a + (b - m) * (b - m), 0) / (n - 1)) : 0, f = x => (Math.abs(x) >= 100 ? x.toFixed(1) : x.toFixed(3));
@@ -209,10 +215,16 @@ ${g.sec.map((s, k) => sec('§', E(s.h), block(s), k < 3 || g.sec.length <= 4)).j
   const refreshTool = () => { const g = GD(G.cur), el = $1('#sp-tool'); if (g && g.tool && el) { const a = document.activeElement, id = a && a.dataset && a.dataset.sx, pos = a && a.selectionStart; el.innerHTML = TOOLS[g.tool](); if (id) { const n = el.querySelector(`[data-sx="${id}"]`); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (_) {} } } } };
 
   /* ---------------- copy text ---------------- */
+  const vtxt = d => {
+    if (!d) return [];
+    const L = Array.isArray(d) ? d : d.disks ? d.disks.map(k => [k[0], k[1] + ' mm', k[2]]) : d.r ? d.r : d.t ? [d] : [];
+    return L.map(x => '• ' + (Array.isArray(x) ? x.filter(v => typeof v === 'string' && !/^#|^[a-z]{2,6}$/.test(v)).join(' — ') : [x.n || x.t, x.m, x.t !== x.n ? x.t : '', x.f, x.pr, x.life && 'Storage ' + x.t + ', ' + x.life, (x.up || []).length && '↑ ' + x.up.join(', '), (x.dn || []).length && '↓ ' + x.dn.join(', ')].filter(Boolean).join(' — ')));
+  };
   const asText = k => {
     if (k[0] === 't') {
       const t = T(k.slice(2)), L = [t.n, `Dept: ${t.dept} · Specimen: ${t.sp} · Container: ${tube(t.tube)[0]} · Volume: ${t.vol}`, 'Collection: ' + t.time];
       const add = (h, a) => a && a.length && L.push('', h + ':', ...a.map(x => '• ' + x));
+      if (G.METHODS && G.METHODS[t.id]) add('Methods', G.METHODS[t.id].map(m => m[0] + (m[1] ? ' (' + m[1] + ')' : '') + ': ' + m[2]));
       add('Precautions', t.pre); add('Processing', t.proc);
       if (t.ref) L.push('', 'Reference values:', ...t.ref.r.map(r => `• ${r[0]}: ${r[1]}${r[2] ? ' (' + r[2] + ')' : ''}`));
       add('Increased in', t.hi); add('Decreased in', t.lo); add('Correlation', t.corr); add('Patient history', t.hx);
@@ -220,7 +232,7 @@ ${g.sec.map((s, k) => sec('§', E(s.h), block(s), k < 3 || g.sec.length <= 4)).j
       return L.join('\n');
     }
     const g = GD(k.slice(2));
-    return [g.n, ...g.sec.flatMap(s => ['', s.h + ':', ...(s.li || []).map(x => '• ' + x), ...(s.st || []).map((x, i) => i + 1 + '. ' + x), ...(s.tb ? s.tb.r.map(r => r.join(' | ')) : []), ...(s.tip ? [s.tip] : [])])].join('\n');
+    return [g.n, ...g.sec.flatMap(s => ['', s.h + ':', ...(s.li || []).map(x => '• ' + x), ...(s.st || []).map((x, i) => i + 1 + '. ' + x), ...(s.tb ? s.tb.r.map(r => r.join(' | ')) : []), ...(s.tip ? [s.tip] : []), ...vtxt(s.d)])].join('\n');
   };
 
   /* ---------------- routing & events ---------------- */
@@ -250,6 +262,7 @@ ${g.sec.map((s, k) => sec('§', E(s.h), block(s), k < 3 || g.sec.length <= 4)).j
     else if (a === 'by') { U.by = v; U.f = ''; }
     else if (a === 'f') U.f = v;
     else if (a === 'gc') U.gc = v;
+    else if (a === 'gcat') { U.tab = 'guides'; U.gc = v; redraw(); const l = $1('#spl'); if (l) l.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
     else if (a === 'u') U.u = +v;
     else if (a === 'qclr') { U.q = ''; }
     else if (a === 'fav') { const k = b.dataset.k; fav = isFav(k) ? fav.filter(x => x !== k) : [k, ...fav]; ST2.set('sopf', fav); if (window.toast) toast(isFav(k) ? 'Bookmarked' : 'Bookmark removed'); }
