@@ -12,7 +12,7 @@
 <title>LabGenie</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Allura&family=Anek+Bangla:wght@400..700&family=Bricolage+Grotesque:opsz,wght@12..96,500..700&family=Dancing+Script&family=Great+Vibes&family=Hanken+Grotesk:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&family=Homemade+Apple&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
-<script>try{var t=JSON.parse(localStorage.getItem('lg.th')||'"auto"');document.documentElement.dataset.e=t=='dark'||(t=='auto'&&matchMedia('(prefers-color-scheme:dark)').matches)?'dark':'light'}catch(e){}</script>
+<script>window.LG_SWV='22.0';try{var t=JSON.parse(localStorage.getItem('lg.th')||'"auto"');document.documentElement.dataset.e=t=='dark'||(t=='auto'&&matchMedia('(prefers-color-scheme:dark)').matches)?'dark':'light'}catch(e){}</script>
 <style>
 :root{--bg:#f4f3fb;--sf:#fff;--ink:#1a1740;--mut:#64638a;--ln:rgba(26,23,64,.1);--pr:#5b3fd4;--pt:#e9e4ff;--ro:#17143a;--ok:#2fc46b;--warn:#f5a524;--bad:#f0506e;--info:#4aa8ff;--f1:'Bricolage Grotesque',system-ui,sans-serif;--f2:'Hanken Grotesk',system-ui,-apple-system,sans-serif}
 :root[data-e=dark]{--bg:#0e0d20;--sf:#181633;--ink:#ecebfa;--mut:#9d9bc4;--ln:rgba(255,255,255,.1);--pt:#2b2668;--ro:#0a0918;--pr:#8f78ff}
@@ -196,6 +196,8 @@ body>*:not(#pr){display:none!important}
 #tm .sh{padding-left:12px;padding-right:12px}
 }
 @media(max-width:340px){.tmhms{gap:6px}.tmq .chip{padding:8px 11px}}
+.bt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.1}.bt h1{flex:none}.swv{font-size:10.5px;font-weight:600;color:var(--mut);letter-spacing:.02em;margin-top:1px}
+.sp-bk{color:var(--ink);text-decoration:none}.sp-bk:hover{color:var(--pr)}
 .ih{margin:0 0 6px;padding-left:20px;line-height:1.6;font-size:14px}.ih li{margin:4px 0}
 </style>
 <link rel="stylesheet" href="css/report.css?v=21">
@@ -371,7 +373,7 @@ function ocalc(sc){const t=S.cur,st=ost(t);st.r=t.o.go(ov(t),st);S.otx=st.r&&!st
 function ostale(){const w=$('#rw');if(w&&ost(S.cur).r)w.classList.add('stale')}
 const flag=(r,g)=>{const x=num(r),m=String(g).match(/([\d.]+)\s*[-–]\s*([\d.]+)/),l=String(g).match(/<\s*([\d.]+)/),h=String(g).match(/>\s*([\d.]+)/);if(x==null)return'';if(m)return x<+m[1]?'L':x>+m[2]?'H':'';if(l)return x>=+l[1]?'H':'';if(h)return x<=+h[1]?'L':'';return''};
 function rtext(){const r=S.rp;return`LABORATORY REPORT\nPatient: ${r.p}  ID: ${r.pid}  Date: ${r.dt}\n`+r.rows.filter(x=>x.n&&!x.off).map(x=>x.h?`\n${x.n.toUpperCase()}`:`${x.n}: ${x.r} ${x.u} ${flag(x.r,x.g)} (ref ${String(x.g).replace(/\s*\|\s*/g,'; ')})`).join('\n')}
-function bar(tab,t){$('#bar').innerHTML=t?`<button class="ib" data-a="back" aria-label="Back">${ic('back')}</button><h1>${t.t}</h1><button class="ib${S.pins.includes(t.id)?' on':''}" data-a="pin" data-id="${t.id}" aria-label="Pin to home">${ic('star')}</button>`:`<div class="logo"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke-width:2.6"><path d="M12 5v14M5 12h14"/></svg></div><h1>LabGenie</h1><button class="ib" data-a="srch" aria-label="Search">${ic('search')}</button><button class="ib" data-a="tgl" aria-label="Toggle theme">${ic('moon')}</button>`}
+function bar(tab,t){$('#bar').innerHTML=t?`<button class="ib" data-a="back" aria-label="Back">${ic('back')}</button><h1>${t.t}</h1><button class="ib${S.pins.includes(t.id)?' on':''}" data-a="pin" data-id="${t.id}" aria-label="Pin to home">${ic('star')}</button>`:`<div class="logo"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke-width:2.6"><path d="M12 5v14M5 12h14"/></svg></div><div class="bt"><h1>LabGenie</h1><small class="swv">Version ${window.LG_SWV||''}</small></div><button class="ib" data-a="srch" aria-label="Search">${ic('search')}</button><button class="ib" data-a="tgl" aria-label="Toggle theme">${ic('moon')}</button>`}
 const re=()=>{const y=scrollY,v=$('#v'),h=window.hid?hid():(location.hash.slice(1)||'home');v.innerHTML=((window.VW&&VW[h])||home)();scrollTo(0,y)};
 addEventListener('hashchange',()=>{S.nav++;render()});
 let DP=null;
