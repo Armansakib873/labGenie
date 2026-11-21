@@ -1,0 +1,149 @@
+/* =====================================================================
+   LabGenie · wide.css — tablet (≥600px) and desktop (≥900px) layout.
+   Everything here is inside min-width media queries, so the phone
+   layout (<600px) is untouched.
+   ===================================================================== */
+
+/* ---------------------------- tablet and up ---------------------------- */
+@media (min-width: 600px) {
+  #app { max-width: 860px; }
+  .bar { padding-left: 24px; padding-right: 24px; }
+  .hero { padding: 20px 24px 8px; }
+  .hero h2 { font-size: 42px; max-width: 13em; margin-bottom: 18px; }
+  .sb { padding: 17px 18px; border-radius: 22px; box-shadow: 0 1px 0 var(--ln), 0 10px 30px -22px rgba(26, 23, 64, .35); }
+  .grid { padding: 0 24px; gap: 14px; }
+  .sh { padding: 30px 24px 12px; }
+  .sh h3 { font-size: 20px; }
+  .chips { padding-left: 24px; padding-right: 24px; }
+  .lastc, .cats, .lst, .srch, .fc, .set, .fm, .ro, .wn, .hi { margin-left: 24px; margin-right: 24px; }
+  #v > .ac { margin-left: 24px; margin-right: 24px; }
+  .nt { margin-left: 28px; margin-right: 28px; }
+  .sp { padding-left: 24px; padding-right: 24px; }
+
+  .card { min-height: 152px; padding: 18px; border-radius: 26px; }
+  .card .tag { top: 20px; right: 20px; }
+  .card.lastc { min-height: 0; padding: 16px 18px; }
+  .card b { font-size: 17px; }
+  .fc { padding: 20px; gap: 16px; border-radius: 26px; }
+  .set { padding: 20px; border-radius: 26px; }
+  .ro { padding: 26px 24px 22px; border-radius: 30px; }
+
+  /* smooth, tactile hover on pointer devices */
+  .card, .row, .chip, .ib, .sb, .cats .cr > button, .calc, .btn, .sp-dep button, .sp-quick a { transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background-color .18s ease, color .18s ease; }
+  @media (hover: hover) {
+    .card:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--c, var(--pr)) 38%, var(--ln)); box-shadow: 0 18px 36px -20px color-mix(in srgb, var(--c, var(--pr)) 55%, transparent); }
+    .card.add:hover { border-color: var(--pr); color: var(--pr); }
+    .row:hover { border-color: color-mix(in srgb, var(--c, var(--pr)) 40%, var(--ln)); box-shadow: 0 10px 24px -18px rgba(26, 23, 64, .45); }
+    .chip:hover { border-color: color-mix(in srgb, var(--pr) 50%, var(--ln)); color: var(--ink); }
+    .chip.on:hover { color: var(--bg); }
+    .ib:hover { border-color: color-mix(in srgb, var(--pr) 45%, var(--ln)); color: var(--pr); }
+    .sb:hover { border-color: color-mix(in srgb, var(--pr) 50%, var(--ln)); color: var(--ink); }
+    .cats .cr > button:hover { background: color-mix(in srgb, var(--c, var(--pr)) 6%, transparent); }
+    .calc:hover { filter: brightness(1.07); box-shadow: 0 16px 30px -12px var(--pr); }
+    .btn:hover { filter: brightness(.97); }
+    .sp-dep button:hover, .sp-quick a:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--pr) 40%, var(--ln)); }
+  }
+
+  /* bottom sheets become centred dialogs */
+  #ov { place-items: center; padding: 24px; }
+  .bs { width: min(560px, 100%); border-radius: 28px; padding: 24px; max-height: 84dvh; box-shadow: 0 40px 90px -30px rgba(10, 8, 30, .6); }
+  .bs .grab { display: none; }
+  @keyframes bsin { from { transform: translateY(14px) scale(.98); opacity: 0; } }
+}
+
+/* ---------------- calculators: form beside a sticky result ---------------- */
+@media (min-width: 820px) {
+  #v > div:has(> #of) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+  #v > div:has(> #of) > #of { margin-right: 8px; }
+  #v > div:has(> #of) > #rw { position: sticky; top: 76px; }
+  #v > div:has(> #of) > #rw .ro { margin-left: 8px; margin-top: 6px; }
+  #v > div:has(> #ro) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+  #v > div:has(> #ro) > * { grid-column: 1; margin-right: 8px; }
+  #v > div:has(> #ro) > #ro { grid-column: 2; grid-row: 1 / span 6; position: sticky; top: 76px; margin-left: 8px; margin-right: 24px; }
+  .big { font-size: 60px; }
+}
+
+/* --------------------------------- desktop --------------------------------- */
+@media (min-width: 900px) {
+  body { background: radial-gradient(1200px 600px at 100% -10%, color-mix(in srgb, var(--pr) 7%, transparent), transparent 60%), var(--bg); background-attachment: fixed; }
+  #shell { max-width: none; grid-template-columns: 276px minmax(0, 1fr); }
+  #app { max-width: 1140px; width: 100%; margin: 0 auto; padding: 0 20px 56px; }
+
+  /* navigation moves to the sidebar */
+  .tb { display: none; }
+  .fab { bottom: 28px; right: 28px; width: 52px; height: 52px; }
+  #mcp { bottom: 92px; right: 28px; }
+  .toast { bottom: 32px; }
+
+  /* header: brand lives in the sidebar */
+  .bar { padding-top: 18px; padding-bottom: 14px; }
+  .bar > .logo { display: none; }
+  .bar > .bt { visibility: hidden; }
+  .bar h1 { font-size: 22px; }
+
+  .hero h2 { font-size: 50px; letter-spacing: -.03em; }
+  .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .cats { display: grid; grid-template-columns: 1fr 1fr; }
+  .cats .cr:nth-child(2) { border-top: 0; }
+  .cats .cr:nth-child(odd) { border-right: 1px solid var(--ln); }
+  #list .lst { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+
+  /* Settings / More: two balanced columns */
+  #v:has(> .set + .set + .set) { columns: 2; column-gap: 0; }
+  #v:has(> .set + .set + .set) > * { break-inside: avoid; }
+  #v:has(> .set + .set + .set) > .hero { column-span: all; }
+  #v:has(> .set + .set + .set) > .set:nth-child(n) { margin-left: 24px; margin-right: 12px; }
+
+  /* guidebook keeps a readable width */
+  .sp { max-width: 1000px; margin: 0 auto; }
+
+  /* ---------------- sidebar ---------------- */
+  #side { display: flex; flex-direction: column; overflow: hidden; padding: 18px 0 0; background: color-mix(in srgb, var(--sf) 60%, var(--bg)); }
+  #side:empty { display: none; }
+  .sd-top { padding: 0 14px; flex: none; }
+  .sd-brand { display: flex; align-items: center; gap: 12px; padding: 4px 8px 20px; color: var(--ink); text-decoration: none; }
+  .sd-brand .logo { width: 40px; height: 40px; border-radius: 13px; box-shadow: 0 10px 22px -10px var(--pr); }
+  .sd-brand b { display: block; font: 700 20px/1.1 var(--f1); letter-spacing: -.015em; }
+  .sd-brand small { margin: 2px 0 0; font-size: 11px; font-weight: 600; }
+  .sd-nav { display: flex; flex-direction: column; gap: 2px; padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid var(--ln); }
+  .sd-nav a { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; color: var(--mut); font-weight: 600; font-size: 14.5px; text-decoration: none; transition: background-color .15s, color .15s; }
+  .sd-nav a svg { width: 20px; height: 20px; }
+  .sd-nav a:hover { background: color-mix(in srgb, var(--pr) 8%, transparent); color: var(--ink); }
+  .sd-nav a.on { background: var(--pt); color: var(--pr); }
+  .sd-lbl { display: flex; justify-content: space-between; padding: 0 12px 8px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--mut); }
+  #side .srch { flex: none; margin: 0 14px 8px; border-radius: 14px; border-width: 1px; }
+  #side .srch svg { width: 18px; height: 18px; color: var(--mut); }
+  #side .srch input { padding: 10px 0; font-size: 14px; }
+  #side #sl { flex: 1; min-height: 0; overflow-y: auto; margin: 0; padding: 2px 8px 24px; gap: 1px; scrollbar-width: thin; scrollbar-color: var(--ln) transparent; }
+  #side .row { padding: 7px 8px; gap: 10px; border: 0; border-radius: 12px; background: none; }
+  #side .row .ti { width: 32px; height: 32px; border-radius: 10px; }
+  #side .row .ti svg { width: 17px; height: 17px; }
+  #side .row b { font: 600 13.5px/1.25 var(--f2); letter-spacing: 0; }
+  #side .row:hover { background: color-mix(in srgb, var(--c) 9%, transparent); box-shadow: none; }
+  #side .row.cur { background: color-mix(in srgb, var(--c) 14%, transparent); box-shadow: inset 3px 0 0 var(--c); }
+}
+
+@media (min-width: 1240px) {
+  .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  #list .lst { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .hero h2 { font-size: 56px; }
+}
+
+/* guidebook tiles on wide screens */
+@media (min-width: 900px) {
+  .sp-quick { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+@media (min-width: 1100px) {
+  .sp-dep { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .sp-dep button:last-child:nth-child(odd) { grid-column: auto; }
+}
+@media (min-width: 900px) {
+  .rx-act { bottom: 20px; }
+  .rx-act { box-shadow: 0 18px 40px -18px rgba(10, 8, 30, .55); }
+}
+@media (min-width: 900px) {
+  /* chip rows wrap instead of scrolling sideways (no horizontal scroll with a mouse) */
+  .chips { flex-wrap: wrap; overflow: visible; }
+  .chw .chips { padding-right: 24px; }
+  .chn { display: none !important; }
+}

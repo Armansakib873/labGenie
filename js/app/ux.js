@@ -141,3 +141,30 @@
     dy = 0;
   });
 })();
+
+/* ---------------- desktop sidebar: brand + main navigation (≥900px) ---------------- */
+(function () {
+  'use strict';
+  const sd = document.getElementById('side');
+  if (!sd) return;
+  const EN = { home: 'Home', tools: 'Tools', saved: 'Saved', more: 'More', calcs: 'Calculators' };
+  const T = k => { let v; try { v = typeof tr === 'function' ? tr(k) : ''; } catch (_) {} return v && v !== k ? v : EN[k] || k; };
+  const I = n => { try { return typeof ic === 'function' ? ic(n) : ''; } catch (_) { return ''; } };
+  const BOOK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5A2.5 2.5 0 0 1 6.5 19H20v3H6.5"/><path d="M9 7h7M9 11h5"/></svg>';
+  /* the app rebuilds #side on its own; we add the brand + nav block on top whenever it does */
+  const paint = () => {
+    if (innerWidth < 900 || !sd.querySelector('.srch')) return;
+    let top = sd.querySelector(':scope > .sd-top');
+    if (!top) { top = document.createElement('div'); top.className = 'sd-top'; sd.prepend(top); }
+    const h = decodeURIComponent(location.hash.slice(1).split('?')[0]) || 'home';
+    const main = ['home', 'tools', 'history', 'more', 'sop'];
+    const act = main.includes(h) ? h : 'tools';
+    const nav = [['home', T('home'), I('home')], ['tools', T('tools'), I('grid')], ['history', T('saved'), I('hist')], ['sop', 'SOP Guidebook', BOOK], ['more', T('more'), I('more')]];
+    const html = `<a class="sd-brand" href="#home"><div class="logo"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke-width:2.6"><path d="M12 5v14M5 12h14"/></svg></div><div><b>LabGenie</b><small>Version ${window.LG_SWV || ''}</small></div></a><nav class="sd-nav" aria-label="Main">${nav.map(([k, l, i]) => `<a href="#${k}" class="${act === k ? 'on' : ''}"${act === k ? ' aria-current="page"' : ''}>${i}<span>${l}</span></a>`).join('')}</nav><div class="sd-lbl"><span>${EN.calcs}</span><span>${(window.LGI && LGI.T || []).length || ''}</span></div>`;
+    if (top.innerHTML !== html) top.innerHTML = html;
+  };
+  new MutationObserver(paint).observe(sd, { childList: true });
+  addEventListener('hashchange', () => setTimeout(paint, 0));
+  addEventListener('resize', () => setTimeout(paint, 0));
+  paint();
+})();

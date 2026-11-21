@@ -12,7 +12,7 @@
 <title>LabGenie</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Allura&family=Anek+Bangla:wght@400..700&family=Bricolage+Grotesque:opsz,wght@12..96,500..700&family=Dancing+Script&family=Great+Vibes&family=Hanken+Grotesk:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&family=Homemade+Apple&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
-<script>window.LG_SWV='23.0';try{var t=JSON.parse(localStorage.getItem('lg.th')||'"auto"');document.documentElement.dataset.e=t=='dark'||(t=='auto'&&matchMedia('(prefers-color-scheme:dark)').matches)?'dark':'light'}catch(e){}</script>
+<script>window.LG_SWV='24.0';try{var t=JSON.parse(localStorage.getItem('lg.th')||'"auto"');document.documentElement.dataset.e=t=='dark'||(t=='auto'&&matchMedia('(prefers-color-scheme:dark)').matches)?'dark':'light'}catch(e){}</script>
 <style>
 :root{--bg:#f4f3fb;--sf:#fff;--ink:#1a1740;--mut:#64638a;--ln:rgba(26,23,64,.1);--pr:#5b3fd4;--pt:#e9e4ff;--ro:#17143a;--ok:#2fc46b;--warn:#f5a524;--bad:#f0506e;--info:#4aa8ff;--f1:'Bricolage Grotesque',system-ui,sans-serif;--f2:'Hanken Grotesk',system-ui,-apple-system,sans-serif}
 :root[data-e=dark]{--bg:#0e0d20;--sf:#181633;--ink:#ecebfa;--mut:#9d9bc4;--ln:rgba(255,255,255,.1);--pt:#2b2668;--ro:#0a0918;--pr:#8f78ff}
@@ -204,6 +204,7 @@ body>*:not(#pr){display:none!important}
 <link rel="stylesheet" href="css/sop.css?v=21">
 <link rel="stylesheet" href="css/sop2.css?v=22">
 <link rel="stylesheet" href="css/app.css?v=21">
+<link rel="stylesheet" href="css/wide.css?v=23">
 </head>
 <body>
 <div id="shell">
@@ -955,7 +956,7 @@ look();theme();off();render();lock();if(!S.seen)sheet(`<h3>Welcome to LabGenie</
 <!-- SOP guidebook -->
 <script src="js/sop/boot.js?v=22"></script>
 <!-- App UX: command search, page transitions, swipe-to-close sheets -->
-<script src="js/app/ux.js?v=21"></script>
+<script src="js/app/ux.js?v=23"></script>
 <script>
 /* On a local dev server (VS Code Live Server etc.) never use the offline cache: remove any old service worker + caches so edits always show. */
 if('serviceWorker'in navigator){const dev=/^(localhost|127\.0\.0\.1|\[::1\]|0\.0\.0\.0|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)$|\.localhost$/.test(location.hostname);if(dev){navigator.serviceWorker.getRegistrations().then(rs=>Promise.all(rs.map(r=>r.unregister()))).then(()=>window.caches?caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k)))):0).catch(()=>{})}else addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}))}
