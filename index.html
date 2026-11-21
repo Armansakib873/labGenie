@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="author" content="Md Arman Hossen, Medical Technologist (Laboratory)">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" id="tc" content="#f4f3fb">
@@ -196,8 +197,10 @@ body>*:not(#pr){display:none!important}
 }
 @media(max-width:340px){.tmhms{gap:6px}.tmq .chip{padding:8px 11px}}
 </style>
-<link rel="stylesheet" href="css/report.css?v=20">
-<link rel="stylesheet" href="css/sop.css?v=20">
+<link rel="stylesheet" href="css/report.css?v=21">
+<link rel="stylesheet" href="css/sop.css?v=21">
+<link rel="stylesheet" href="css/sop2.css?v=21">
+<link rel="stylesheet" href="css/app.css?v=21">
 </head>
 <body>
 <div id="shell">
@@ -733,7 +736,7 @@ return`<div class="hero"><h2 style="font-size:28px">${tr('settings')}</h2></div>
 <div class="set"><h4>${tr('data')}</h4><p>Everything stays on this device.</p><div class="ac" style="margin:0;flex-wrap:wrap"><button data-a="exp">Export JSON</button><button data-a="imp">Import JSON</button><button data-a="csv">History CSV</button></div><div class="ac" style="margin:8px 0 0"><button data-a="rst">Reset home shortcuts</button></div></div>
 <div class="set"><h4>${tr('tools2')}</h4><div class="ac" style="margin:0"><a class="btn" href="#batch" style="flex:1;text-align:center;text-decoration:none">Batch mode</a><a class="btn" href="#selftest" style="flex:1;text-align:center;text-decoration:none">Self-test</a></div></div>
 <div class="set"><h4>${tr('install')}</h4>${DP?'<button class="btn" data-a="inst">Install LabGenie</button>':'<p><b>Android (Chrome):</b> menu → Install app.<br><b>iPhone (Safari):</b> Share → Add to Home Screen.</p>'}</div>
-<div class="set"><h4>${tr('about')}</h4><p>LabGenie v${VER} · ${T.length} calculators · Includes formulas from Lab Calculator by ArRoni. ${DISC[S.disc]}</p></div>`};
+<div class="set"><h4>${tr('about')}</h4><p>LabGenie v${VER} · ${T.length} calculators · Includes formulas from Lab Calculator by ArRoni. ${DISC[S.disc]}</p>${window.SOPG&&SOPG.AUTHOR?SOPG.AUTHOR():''}</div>`};
 const BT=()=>T.filter(x=>x.F&&x.c);
 window.batch=function(){const x=by(S.bt)&&by(S.bt).c?by(S.bt):BT()[0];S.bt=x.id;return`<div class="hero"><h2 style="font-size:28px">Batch mode</h2></div><div class="fc o"><div class="fd"><label>Calculator</label><select data-bt="1">${BT().map(y=>`<option value="${y.id}"${y==x?' selected':''}>${y.t}</option>`).join('')}</select></div><div class="fd"><label>Paste a table — first row = column ids: ${x.F.map(f=>f.id).join(', ')}</label><textarea id="bta" placeholder="${x.F.filter(f=>!f.s).map(f=>f.id).join(',')}"></textarea></div><div class="fd"><button class="calc" style="width:100%" data-a="bgo">Calculate all rows</button></div></div><p class="nt">Values are read in conventional units (the units shown on each tool when SI is off).</p><div id="bo"></div>`};
 const TESTS=[['CKD-EPI 2021 · M, 50 y, Cr 1.0',()=>FX.ckd(1,50,'male'),91.7,.5],['Cockcroft-Gault · M, 50 y, 70 kg',()=>FX.cg(1,50,'male',70),87.5,.01],['Sampson LDL · 200/50/150',()=>FX.samp(200,50,150),123.4,.2],['Creatinine 1 mg/dL → µmol/L',()=>K.cr,88.4,.01],['BUN↔urea factors agree (14 mg/dL)',()=>14*K.bunMmol-14*K.bun*K.ureaMmol,0,.05],['MCV (Hct 40, RBC 5)',()=>40*10/5,80,.01],['INR (PT 15, MNPT 12, ISI 1)',()=>Math.pow(15/12,1),1.25,.01],['FeNa',()=>20*1/(140*100)*100,.143,.001],['SD of 1–5',()=>FX.sd([1,2,3,4,5]),1.581,.001],['Centrifuge 10 cm @ 3000 rpm',()=>1.118e-5*10*3000*3000,1006.2,.5]];
@@ -929,23 +932,21 @@ HOW['ideal-body-weight']='Devine: male 50 + 2.3 × (inches over 60); female 45.5
 To('osmolar-gap','Osmolar Gap','Measured − calculated osmolality.','elec','act','osmolar gap toxic alcohol osmolality','Calculate',[{t:'n',id:'mo',h:1,l:'Measured osmolality (mOsm/kg)'},{t:'n',id:'na',h:1,l:'Sodium (mmol/L)'},{t:'n',id:'gl',h:1,l:'Glucose (mg/dL)'},{t:'n',id:'bn',h:1,l:'BUN (mg/dL)'}],v=>{if([v.mo,v.na,v.gl,v.bn].some(a=>a==null))return{err:'Enter all four values.'};const c=2*v.na+v.gl/18+v.bn/2.8,g=v.mo-c;return{st:null,tx:`Calculated osmolality ${fm(c,1)} mOsm/kg; osmolar gap ${fm(g,1)} mOsm/kg (${g>10?'raised':'normal'})`,html:hd('Osmolar gap')+pr2(tl('Osmolar gap',fm(g,1),'mOsm/kg',{c:'hl'}),tl('Calculated Osm',fm(c,1),'mOsm/kg'))+bn(g>10?'y':'g',g>10?'Raised gap (> 10) — consider unmeasured osmoles.':'Within the usual range (< 10).')}});
 To('ca-po4-product','Ca × PO₄ Product','Calcium–phosphate product (CKD-MBD).','renal','act','calcium phosphate product ckd mineral','Calculate',[{t:'n',id:'ca',h:1,l:'Total calcium (mg/dL)'},{t:'n',id:'po',h:1,l:'Phosphate (mg/dL)'}],v=>{if(v.ca==null||v.po==null)return{err:'Enter calcium and phosphate.'};const p=v.ca*v.po;return{st:null,tx:`Ca × PO4 product ${fm(p,1)} mg²/dL² (${p>55?'high':'acceptable'})`,html:hd('Ca × PO₄')+pr2(tl('Product',fm(p,1),'mg²/dL²',{c:'hl'}))+bn(p>55?'y':'g',p>55?'Above 55 — higher calcification risk.':'At or below 55.')}});
 To('ideal-body-weight','Ideal & Adjusted Body Weight','Devine IBW and adjusted weight for dosing.','gen','act','ideal body weight devine adjusted dosing','Calculate',[{t:'b',id:'sx',l:'Sex',o:[['m','Male'],['f','Female']]},{t:'n',id:'ht',h:1,l:'Height (cm)'},{t:'n',id:'wt',h:1,l:'Actual weight (kg)'}],v=>{if(v.ht==null||v.ht<=0)return{err:'Enter height.'};const inch=v.ht/2.54,ib=(v.sx=='f'?45.5:50)+2.3*Math.max(0,inch-60);let h=hd('Body weight')+pr2(tl('Ideal body weight',fm(ib,1),'kg',{c:'hl'}));let tx=`Ideal body weight ${fm(ib,1)} kg`;if(v.wt!=null){const a=ib+.4*(v.wt-ib);h+=pr2(tl('Adjusted body weight',fm(a,1),'kg'));tx+=`; adjusted ${fm(a,1)} kg`}return{st:null,tx,html:h}});
-window.LGI={sheet,closeS,ask,dl,hap,aud};
+window.LGI={sheet,closeS,ask,dl,hap,aud,T,by};
 look();theme();off();render();lock();if(!S.seen)sheet(`<h3>Welcome to LabGenie</h3><p>${T.length} lab calculators, offline-ready.</p><ul class="nl" style="margin-top:0"><li>Tap the unit chip beside a field to switch conventional ⇄ SI.</li><li>Save results with a patient or sample ID, then reopen them later.</li><li>Build print-ready reports with barcode, signatures and PDF/JPG export.</li></ul><button class="calc" style="width:100%;margin-top:12px" data-a="onb">Get started</button>`);
 })();
 </script>
 <!-- Report engine v2 (modular) -->
-<script src="js/report/catalog.js?v=20"></script>
-<script src="js/report/engine.js?v=20"></script>
-<script src="js/report/signature.js?v=20"></script>
-<script src="js/report/render.js?v=20"></script>
-<script src="js/report/export.js?v=20"></script>
-<script src="js/report/ui.js?v=20"></script>
+<script src="js/report/catalog.js?v=21"></script>
+<script src="js/report/engine.js?v=21"></script>
+<script src="js/report/signature.js?v=21"></script>
+<script src="js/report/render.js?v=21"></script>
+<script src="js/report/export.js?v=21"></script>
+<script src="js/report/ui.js?v=21"></script>
 <!-- SOP guidebook -->
-<script src="js/sop/tests.js?v=20"></script>
-<script src="js/sop/methods.js?v=20"></script>
-<script src="js/sop/visuals.js?v=20"></script>
-<script src="js/sop/guides.js?v=20"></script>
-<script src="js/sop/sop.js?v=20"></script>
+<script src="js/sop/boot.js?v=21"></script>
+<!-- App UX: command search, page transitions, swipe-to-close sheets -->
+<script src="js/app/ux.js?v=21"></script>
 <script>
 /* On a local dev server (VS Code Live Server etc.) never use the offline cache: remove any old service worker + caches so edits always show. */
 if('serviceWorker'in navigator){const dev=/^(localhost|127\.0\.0\.1|\[::1\]|0\.0\.0\.0|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)$|\.localhost$/.test(location.hostname);if(dev){navigator.serviceWorker.getRegistrations().then(rs=>Promise.all(rs.map(r=>r.unregister()))).then(()=>window.caches?caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k)))):0).catch(()=>{})}else addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}))}

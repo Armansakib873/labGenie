@@ -60,8 +60,8 @@
   const seg = (list, cur, attr) => `<div class="sp-seg">${list.map(([v, l]) => `<button class="${cur === v ? 'on' : ''}" data-sa="${attr}" data-v="${v}">${l}</button>`).join('')}</div>`;
 
   /* ---------------- home ---------------- */
-  const QUICK = [['westgard', '🚦', 'Westgard checker'], ['iqc', '📈', 'QC statistics'], ['centri', '🌀', 'RPM ⇄ RCF'], ['draw', '🧪', 'Order of draw'], ['conv', '🔁', 'Unit converter'], ['critical', '🚨', 'Critical values'], ['spill', '🧯', 'Needle-stick / spill'], ['reject', '⛔', 'Rejection criteria']];
-  const DEPS = [['Staining & microscopy', '🔬', 'Staining', 'Gram · ZN · Leishman · mounts'], ['Microbiology', '🧫', 'Microbiology', 'Media · ID · biochem · AST'], ['Blood bank', '🩸', 'Blood bank', 'Donor · storage · reactions'], ['Haematology atlas', '🧬', 'PBF atlas', 'RBC · WBC · disease films']];
+  const QUICK = [['quiz', '⏱️', 'MCQ quiz'], ['pattern', '🧩', 'Pattern finder'], ['westgard', '🚦', 'Westgard checker'], ['iqc', '📈', 'QC statistics'], ['centri', '🌀', 'RPM ⇄ RCF'], ['draw', '🧪', 'Order of draw'], ['conv', '🔁', 'Unit converter'], ['critical', '🚨', 'Critical values'], ['reject', '⛔', 'Rejection criteria'], ['pbfdx', '🔬', 'PBF in disease'], ['bbstore', '🩸', 'Blood storage'], ['bbdonor', '🫶', 'Donor selection']];
+  const DEPS = [['Haematology atlas', '🧬', 'PBF & stains', 'RBC · WBC · disease films'], ['Blood bank', '🩸', 'Blood bank', 'Donor · storage · reactions'], ['Case studies', '🩺', 'Case studies', 'Worked interpretation'], ['Learning', '🎓', 'Quiz & tools', 'MCQ · pattern finder']];
   const listBody = () => {
     if (U.q.trim()) {
       const r = search(U.q.trim());
@@ -91,19 +91,71 @@
 <section class="sp-hero"><div class="sp-ht"><span class="sp-hi">${ico('book')}</span><div><h2>SOP Guidebook</h2><p>${G.TESTS.length} test guides · ${G.GUIDES.length} SOP, atlas & QC guides</p></div></div>
 <label class="sp-q">${ico('search')}<input id="spq" data-sx="q" placeholder="Search tests, SOPs, QC, keywords…" value="${E(U.q)}" autocomplete="off" enterkeyhint="search">${U.q ? `<button data-sa="qclr" aria-label="Clear search">${ico('x')}</button>` : ''}</label></section>
 ${U.q ? '' : `<div class="sp-quick">${QUICK.map(([id, i, l]) => `<a href="#sop?g=${id}"><i>${i}</i><span>${l}</span></a>`).join('')}</div>`}
+${U.q ? '' : `<div class="sp-dep">${DEPS.filter(d => G.GUIDES.some(g => g.cat === d[0])).map(([c, i, l, s]) => `<button data-sa="gcat" data-v="${E(c)}"><i>${i}</i><b>${l}</b><small>${s}</small></button>`).join('')}</div>`}
 ${U.q ? '' : seg([['tests', '🔬 Tests'], ['guides', '📘 SOP & QC'], ['saved', '★ Saved']], U.tab, 'tab')}
 <div id="spl">${listBody()}</div>
-<p class="sp-disc">Reference values and procedures are typical guidance from standard textbooks (Tietz, Henry, CLSI, WHO). Always follow your laboratory’s validated SOPs and the reagent kit insert.</p></div>`;
+<p class="sp-disc">Reference values and procedures are typical guidance from standard textbooks (Tietz, Henry, CLSI, WHO). Always follow your laboratory’s validated SOPs and the reagent kit insert.</p>${G.AUTHOR ? G.AUTHOR() : ''}</div>`;
 
   /* ---------------- detail: test ---------------- */
   const sec = (ic, h, body, open) => body ? `<details class="sp-sec"${open ? ' open' : ''}><summary><i>${ic}</i>${h}</summary><div class="sp-sb">${body}</div></details>` : '';
   const ul = a => (a && a.length ? `<ul class="sp-ul">${a.map(x => `<li>${E(x)}</li>`).join('')}</ul>` : '');
+  const PK = (G.pk = Object.assign({ s: '', a: '', u: 'y', p: 0 }, ST2.get('soppk', {})));
+  const ageY = () => { const a = parseFloat(PK.a); return isFinite(a) && a >= 0 ? (PK.u === 'm' ? a / 12 : PK.u === 'd' ? a / 365 : a) : null; };
+  const UF = u => (/^d/.test(u) ? 1 / 365 : /^m/.test(u) ? 1 / 12 : 1);
+  const rowTag = lbl => {
+    const L = ' ' + String(lbl).toLowerCase() + ' ', t = { s: '', p: /pregnan|trimester|\bgdm\b|gestation|\bt[123]\b/.test(L), tri: 0, lo: null, hi: null };
+    const m = /\b(male|men|man|boys?)\b/.test(L), w = /\b(female|women|woman|girls?)\b|pregnan|trimester|\bgdm\b|gestation|follicular|luteal|ovulat|menopaus|mid-cycle/.test(L);
+    t.s = m && !w ? 'm' : w && !m ? 'f' : '';
+    const tm = L.match(/\bt([123])\b|(first|second|third|1st|2nd|3rd) trimester/);
+    if (tm) t.tri = tm[1] ? +tm[1] : { first: 1, '1st': 1, second: 2, '2nd': 2, third: 3, '3rd': 3 }[tm[2]];
+    const R = (a, b) => { t.lo = a; t.hi = b; };
+    let x;
+    if ((x = L.match(/(\d+(?:\.\d+)?)\s*[–-]\s*(\d+(?:\.\d+)?)\s*(y|yr|yrs|years?|m|mo|months?|d|days?|wk|weeks?)\b/))) { const f2 = /^w/.test(x[3]) ? 7 / 365 : UF(x[3]); R(+x[1] * f2, +x[2] * f2); }
+    else if ((x = L.match(/(<|≤|under)\s*(\d+(?:\.\d+)?)\s*(y|yr|years?|m|mo|months?|d|days?)\b/))) R(0, +x[2] * UF(x[3]));
+    else if ((x = L.match(/(>|≥|over)\s*(\d+(?:\.\d+)?)\s*(y|yr|years?|m|mo|months?|d|days?)\b/))) R(+x[2] * UF(x[3]), 200);
+    else if (/cord|newborn|neonat/.test(L)) R(0, 0.08);
+    else if (/infant/.test(L)) R(0, 1);
+    else if (/adolescen|teen|pubert/.test(L)) R(10, 18);
+    else if (/child|paediatric|pediatric/.test(L)) R(1, 12);
+    else if (/elderly|older adult/.test(L)) R(60, 200);
+    else if (/adult/.test(L)) R(18, 200);
+    return t;
+  };
+  const pickRows = rows => {
+    const tags = rows.map(x => rowTag(x[0])), on = !!(PK.s || PK.a !== '' || +PK.p), age = ageY(), anyP = tags.some(t => t.p);
+    const relevant = tags.some(t => t.s || t.p || t.lo != null);
+    const preg = PK.s === 'f' && +PK.p, pre = s => String(s).split(/\s+[—–]\s+/)[0].toLowerCase().trim();
+    // analytes that have a pregnancy row matching the chosen trimester (or an untimed pregnancy row)
+    const pPre = new Set(rows.filter((x, i) => tags[i].p && (!tags[i].tri || tags[i].tri === +PK.p)).map(x => pre(x[0])));
+    const keep = rows.map((x, i) => {
+      const t = tags[i];
+      if (!on) return true;
+      if (PK.s && t.s && t.s !== PK.s) return false;
+      if (t.p && !preg) return false;
+      if (t.p && t.tri && preg && t.tri !== +PK.p) return false;
+      if (preg && anyP && t.s === 'f' && !t.p) return false;
+      if (preg && !t.p && pPre.has(pre(x[0]))) return false;
+      if (preg && age == null && t.lo != null && t.hi < 12) return false;
+      if (age != null && t.lo != null && (age < t.lo || age > t.hi)) return false;
+      return true;
+    });
+    return { tags, keep, relevant, on, age };
+  };
+  const picker = (t, k) => {
+    if (!k.relevant) return '';
+    const n = k.keep.filter(Boolean).length;
+    return `<div class="sp-pk"><div class="sp-pkr"><div class="sp-pks">${[['', 'Any'], ['m', '♂ Male'], ['f', '♀ Female']].map(([v, l]) => `<button class="${PK.s === v ? 'on' : ''}" data-sa="pks" data-v="${v}">${l}</button>`).join('')}</div><label class="sp-pka">Age<input data-sx="pk.a" inputmode="decimal" placeholder="any" value="${E(PK.a)}"><select data-sx="pk.u"><option value="y"${PK.u === 'y' ? ' selected' : ''}>yrs</option><option value="m"${PK.u === 'm' ? ' selected' : ''}>mo</option><option value="d"${PK.u === 'd' ? ' selected' : ''}>days</option></select></label></div>${PK.s === 'f' ? `<div class="sp-pks sp-pkp">${[[0, 'Not pregnant'], [1, 'T1'], [2, 'T2'], [3, 'T3']].map(([v, l]) => `<button class="${+PK.p === v ? 'on' : ''}" data-sa="pkp" data-v="${v}">${l}</button>`).join('')}</div>` : ''}${k.on ? `<p class="sp-pkn">Showing ${n} of ${k.keep.length} ranges · <button data-sa="pkclr">Show all</button></p>` : '<p class="sp-pkn">Pick sex / age (and pregnancy) to see only the matching ranges.</p>'}</div>`;
+  };
   const refTable = t => {
     const r = t.ref; if (!r) return '';
     const two = r.r.some(x => x[2]);
-    return `${two ? seg([[0, E(r.u[0])], [1, E(r.u[1])], [2, 'Both']], U.u, 'u') : ''}<div class="sp-tw"><table class="sp-tbl"><thead><tr><th>Group</th>${U.u !== 1 || !two ? `<th>${E(r.u[0])}</th>` : ''}${two && U.u !== 0 ? `<th>${E(r.u[1])}</th>` : ''}</tr></thead><tbody>${r.r.map(x => `<tr><td>${E(x[0])}</td>${U.u !== 1 || !two ? `<td><b>${E(x[1])}</b></td>` : ''}${two && U.u !== 0 ? `<td><b>${E(x[2] || '—')}</b></td>` : ''}</tr>`).join('')}</tbody></table></div><p class="sp-note">Approximate adult values unless stated. Verify with your method / kit insert.</p>`;
+    const k = pickRows(r.r), kid = k.on && k.age != null && k.age < 18;
+    return `${picker(t, k)}${two ? seg([[0, E(r.u[0])], [1, E(r.u[1])], [2, 'Both']], U.u, 'u') : ''}<div class="sp-tw"><table class="sp-tbl"><thead><tr><th>Group</th>${U.u !== 1 || !two ? `<th>${E(r.u[0])}</th>` : ''}${two && U.u !== 0 ? `<th>${E(r.u[1])}</th>` : ''}</tr></thead><tbody>${r.r.map((x, i) => !k.keep[i] ? '' : `<tr${k.tags[i].p ? ' class="sp-prg"' : ''}><td>${E(x[0])}${kid && k.tags[i].lo == null && !k.tags[i].p ? ' <em class="sp-ad">adult</em>' : ''}</td>${U.u !== 1 || !two ? `<td><b>${E(x[1])}</b></td>` : ''}${two && U.u !== 0 ? `<td><b>${E(x[2] || '—')}</b></td>` : ''}</tr>`).join('')}</tbody></table></div><p class="sp-note">Approximate adult values unless stated. Verify with your method / kit insert.</p>`;
   };
   const methods = m => `<div class="sp-mt">${m.map(([n, tag, d]) => `<div><b>${E(n)}</b>${tag ? `<span>${E(tag)}</span>` : ''}<p>${E(d)}</p></div>`).join('')}</div>`;
+  const X = t => { const x = (G.XTRA || {})[t.id] || {}; return { st: t.st || x.st, hil: t.hil || x.hil, rej: t.rej || x.rej, spc: t.spc || x.spc, hx: x.hx }; };
+  const stabT = st => `<div class="sp-st">${st.map(([c, d]) => { const k = /−\s?\d|-\s?\d|frozen|freez/i.test(c) ? 'fz' : /2\s*[–-]\s*8|fridge|refrig|\b4\s*°|ice/i.test(c) ? 'cd' : /37\s*°|body/i.test(c) ? 'wm' : 'rt'; return `<div class="${k}"><em>${E(c)}</em><b>${E(d)}</b></div>`; }).join('')}</div><p class="sp-note">Typical stability — confirm with your kit insert / validated data.</p>`;
+  const hilB = x => `${x.hil ? `<div class="sp-hil">${[['H', 'Haemolysis', 'h'], ['I', 'Icterus', 'i'], ['L', 'Lipaemia', 'l'], ['T', 'Turbidity / clots', 't']].filter(k => x.hil[k[2]]).map(([a, n, k]) => `<div class="${k}"><i>${a}</i><span><b>${n}</b>${E(x.hil[k])}</span></div>`).join('')}</div>` : ''}${x.rej ? `<h4 class="sp-h4">Reject / recollect when</h4>${ul(x.rej)}` : ''}`;
   const testView = t => {
     const tb = tube(t.tube), list = G.TESTS, i = list.indexOf(t), prev = list[i - 1], next = list[i + 1];
     const rel = list.filter(x => x !== t && (x.cat === t.cat || x.dept === t.dept)).slice(0, 8);
@@ -112,13 +164,16 @@ ${U.q ? '' : seg([['tests', '🔬 Tests'], ['guides', '📘 SOP & QC'], ['saved'
 <div class="sp-act"><button data-sa="fav" data-k="t:${t.id}" class="${isFav('t:' + t.id) ? 'on' : ''}">${ico('star')}${isFav('t:' + t.id) ? 'Saved' : 'Save'}</button><button data-sa="copy" data-k="t:${t.id}">${ico('copy')}Copy</button></div></section>
 <div class="sp-facts"><div><em>Specimen</em><b>${E(t.sp)}</b></div><div><em>Container</em><b><i class="sp-dot" style="background:${tb[1]}"></i>${E(tb[0])}</b></div><div><em>Volume</em><b>${E(t.vol)}</b></div><div class="w"><em>Best collection time / preparation</em><b>${E(t.time)}</b></div></div>
 ${t.crit ? `<div class="sp-crit"><b>🚨 Critical values</b>${E(t.crit)}</div>` : ''}
-${G.METHODS && G.METHODS[t.id] ? sec('🧬', 'Test methods (principles)', methods(G.METHODS[t.id]), 1) : ''}
+${X(t).spc ? `<div class="sp-spc"><b>🧊 Special handling</b>${E(X(t).spc)}</div>` : ''}
+${(G.METHODS && G.METHODS[t.id]) || t.m ? sec('🧬', 'Test methods (principles)', methods((G.METHODS && G.METHODS[t.id]) || t.m), 1) : ''}
 ${sec('🧑‍⚕️', 'Collection precautions', ul(t.pre), 1)}
-${sec('🌀', 'Sample processing & stability', ul(t.proc), 1)}
-${sec('📏', 'Reference values (age / sex / units)', refTable(t), 1)}
+${sec('🌀', 'Sample processing', ul(t.proc), 1)}
+${X(t).st ? sec('🌡️', 'Preservation: temperature & duration', stabT(X(t).st), 1) : ''}
+${X(t).hil || X(t).rej ? sec('🧪', 'Rejection criteria & interference (HIL)', hilB(X(t)), 1) : ''}
+${sec('📏', 'Reference values (age / sex / units)', t.ref ? `<div id="sp-ref">${refTable(t)}</div>` : '', 1)}
 ${t.hi || t.lo ? sec('📊', 'Result interpretation', `<div class="sp-hl">${t.hi ? `<div class="sp-up"><h4>${ico('up')} Increased</h4>${ul(t.hi)}</div>` : ''}${t.lo ? `<div class="sp-dn"><h4>${ico('dn')} Decreased</h4>${ul(t.lo)}</div>` : ''}</div>`, 1) : ''}
 ${sec('🔗', 'Correlation with other parameters', ul(t.corr), 1)}
-${sec('🗂️', 'Patient history to check', ul(t.hx), 0)}
+${sec('🗂️', 'Patient history to check before release', ul([...(t.hx || []), ...(X(t).hx || [])]), 1)}
 ${sec('⚠️', 'Interferences & pitfalls', ul(t.int), 0)}
 ${rel.length ? `<h3 class="sp-h3">Related tests</h3><div class="sp-rel">${rel.map(x => `<a href="#sop?t=${x.id}">${E(x.n.split(' (')[0])}</a>`).join('')}</div>` : ''}
 <div class="sp-pn">${prev ? `<a href="#sop?t=${prev.id}">‹ ${E(prev.n.split(' (')[0])}</a>` : '<span></span>'}${next ? `<a href="#sop?t=${next.id}">${E(next.n.split(' (')[0])} ›</a>` : '<span></span>'}</div>
@@ -141,7 +196,7 @@ ${rel.length ? `<h3 class="sp-h3">Related tests</h3><div class="sp-rel">${rel.ma
     return `<div class="sp sp-d" id="sp">
 <section class="sp-dh sp-dg"><div class="sp-tags"><span>${E(g.cat)}</span>${g.tool ? '<span>Interactive</span>' : ''}</div><h2><i>${g.ic}</i> ${E(g.n)}</h2>
 <div class="sp-act"><button data-sa="fav" data-k="g:${g.id}" class="${isFav('g:' + g.id) ? 'on' : ''}">${ico('star')}${isFav('g:' + g.id) ? 'Saved' : 'Save'}</button><button data-sa="copy" data-k="g:${g.id}">${ico('copy')}Copy</button></div></section>
-${g.tool ? `<section class="sp-tool" id="sp-tool">${TOOLS[g.tool]()}</section>` : ''}
+${g.tool ? `<section class="sp-tool" id="sp-tool">${(TOOLS[g.tool] || G.TOOLX[g.tool])()}</section>` : ''}
 ${g.sec.map((s, k) => sec('§', E(s.h), block(s), k < 3 || g.sec.length <= 4)).join('')}
 <div class="sp-pn">${prev ? `<a href="#sop?g=${prev.id}">‹ ${E(prev.n)}</a>` : '<span></span>'}${next ? `<a href="#sop?g=${next.id}">${E(next.n)} ›</a>` : '<span></span>'}</div>
 <p class="sp-disc">Adopt and approve locally before use — this is a general template, not a substitute for your lab’s controlled SOP.</p></div>`;
@@ -172,6 +227,8 @@ ${g.sec.map((s, k) => sec('§', E(s.h), block(s), k < 3 || g.sec.length <= 4)).j
     z.forEach((v, i) => { if (!bad[i] && Math.abs(v) > 2) bad[i] = 1; });
     return { out, bad, z };
   };
+  G.TOOLX = G.TOOLX || {};
+  G.ACT = G.ACT || {};
   const TOOLS = {
     westgard: () => {
       const v = nums(TS.vals), m = parseFloat(TS.mean), s = parseFloat(TS.sd), ok = v.length && s > 0 && isFinite(m);
@@ -212,8 +269,10 @@ ${g.sec.map((s, k) => sec('§', E(s.h), block(s), k < 3 || g.sec.length <= 4)).j
     return o;
     function R(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-'); }
   };
-  const refreshTool = () => { const g = GD(G.cur), el = $1('#sp-tool'); if (g && g.tool && el) { const a = document.activeElement, id = a && a.dataset && a.dataset.sx, pos = a && a.selectionStart; el.innerHTML = TOOLS[g.tool](); if (id) { const n = el.querySelector(`[data-sx="${id}"]`); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (_) {} } } } };
+  const refreshTool = () => { const g = GD(G.cur), el = $1('#sp-tool'); if (g && g.tool && el) { const a = document.activeElement, id = a && a.dataset && a.dataset.sx, pos = a && a.selectionStart; el.innerHTML = (TOOLS[g.tool] || G.TOOLX[g.tool])(); if (id) { const n = el.querySelector(`[data-sx="${id}"]`); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (_) {} } } } };
 
+  const refreshRef = () => { const t = T(G.cur), el = $1('#sp-ref'); if (!t || !el) return; const a = document.activeElement, id = a && a.dataset && a.dataset.sx, pos = a && a.selectionStart; el.innerHTML = refTable(t); if (id) { const n = el.querySelector(`[data-sx="${id}"]`); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (_) {} } } };
+  G.refreshTool = () => refreshTool();
   /* ---------------- copy text ---------------- */
   const vtxt = d => {
     if (!d) return [];
@@ -227,6 +286,7 @@ ${g.sec.map((s, k) => sec('§', E(s.h), block(s), k < 3 || g.sec.length <= 4)).j
       if (G.METHODS && G.METHODS[t.id]) add('Methods', G.METHODS[t.id].map(m => m[0] + (m[1] ? ' (' + m[1] + ')' : '') + ': ' + m[2]));
       add('Precautions', t.pre); add('Processing', t.proc);
       if (t.ref) L.push('', 'Reference values:', ...t.ref.r.map(r => `• ${r[0]}: ${r[1]}${r[2] ? ' (' + r[2] + ')' : ''}`));
+      const xx = X(t); if (xx.st) L.push('', 'Stability:', ...xx.st.map(r => '• ' + r[0] + ': ' + r[1])); if (xx.hil) L.push('', 'Interference: ' + Object.entries(xx.hil).map(([k, v]) => k.toUpperCase() + ' – ' + v).join(' | ')); add('Reject when', xx.rej);
       add('Increased in', t.hi); add('Decreased in', t.lo); add('Correlation', t.corr); add('Patient history', t.hx);
       if (t.crit) L.push('', 'Critical: ' + t.crit);
       return L.join('\n');
@@ -255,6 +315,8 @@ ${g.sec.map((s, k) => sec('§', E(s.h), block(s), k < 3 || g.sec.length <= 4)).j
     if (!b) return;
     const a = b.dataset.sa, v = b.dataset.v;
     e.preventDefault();
+    if (G.ACT[a]) { G.ACT[a](b, v); return; }
+    if (a === 'pks' || a === 'pkp' || a === 'pkclr') { if (a === 'pks') { PK.s = v; if (v !== 'f') PK.p = 0; } else if (a === 'pkp') PK.p = +v; else { PK.s = ''; PK.a = ''; PK.p = 0; } ST2.set('soppk', PK); refreshRef(); return; }
     if (a === 'open') { location.hash = 'sop'; return; }
     if (a === 'back') { if (history.length > 1 && /#sop\?/.test(location.hash)) history.back(); else location.hash = /#sop\?/.test(location.hash) ? 'sop' : 'home'; return; }
     if (a === 'focus') { if (!/^#sop$/.test(location.hash)) location.hash = 'sop'; setTimeout(() => { const q = $1('#spq'); q && q.focus(); }, 80); return; }
@@ -276,6 +338,7 @@ ${g.sec.map((s, k) => sec('§', E(s.h), block(s), k < 3 || g.sec.length <= 4)).j
     const el = e.target, k = el.dataset && el.dataset.sx;
     if (!k) return;
     if (k === 'q') { U.q = el.value; clearTimeout(qT); qT = setTimeout(() => { const l = $1('#spl'); if (l) l.innerHTML = listBody(); const hero = $1('.sp-quick'), sg = $1('#sp > .sp-seg'); if (hero) hero.style.display = U.q ? 'none' : ''; if (sg) sg.style.display = U.q ? 'none' : ''; }, 120); return; }
+    if (k.startsWith('pk.')) { PK[k.slice(3)] = el.value; ST2.set('soppk', PK); clearTimeout(qT); qT = setTimeout(refreshRef, el.tagName === 'SELECT' ? 0 : 300); return; }
     if (k.startsWith('ts.')) { TS[k.slice(3)] = el.value; saveTS(); clearTimeout(qT); qT = setTimeout(refreshTool, el.tagName === 'SELECT' ? 0 : 250); }
   });
   document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'spq') e.target.blur(); });
@@ -291,9 +354,6 @@ ${g.sec.map((s, k) => sec('§', E(s.h), block(s), k < 3 || g.sec.length <= 4)).j
         const r = route(), it = r && (r.k === 't' ? T(r.id) : GD(r.id));
         b.innerHTML = `<button class="ib" data-sa="back" aria-label="Back">${ico('back')}</button><h1>${it ? E(it.n.split(' (')[0]) : 'SOP Guidebook'}</h1><button class="ib" data-sa="focus" aria-label="Search guidebook">${ico('search')}</button>`;
         document.title = (it ? it.n + ' · ' : '') + 'SOP Guidebook | LabGenie';
-      } else if (!t) {
-        const s = b.querySelector('[data-a="srch"]');
-        if (s && !b.querySelector('[data-sa="open"]')) s.insertAdjacentHTML('beforebegin', `<button class="ib sp-bk" data-sa="open" aria-label="SOP guidebook" title="SOP guidebook">${ico('book')}</button>`);
       }
     };
   }

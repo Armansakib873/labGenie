@@ -1,4 +1,4 @@
-const CACHE_NAME = 'labgenie-v20';
+const CACHE_NAME = 'labgenie-v21';
 
 const urlsToCache = [
   './',
@@ -6,11 +6,21 @@ const urlsToCache = [
   './manifest.json',
   './css/report.css',
   './css/sop.css',
+  './css/sop2.css',
+  './css/app.css',
+  './js/sop/boot.js',
   './js/sop/tests.js',
+  './js/sop/tests2a.js',
+  './js/sop/tests2b.js',
+  './js/sop/handling.js',
   './js/sop/methods.js',
   './js/sop/visuals.js',
   './js/sop/guides.js',
+  './js/sop/atlas-haem.js',
+  './js/sop/bloodbank.js',
+  './js/sop/learn.js',
   './js/sop/sop.js',
+  './js/app/ux.js',
   './js/report/catalog.js',
   './js/report/engine.js',
   './js/report/signature.js',

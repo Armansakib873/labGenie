@@ -204,7 +204,7 @@
     };
   };
   const footer = (c, lab, pg) => {
-    const L = [lab.pby ? `<span>Printed by: <b>${E(lab.pby)}</b></span>` : '', `<span>Printed: <b>${E(nowStr())}</b></span>`, lab.pn ? '<span>Page <b>{{P}}</b> of <b>{{N}}</b></span>' : '', lab.pw ? `<span>Powered by: <b>${E(lab.pw)}</b></span>` : ''].filter(Boolean);
+    const L = [lab.pby ? `<span>Printed by: <b>${E(lab.pby)}</b></span>` : '', `<span>Printed: <b>${E(nowStr())}</b></span>`, lab.pn ? '<span>Page <b>{{P}}</b> of <b>{{N}}</b></span>' : '', lab.pw ? `<span>Powered by - <b>${E(lab.pw)}</b></span>` : ''].filter(Boolean);
     return `<div class="rq-ft">${L.join('')}${lab.disc ? `<div class="rq-ds">${E(lab.disc)}</div>` : ''}</div>`;
   };
   // density 0 = normal … 3 = tightest (used automatically to fit a page on one sheet)

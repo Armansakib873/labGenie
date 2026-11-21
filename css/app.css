@@ -1,0 +1,33 @@
+/* LabGenie · app-wide UX (command search, page transitions, sheets) */
+#cmdk { position: fixed; inset: 0; z-index: 60; display: none; align-items: flex-start; justify-content: center; padding: calc(env(safe-area-inset-top) + 8vh) 12px 12px; background: rgba(10, 8, 30, .42); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+#cmdk.on { display: flex; animation: ckf .16s ease-out; }
+@keyframes ckf { from { opacity: 0; } }
+.ck-b { width: min(620px, 100%); max-height: min(72dvh, 640px); display: flex; flex-direction: column; border-radius: 22px; background: var(--sf); border: 1px solid var(--ln); box-shadow: 0 30px 80px -20px rgba(0, 0, 0, .5); overflow: hidden; animation: ckb .2s cubic-bezier(.2, .9, .3, 1.2); }
+@keyframes ckb { from { transform: translateY(-10px) scale(.98); opacity: 0; } }
+.ck-q { display: flex; align-items: center; gap: 10px; padding: 0 14px; border-bottom: 1px solid var(--ln); color: var(--mut); }
+.ck-q svg { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; }
+.ck-q input { flex: 1; min-width: 0; border: 0; background: none; outline: 0; padding: 16px 0; font-size: 16px; color: var(--ink); }
+.ck-q kbd { font: 600 11px system-ui, sans-serif; padding: 3px 7px; border-radius: 7px; border: 1px solid var(--ln); color: var(--mut); }
+.ck-l { overflow-y: auto; padding: 6px; overscroll-behavior: contain; }
+.ck-g { padding: 10px 10px 4px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--mut); }
+.ck-i { display: flex; flex-direction: column; align-items: flex-start; width: 100%; text-align: left; padding: 10px 12px; border-radius: 12px; color: var(--ink); }
+.ck-i b { font-weight: 600; font-size: 14.5px; }
+.ck-i small { margin: 1px 0 0; font-size: 12px; color: var(--mut); }
+.ck-i.on, .ck-i:hover { background: var(--pt); }
+.ck-i.on b { color: var(--pr); }
+.ck-e { padding: 28px 16px; text-align: center; color: var(--mut); font-size: 14px; }
+.ck-f { display: flex; justify-content: space-between; padding: 8px 14px; border-top: 1px solid var(--ln); font-size: 11.5px; color: var(--mut); }
+@media (max-width: 600px) { .ck-f span:first-child { display: none; } }
+
+/* page transitions */
+#v.vt-in { animation: vtin .26s cubic-bezier(.2, .8, .3, 1); }
+#v.vt-back { animation: vtback .26s cubic-bezier(.2, .8, .3, 1); }
+@keyframes vtin { from { opacity: 0; transform: translateX(14px); } }
+@keyframes vtback { from { opacity: 0; transform: translateX(-14px); } }
+
+/* sheets: smoother entrance + grab affordance (swipe handled in ux.js) */
+#ov.on .bs { animation: bsin .26s cubic-bezier(.2, .9, .3, 1.05); will-change: transform; }
+@keyframes bsin { from { transform: translateY(40px); opacity: .4; } }
+.grab { cursor: grab; touch-action: none; }
+
+@media (prefers-reduced-motion: reduce) { #v.vt-in, #v.vt-back, #ov.on .bs, #cmdk.on, .ck-b { animation: none; } }

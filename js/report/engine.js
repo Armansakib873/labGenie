@@ -23,13 +23,14 @@
     em: '', web: '', tag: '', logo: null, hdr: 'lab', gap: 42, himg: null,
     bc: 1, seal: 0, dup: 0, wm: 1, fs: 'n', flg: 'hl', pn: 1, col: 'bw', acc: '#1d3b8b',
     eor: 1, nts: 1, disc: '',
-    pre: 'LG', seq: 0, prefill: 1, fit: 1, lib: [], pby: '', pw: ''
+    pre: 'LG', seq: 0, prefill: 1, fit: 1, lib: [], pby: '', pw: 'LabGenie'
   };
   R.lab = () => {
     if (!S.rxl) {
       S.rxl = Object.assign({}, R.LAB_DEF, ST.get('rxl', {}));
       // one-time: seals off by default, drop the old default disclaimer line
       if (!S.rxl.m4) { S.rxl.seal = 0; S.rxl.dup = 0; if (/^Results relate only/.test(S.rxl.disc || '')) S.rxl.disc = ''; S.rxl.m4 = 1; R.store('rxl', S.rxl); }
+      if (!S.rxl.m5) { if (!S.rxl.pw) S.rxl.pw = 'LabGenie'; S.rxl.m5 = 1; R.store('rxl', S.rxl); }
     }
     return S.rxl;
   };
