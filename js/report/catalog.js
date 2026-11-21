@@ -145,7 +145,7 @@
       H('Platelets'),
       ['plt', 'Platelet Count', '×10³/µL', '150–410', '265', { c: [20, 1000] }],
       ['mpv', 'MPV', 'fL', '7.5–11.5', '9.4']
-    ]),
+    ], { nocm: 1 }),
     P('hb', 'Hemoglobin (Hb%)', 'Hematology', 'Hematology', ['wb-edta', 'cap'], '', [
       ['hb', 'Hemoglobin', 'g/dL', { m: '13.0–17.0', f: '12.0–15.0' }, '13.6', { c: [7, 20] }]
     ]),
@@ -407,7 +407,7 @@
       ['ubac', 'Bacteria', '', 'Nil', 'Nil', { o: 'nilp' }],
       ['uyst', 'Yeast Cells', '', 'Nil', 'Nil', { o: 'nilp' }],
       ['uoth', 'Others', '', '', 'Nil', { nf: 1 }]
-    ]),
+    ], { nocm: 1 }),
     P('upt', 'Urine Pregnancy Test', 'Urine & stool', 'Clinical Pathology', ['ur-fm', 'ur-rand'], '(Immunochromatographic hCG card test)', [
       ['upt', 'Pregnancy Test (Urine hCG)', '', '', 'Negative', { o: 'posneg', nf: 1 }]
     ], { sex: 'f' }),
@@ -430,7 +430,7 @@
       ['sfat', 'Fat Globules', '', 'Absent', 'Absent', { o: 'abs' }],
       ['sveg', 'Vegetable Cells', '', '', 'Present', { nf: 1 }],
       ['sstr', 'Starch Granules', '', 'Absent', 'Absent', { o: 'abs' }]
-    ]),
+    ], { nocm: 1 }),
     P('fobt', 'Stool Occult Blood (FOBT)', 'Urine & stool', 'Clinical Pathology', ['stool'], '(Immunochromatographic — human Hb specific)', [
       ['sob', 'Occult Blood', '', 'Negative', 'Negative', { o: 'posneg' }]
     ]),

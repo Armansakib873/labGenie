@@ -77,6 +77,8 @@
     pg.rows = pg.rows.filter(x => x.h || x.sub || x.n || x.r);
     const first = !R.panels(pg).length && !pg.rows.some(x => x.n);
     pg.rows.push(...R.profRows(p, prefill));
+    // CBC / urine / stool routine pages print without an auto interpretation
+    if (p.nocm && !pg.cmMan) { pg.acm = 0; pg.cm = ''; }
     if (first) {
       if (!pg.sp || pg.spAuto) { pg.sp = p.acc[0]; pg.spAuto = 1; }
       if (!pg.dept) pg.dept = p.dept;
@@ -444,6 +446,12 @@
     if (!S.rx) {
       const c = ST.get('rx', null);
       S.rx = c && c.v === 2 && c.pages && c.pages.length ? c : R.buildDemo();
+    }
+    // one-time: switch off auto interpretation on pages holding CBC / urine / stool routine panels
+    if (!S.rx.m3) {
+      S.rx.pages.forEach(pg => { if (!pg.cmMan && pg.rows.some(x => x.h && R.PROF_BY[x.pid] && R.PROF_BY[x.pid].nocm)) { pg.acm = 0; pg.cm = ''; } });
+      S.rx.m3 = 1;
+      R.save();
     }
     S.rxs = S.rxs || ST.get('rxs', []);
     if (S.rx.cur >= S.rx.pages.length) S.rx.cur = 0;

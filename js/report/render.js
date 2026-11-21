@@ -80,7 +80,7 @@
 .rxp .rq-seal{width:92px;height:92px;border:2px solid #111;border-radius:50%;outline:1px solid #111;outline-offset:-6px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font:700 8.2px/1.25 Arial,sans-serif;letter-spacing:.4px;transform:rotate(-8deg)}
 .rxp .rq-seal b{font-size:19px;line-height:1}
 .rxp .rq-eo{text-align:center;margin-top:12px;font-size:9.8px;letter-spacing:.5px}
-.rxp .rq-ft{margin-top:8px;padding-top:5px;border-top:1px solid #111;display:flex;justify-content:space-between;flex-wrap:wrap;gap:2px 12px;font-size:9.6px;color:#222;position:relative;z-index:1}
+.rxp .rq-ft{margin-top:8px;padding-top:4px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:2px 12px;font-size:9.6px;color:#222;position:relative;z-index:1}
 .rxp .rq-ft .rq-ds{flex-basis:100%;text-align:center;font-style:italic;color:#444}
 .rxp.d1 .rq-t td{padding:3.8px 6px}.rxp.d1 .rq-t .rq-ph td{padding:8px 6px 3px}.rxp.d1 .rq-t .rq-sb td{padding:4px 6px 1px}.rxp.d1 .rq-sg{margin-top:14px}.rxp.d1 .rq-cm{margin-top:7px}.rxp.d1 .rq-eo{margin-top:8px}
 .rxp.d2 .rq-t td,.rxp.d3 .rq-t td{padding:2.4px 6px}.rxp.d2 .rq-t th,.rxp.d3 .rq-t th{padding:4px 6px;font-size:11.5px}.rxp.d2 .rq-t .rq-ph td,.rxp.d3 .rq-t .rq-ph td{padding:6px 6px 2px;font-size:11.5px}.rxp.d2 .rq-t .rq-sb td,.rxp.d3 .rq-t .rq-sb td{padding:3px 6px 0}.rxp.d2 .rq-t .rq-rs{font-size:12px}

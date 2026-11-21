@@ -196,7 +196,7 @@ body>*:not(#pr){display:none!important}
 }
 @media(max-width:340px){.tmhms{gap:6px}.tmq .chip{padding:8px 11px}}
 </style>
-<link rel="stylesheet" href="css/report.css">
+<link rel="stylesheet" href="css/report.css?v=18">
 </head>
 <body>
 <div id="shell">
@@ -933,12 +933,12 @@ look();theme();off();render();lock();if(!S.seen)sheet(`<h3>Welcome to LabGenie</
 })();
 </script>
 <!-- Report engine v2 (modular) -->
-<script src="js/report/catalog.js"></script>
-<script src="js/report/engine.js"></script>
-<script src="js/report/signature.js"></script>
-<script src="js/report/render.js"></script>
-<script src="js/report/export.js"></script>
-<script src="js/report/ui.js"></script>
+<script src="js/report/catalog.js?v=18"></script>
+<script src="js/report/engine.js?v=18"></script>
+<script src="js/report/signature.js?v=18"></script>
+<script src="js/report/render.js?v=18"></script>
+<script src="js/report/export.js?v=18"></script>
+<script src="js/report/ui.js?v=18"></script>
 <script>
 /* On a local dev server (VS Code Live Server etc.) never use the offline cache: remove any old service worker + caches so edits always show. */
 if('serviceWorker'in navigator){const dev=/^(localhost|127\.0\.0\.1|\[::1\]|0\.0\.0\.0|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)$|\.localhost$/.test(location.hostname);if(dev){navigator.serviceWorker.getRegistrations().then(rs=>Promise.all(rs.map(r=>r.unregister()))).then(()=>window.caches?caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k)))):0).catch(()=>{})}else addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}))}
