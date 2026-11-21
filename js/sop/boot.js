@@ -6,8 +6,8 @@
    ===================================================================== */
 (function () {
   'use strict';
-  const V = '21';
-  const FILES = ['tests', 'tests2a', 'tests2b', 'handling', 'methods', 'visuals', 'guides', 'atlas-haem', 'bloodbank', 'learn', 'sop'];
+  const V = '22';
+  const FILES = ['tests', 'tests2a', 'tests2b', 'handling', 'methods', 'visuals', 'guides', 'atlas-haem', 'bloodbank', 'learn', 'micro', 'sop'];
   const G = (window.SOPG = window.SOPG || {});
   let p = null;
   const one = f => new Promise((ok, no) => { const s = document.createElement('script'); s.src = `js/sop/${f}.js?v=${V}`; s.onload = ok; s.onerror = () => no(new Error('Could not load ' + f)); document.head.appendChild(s); });

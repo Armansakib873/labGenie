@@ -61,7 +61,7 @@
 
   /* ---------------- home ---------------- */
   const QUICK = [['quiz', '⏱️', 'MCQ quiz'], ['pattern', '🧩', 'Pattern finder'], ['westgard', '🚦', 'Westgard checker'], ['iqc', '📈', 'QC statistics'], ['centri', '🌀', 'RPM ⇄ RCF'], ['draw', '🧪', 'Order of draw'], ['conv', '🔁', 'Unit converter'], ['critical', '🚨', 'Critical values'], ['reject', '⛔', 'Rejection criteria'], ['pbfdx', '🔬', 'PBF in disease'], ['bbstore', '🩸', 'Blood storage'], ['bbdonor', '🫶', 'Donor selection']];
-  const DEPS = [['Haematology atlas', '🧬', 'PBF & stains', 'RBC · WBC · disease films'], ['Blood bank', '🩸', 'Blood bank', 'Donor · storage · reactions'], ['Case studies', '🩺', 'Case studies', 'Worked interpretation'], ['Learning', '🎓', 'Quiz & tools', 'MCQ · pattern finder']];
+  const DEPS = [['Haematology atlas', '🧬', 'PBF & stains', 'RBC · WBC · disease films'], ['Blood bank', '🩸', 'Blood bank', 'Donor · storage · reactions'], ['Case studies', '🩺', 'Case studies', 'Worked interpretation'], ['Learning', '🎓', 'Quiz & tools', 'MCQ · pattern finder'], ['Microbiology', '🦠', 'Microbiology', 'Organisms · media · specimens']];
   const listBody = () => {
     if (U.q.trim()) {
       const r = search(U.q.trim());
