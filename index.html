@@ -196,6 +196,7 @@ body>*:not(#pr){display:none!important}
 #tm .sh{padding-left:12px;padding-right:12px}
 }
 @media(max-width:340px){.tmhms{gap:6px}.tmq .chip{padding:8px 11px}}
+.ih{margin:0 0 6px;padding-left:20px;line-height:1.6;font-size:14px}.ih li{margin:4px 0}
 </style>
 <link rel="stylesheet" href="css/report.css?v=21">
 <link rel="stylesheet" href="css/sop.css?v=21">
@@ -374,8 +375,14 @@ function bar(tab,t){$('#bar').innerHTML=t?`<button class="ib" data-a="back" aria
 const re=()=>{const y=scrollY,v=$('#v'),h=window.hid?hid():(location.hash.slice(1)||'home');v.innerHTML=((window.VW&&VW[h])||home)();scrollTo(0,y)};
 addEventListener('hashchange',()=>{S.nav++;render()});
 let DP=null;
-addEventListener('beforeinstallprompt',e=>{e.preventDefault();DP=e;re()});
-addEventListener('appinstalled',()=>{DP=null;re()});
+/* Install: Chrome/Edge/Android give a deferred prompt (must be shown from a tap); iOS Safari has no API, so we show the Add-to-Home-Screen steps. A one-time sheet offers this on the first visit. */
+const STANDALONE=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true,IOS=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const instHelp=()=>IOS?'<ol class="ih"><li>Tap the <b>Share</b> button <span aria-hidden="true">⬆︎</span> in Safari’s toolbar.</li><li>Scroll and choose <b>Add to Home Screen</b>.</li><li>Tap <b>Add</b> — LabGenie opens full-screen and works offline.</li></ol>':/android/i.test(navigator.userAgent)?'<ol class="ih"><li>Open the browser menu <b>⋮</b>.</li><li>Tap <b>Install app</b> or <b>Add to Home screen</b>.</li><li>Confirm <b>Install</b>.</li></ol>':'<ol class="ih"><li>Click the <b>install icon</b> at the right of the address bar (Chrome / Edge),</li><li>or open the browser menu → <b>Install LabGenie</b> / <b>Apps → Install this site as an app</b>.</li></ol>';
+const instSheet=first=>{try{localStorage.setItem('lg.instAsk','1')}catch(e){}LGI.sheet(`<h3>📲 Install LabGenie</h3><p class="nt" style="margin:0 0 10px">Add LabGenie to your home screen for one-tap access, full-screen use and offline calculators &amp; guidebook.</p>${DP?'':instHelp()}<div class="ac">${first?'<button data-a="no">Not now</button>':''}${DP?'<button data-a="inst" style="color:var(--pr)">Install</button>':'<button data-a="no">Got it</button>'}</div>`)};
+const firstAsk=()=>{try{if(localStorage.getItem('lg.instAsk')||STANDALONE())return}catch(e){return}if($('#ov')&&$('#ov').className==='on')return;instSheet(1)};
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();DP=e;re();setTimeout(firstAsk,2500)});
+addEventListener('appinstalled',()=>{DP=null;try{localStorage.setItem('lg.instAsk','1')}catch(e){}re()});
+addEventListener('load',()=>setTimeout(()=>{if(!DP&&(IOS||!('onbeforeinstallprompt' in window)))firstAsk()},5000));
 document.addEventListener('click',e=>{
 const cd=e.target.closest('a.card[data-id]');if(S.edit&&cd){e.preventDefault();S.pins=S.pins.filter(x=>x!=cd.dataset.id);ST.set('pins',S.pins);return re()}
 const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,d=b.dataset;if(b.closest('a'))e.preventDefault();
@@ -383,7 +390,7 @@ const A={back:()=>S.nav?history.back():(location.hash='home'),
 srch:()=>{location.hash='tools';setTimeout(()=>{const q=$('#q');q&&q.focus()},60)},
 tgl:()=>{S.th=document.documentElement.dataset.e=='dark'?'light':'dark';ST.set('th',S.th);theme()},
 edit:()=>{S.edit=!S.edit;re()},
-inst:async()=>{if(!DP)return;DP.prompt();await DP.userChoice;DP=null;re()},
+inst:async()=>{if(!DP){instSheet(0);return}LGI.closeS();DP.prompt();const c=await DP.userChoice;DP=null;re();if(c&&c.outcome==='accepted')toast('LabGenie installed')},
 cat:()=>{S.cat=d.k;if(location.hash!='#tools')location.hash='tools';else re()},
 pin:()=>{const i=S.pins.indexOf(d.id);i<0?S.pins.push(d.id):S.pins.splice(i,1);ST.set('pins',S.pins);toast(i<0?'Pinned to Home':'Removed from Home');if(S.cur)bar('tool',S.cur);else re()},
 copy:()=>cp(sumry()),
@@ -735,7 +742,7 @@ return`<div class="hero"><h2 style="font-size:28px">${tr('settings')}</h2></div>
 <div class="set"><h4>${tr('privacy')}</h4><p>Don’t store patient names</p>${sg('priv',oo)}<p style="margin:10px 0 6px">Audit log of calculations</p>${sg('audit',oo)}<p style="margin:10px 0 6px">Disclaimer</p>${sg('disc',[['short','Short'],['std','Standard'],['strict','Strict']])}<p style="margin:10px 0 6px">App PIN ${S.pin?'(set)':'(off)'}</p><button class="btn" data-a="pinset">${S.pin?'Change PIN':'Set PIN'}</button> ${S.pin?'<button class="btn d" data-a="pinclr">Remove PIN</button>':''}${S.audit&&S.aud.length?`<p style="margin-top:12px;font-size:12.5px">${S.aud.slice(0,12).map(a=>new Date(a.ts).toLocaleTimeString()+' · '+esc(a.a)).join('<br>')}</p>`:''}</div>
 <div class="set"><h4>${tr('data')}</h4><p>Everything stays on this device.</p><div class="ac" style="margin:0;flex-wrap:wrap"><button data-a="exp">Export JSON</button><button data-a="imp">Import JSON</button><button data-a="csv">History CSV</button></div><div class="ac" style="margin:8px 0 0"><button data-a="rst">Reset home shortcuts</button></div></div>
 <div class="set"><h4>${tr('tools2')}</h4><div class="ac" style="margin:0"><a class="btn" href="#batch" style="flex:1;text-align:center;text-decoration:none">Batch mode</a><a class="btn" href="#selftest" style="flex:1;text-align:center;text-decoration:none">Self-test</a></div></div>
-<div class="set"><h4>${tr('install')}</h4>${DP?'<button class="btn" data-a="inst">Install LabGenie</button>':'<p><b>Android (Chrome):</b> menu → Install app.<br><b>iPhone (Safari):</b> Share → Add to Home Screen.</p>'}</div>
+<div class="set"><h4>${tr('install')}</h4>${STANDALONE()?'<p>✅ LabGenie is installed on this device.</p>':`<button class="calc" style="width:100%" data-a="inst">📲 Install LabGenie</button><p style="margin-top:8px;font-size:12.5px">${DP?'One tap — your browser will ask to confirm.':IOS?'On iPhone / iPad: Safari → Share → Add to Home Screen.':'Android: menu ⋮ → Install app · Desktop: install icon in the address bar.'}</p>`}</div>
 <div class="set"><h4>${tr('about')}</h4><p>LabGenie v${VER} · ${T.length} calculators · Includes formulas from Lab Calculator by ArRoni. ${DISC[S.disc]}</p>${window.SOPG&&SOPG.AUTHOR?SOPG.AUTHOR():''}</div>`};
 const BT=()=>T.filter(x=>x.F&&x.c);
 window.batch=function(){const x=by(S.bt)&&by(S.bt).c?by(S.bt):BT()[0];S.bt=x.id;return`<div class="hero"><h2 style="font-size:28px">Batch mode</h2></div><div class="fc o"><div class="fd"><label>Calculator</label><select data-bt="1">${BT().map(y=>`<option value="${y.id}"${y==x?' selected':''}>${y.t}</option>`).join('')}</select></div><div class="fd"><label>Paste a table — first row = column ids: ${x.F.map(f=>f.id).join(', ')}</label><textarea id="bta" placeholder="${x.F.filter(f=>!f.s).map(f=>f.id).join(',')}"></textarea></div><div class="fd"><button class="calc" style="width:100%" data-a="bgo">Calculate all rows</button></div></div><p class="nt">Values are read in conventional units (the units shown on each tool when SI is off).</p><div id="bo"></div>`};
