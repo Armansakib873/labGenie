@@ -23,7 +23,7 @@
     em: '', web: '', tag: '', logo: null, hdr: 'lab', gap: 42, himg: null,
     bc: 1, seal: 0, wm: 1, fs: 'n', flg: 'hl', pn: 1, col: 'bw', acc: '#1d3b8b',
     eor: 1, nts: 1, disc: 'Results relate only to the specimen received. Interpret in clinical context.',
-    pre: 'LG', seq: 0, prefill: 1, lib: [], pby: '', pw: ''
+    pre: 'LG', seq: 0, prefill: 1, fit: 1, lib: [], pby: '', pw: ''
   };
   R.lab = () => {
     if (!S.rxl) S.rxl = Object.assign({}, R.LAB_DEF, ST.get('rxl', {}));

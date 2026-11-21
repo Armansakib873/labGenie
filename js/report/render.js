@@ -82,6 +82,10 @@
 .rxp .rq-eo{text-align:center;margin-top:12px;font-size:9.8px;letter-spacing:.5px}
 .rxp .rq-ft{margin-top:8px;padding-top:5px;border-top:1px solid #111;display:flex;justify-content:space-between;flex-wrap:wrap;gap:2px 12px;font-size:9.6px;color:#222;position:relative;z-index:1}
 .rxp .rq-ft .rq-ds{flex-basis:100%;text-align:center;font-style:italic;color:#444}
+.rxp.d1 .rq-t td{padding:3.8px 6px}.rxp.d1 .rq-t .rq-ph td{padding:8px 6px 3px}.rxp.d1 .rq-t .rq-sb td{padding:4px 6px 1px}.rxp.d1 .rq-sg{margin-top:14px}.rxp.d1 .rq-cm{margin-top:7px}.rxp.d1 .rq-eo{margin-top:8px}
+.rxp.d2 .rq-t td,.rxp.d3 .rq-t td{padding:2.4px 6px}.rxp.d2 .rq-t th,.rxp.d3 .rq-t th{padding:4px 6px;font-size:11.5px}.rxp.d2 .rq-t .rq-ph td,.rxp.d3 .rq-t .rq-ph td{padding:6px 6px 2px;font-size:11.5px}.rxp.d2 .rq-t .rq-sb td,.rxp.d3 .rq-t .rq-sb td{padding:3px 6px 0}.rxp.d2 .rq-t .rq-rs{font-size:12px}
+.rxp.d2 .rq-sg,.rxp.d3 .rq-sg{margin-top:8px}.rxp.d2 .rq-si,.rxp.d3 .rq-si{height:40px}.rxp.d2 .rq-tr,.rxp.d3 .rq-tr{margin:6px 0 2px;min-height:34px}.rxp.d2 .rq-cm,.rxp.d3 .rq-cm{margin-top:5px;padding:2px 0 2px 8px}.rxp.d2 .rq-eo,.rxp.d3 .rq-eo{margin-top:5px}.rxp.d2 .rq-ib,.rxp.d3 .rq-ib{line-height:1.26}.rxp.d2 .rq-hd,.rxp.d3 .rq-hd{padding-bottom:6px;margin-bottom:7px}.rxp.d2 .rq-ft,.rxp.d3 .rq-ft{margin-top:5px}
+.rxp.d3 .rq-t td{padding:1.4px 6px}.rxp.d3 .rq-t .rq-rs{font-size:11.4px}.rxp.d3 .rq-hn{font-size:21px}.rxp.d3 .rq-hd .rq-lg{height:52px}.rxp.d3 .rq-tt{font-size:17px;padding:3px 22px}.rxp.d3 .rq-seal{width:74px;height:74px;font-size:7px}.rxp.d3 .rq-seal b{font-size:15px}.rxp.d3 .rq-himg{height:92px}
 @media print{#pr .rxp{width:210mm;height:296.6mm;padding:8mm 10.5mm 7mm;break-after:page;page-break-after:always}#pr .rxp:last-child{break-after:auto;page-break-after:auto}}
 `;
   const st = document.createElement('style');
@@ -183,22 +187,29 @@
     const z = img ? R.sig.printSize(img, 190, 50) : null;
     return `<div class="rq-ss"><div class="rq-si">${img ? `<img src="${img.u}" alt="" style="width:${z.w}px;height:${z.h}px"/>` : ''}</div><div class="rq-sl"></div><b>${E(s.n)}</b>${s.d ? `<div>${E(s.d)}</div>` : ''}${s.q ? `<div>${E(s.q)}</div>` : ''}${s.h ? `<div>${E(s.h)}</div>` : ''}${img ? `<div class="rq-es">Electronically signed${c.pt.deliv ? ' · ' + E(fdt(c.pt.deliv)) : ''}</div>` : ''}</div>`;
   };
-  const tail = (c, pg, lab, rows) => {
+  /* tail blocks: "last" = comment, notes, legend, signatures, end line;
+     "mid" = continued note, legend, signatures (signatures repeat on every sheet) */
+  const tails = (c, pg, lab, rows) => {
     const sx = R.sexOf(c), anyF = rows.some(x => !x.h && !x.sub && R.flag(x, sx).f), anyC = rows.some(x => !x.h && !x.sub && R.flag(x, sx).c);
     const notes = lab.nts ? [...new Set(pg.rows.filter(x => x.h && x.note && rows.includes(x)).map(x => x.note))] : [];
     const cm = String(pg.cm || '').trim();
     const legend = anyF ? `<div class="rq-lgd">${lab.flg === 'ar' ? '↑ High · ↓ Low' : 'H High · L Low'} · A Abnormal${anyC ? (lab.flg === 'ar' ? ' · ↑↑/↓↓ Critical value' : ' · * Critical value') : ''}</div>` : '';
     const sg = c.sig, sig = sg.l.on || sg.r.on || lab.seal ? `<div class="rq-sg">${sigSlot(sg.l, c)}<div class="rq-sc">${lab.seal ? '<div class="rq-seal"><span>MACHINE</span><span>GENERATED</span><b>✓</b><span>COPY</span></div>' : ''}</div>${sigSlot(sg.r, c)}</div>` : '';
-    return `<div class="rq-tail">${cm ? `<div class="rq-cm"><b>Comment / Interpretation</b>${E(cm)}</div>` : ''}${notes.length ? `<div class="rq-nt"><b>Notes:</b> ${notes.map(E).join(' ')}</div>` : ''}${legend}${sig}${lab.eor ? '<div class="rq-eo">*** End of report ***</div>' : ''}</div>`;
+    return {
+      last: `<div class="rq-tail">${cm ? `<div class="rq-cm"><b>Comment / Interpretation</b>${E(cm)}</div>` : ''}${notes.length ? `<div class="rq-nt"><b>Notes:</b> ${notes.map(E).join(' ')}</div>` : ''}${legend}${sig}${lab.eor ? '<div class="rq-eo">*** End of report ***</div>' : ''}</div>`,
+      mid: `<div class="rq-tail"><div class="rq-ct">Continued on next page…</div>${legend}${sig}</div>`
+    };
   };
   const footer = (c, lab, pg) => {
     const L = [lab.pby ? `<span>Printed by: <b>${E(lab.pby)}</b></span>` : '', `<span>Printed: <b>${E(nowStr())}</b></span>`, lab.pn ? '<span>Page <b>{{P}}</b> of <b>{{N}}</b></span>' : '', lab.pw ? `<span>Powered by: <b>${E(lab.pw)}</b></span>` : ''].filter(Boolean);
     return `<div class="rq-ft">${L.join('')}${lab.disc ? `<div class="rq-ds">${E(lab.disc)}</div>` : ''}</div>`;
   };
-  const sheetOpen = (lab, pg) => {
-    const fz = { s: '11.8px', n: '12.5px', l: '13.4px' }[lab.fs] || '12.5px';
+  // density 0 = normal … 3 = tightest (used automatically to fit a page on one sheet)
+  const FZ_OFF = [0, 0.5, 0.9, 1.4];
+  const sheetOpen = (lab, pg, d) => {
+    const base = { s: 11.8, n: 12.5, l: 13.4 }[lab.fs] || 12.5, fz = (base - FZ_OFF[d || 0]).toFixed(1) + 'px';
     const wm = lab.wm && pg.st && pg.st !== 'Completed' ? `<div class="rq-wm">${E(String(pg.st).split(' ')[0].toUpperCase())}</div>` : '';
-    return `<div class="rxp${lab.col === 'acc' ? ' acc' : ''}" style="--fz:${fz};${lab.col === 'acc' ? '--ac:' + E(lab.acc) : ''}">${wm}`;
+    return `<div class="rxp${lab.col === 'acc' ? ' acc' : ''}${d ? ' d' + d : ''}" style="--fz:${fz};${lab.col === 'acc' ? '--ac:' + E(lab.acc) : ''}">${wm}`;
   };
   const thead = '<thead><tr><th class="rq-c1">Test Name</th><th class="rq-c2">Result</th><th class="rq-c3">Flag</th><th class="rq-c4">Unit</th><th>Reference Range</th></tr></thead>';
 
@@ -209,50 +220,78 @@
     probe.innerHTML = html;
     return probe.firstElementChild;
   };
-  R.pageSheets = (c, pg, lab) => {
-    const rows = R.printable(pg);
-    const top = c => header(c, lab) + infoBox(c, pg) + titleRow(c, pg, lab, 0);
-    const topC = header(c, lab) + infoBox(c, pg) + titleRow(c, pg, lab, 1);
-    const rowsH = rows.map(x => rowHTML(x, c, pg, lab));
-    const tl = tail(c, pg, lab, rows), ft = footer(c, lab, pg);
-    // measure everything once on a single tall sheet
-    const el = measure(sheetOpen(lab, pg).replace('class="rxp', 'class="rxp rxm') + top(c) + `<table class="rq-t">${thead}<tbody>${rowsH.join('')}</tbody></table><div class="rq-ct">Continued on next page…</div>` + tl + ft + '</div>');
-    const rect = e => e.getBoundingClientRect(), sR = rect(el), tb = el.querySelector('table'), th = el.querySelector('thead'), trs = [...el.querySelectorAll('tbody tr')];
-    const ctE = el.querySelector('.rq-ct'), tlE = el.querySelector('.rq-tail'), ftE = el.querySelector('.rq-ft');
+  const sum = (a, h) => a.reduce((s, i) => s + h[i], 0);
+  const isHead = r => r.h || r.sub;
+
+  /* one layout attempt at density d → array of row-index chunks (one per sheet) */
+  const plan = (c, pg, lab, d, rows, rowsH, T, ft) => {
+    const top0 = header(c, lab) + infoBox(c, pg) + titleRow(c, pg, lab, 0);
+    const el = measure(sheetOpen(lab, pg, d).replace('class="rxp', 'class="rxp rxm') + top0 + `<table class="rq-t">${thead}<tbody>${rowsH.join('')}</tbody></table>` + T.mid + T.last + ft + '</div>');
+    const rect = e => e.getBoundingClientRect(), sR = rect(el), th = el.querySelector('thead'), trs = [...el.querySelectorAll('tbody tr')], tl = el.querySelectorAll('.rq-tail'), ftE = el.querySelector('.rq-ft');
     const topH = rect(th).top - sR.top - PT, theadH = rect(th).height, rh = trs.map(t => rect(t).height);
-    const contH = rect(ctE).bottom - rect(tb).bottom, tailH = rect(tlE).bottom - rect(ctE).bottom + 4, ftH = rect(ftE).bottom - rect(tlE).bottom;
-    const avail = SH - PT - PB - topH - theadH - ftH - 6;
+    const midH = rect(tl[0]).height, lastH = rect(tl[1]).height, ftH = rect(ftE).bottom - rect(tl[1]).bottom;
+    probe.innerHTML = '';
+    const room = SH - PT - PB - topH - theadH - ftH - 8, aMid = room - midH, aLast = room - lastH;
+    // groups = one panel (heading + its rows); rows before the first heading form their own group
+    let gid = 0;
+    const gOf = rows.map((x, i) => (x.h && i > 0 ? ++gid : gid)), groups = [];
+    rows.forEach((x, i) => (groups[gOf[i]] = groups[gOf[i]] || []).push(i));
     const chunks = [];
-    let cur = [], used = 0;
-    rows.forEach((x, i) => {
-      if (cur.length && used + rh[i] > avail - contH) {
-        // keep headings with the rows they introduce
-        const carry = [];
-        while (cur.length > 1 && (rows[cur[cur.length - 1]].h || rows[cur[cur.length - 1]].sub)) carry.unshift(cur.pop());
-        chunks.push(cur);
-        cur = carry;
-        used = carry.reduce((a, j) => a + rh[j], 0);
-      }
-      cur.push(i);
-      used += rh[i];
+    let cur = [];
+    const flush = () => { if (cur.length) chunks.push(cur); cur = []; };
+    const rowSplit = (idx, limit) => {
+      // split an oversized panel row by row, keeping headings with the rows they introduce
+      idx.forEach(i => {
+        if (cur.length && sum(cur, rh) + rh[i] > limit) {
+          const carry = [];
+          while (cur.length > 1 && isHead(rows[cur[cur.length - 1]])) carry.unshift(cur.pop());
+          flush();
+          cur = carry;
+        }
+        cur.push(i);
+      });
+    };
+    groups.filter(Boolean).forEach(g => {
+      const gh = sum(g, rh);
+      if (gh <= aMid) { if (cur.length && sum(cur, rh) + gh > aMid) flush(); cur.push(...g); }
+      else rowSplit(g, aMid);
     });
-    // last chunk must also hold the comment / signature block
-    if (used + tailH > avail) {
+    // the last sheet also carries the comment / notes: move whole panels (or rows) forward until it fits
+    for (let guard = 0; guard < 40 && sum(cur, rh) > aLast; guard++) {
       const move = [];
-      if (cur.length > 2 && tailH < avail) {
-        let freed = 0;
-        while (cur.length > 1 && used - freed + tailH > avail) { const j = cur.pop(); move.unshift(j); freed += rh[j]; }
-        while (cur.length > 1 && (rows[cur[cur.length - 1]].h || rows[cur[cur.length - 1]].sub)) move.unshift(cur.pop());
+      const gs = [...new Set(cur.map(i => gOf[i]))];
+      if (gs.length > 1) {
+        while (sum(cur, rh) > aLast && new Set(cur.map(i => gOf[i])).size > 1) {
+          const lg = gOf[cur[cur.length - 1]];
+          while (cur.length && gOf[cur[cur.length - 1]] === lg) move.unshift(cur.pop());
+        }
+      } else {
+        while (cur.length > 1 && sum(cur, rh) > aLast) move.unshift(cur.pop());
+        while (cur.length > 1 && isHead(rows[cur[cur.length - 1]])) move.unshift(cur.pop());
       }
-      chunks.push(cur);
+      if (!move.length) break;
+      flush();
       cur = move;
     }
-    chunks.push(cur);
-    probe.innerHTML = '';
-    return chunks.map((idx, k) => {
-      const last = k === chunks.length - 1;
+    flush();
+    if (!chunks.length) chunks.push([]);
+    return chunks;
+  };
+
+  R.pageSheets = (c, pg, lab) => {
+    const rows = R.printable(pg), rowsH = rows.map(x => rowHTML(x, c, pg, lab)), T = tails(c, pg, lab, rows), ft = footer(c, lab, pg);
+    const levels = lab.fit === 0 ? [0] : [0, 1, 2, 3];
+    let best = null, bd = 0;
+    for (const d of levels) {
+      const p = plan(c, pg, lab, d, rows, rowsH, T, ft);
+      if (!best || p.length < best.length) { best = p; bd = d; }
+      if (p.length === 1) break;
+    }
+    const top0 = header(c, lab) + infoBox(c, pg) + titleRow(c, pg, lab, 0), top1 = header(c, lab) + infoBox(c, pg) + titleRow(c, pg, lab, 1);
+    return best.map((idx, k) => {
+      const last = k === best.length - 1;
       const body = idx.length ? `<table class="rq-t">${thead}<tbody>${idx.map(i => rowsH[i]).join('')}</tbody></table>` : '';
-      return sheetOpen(lab, pg) + (k ? topC : top(c)) + body + (last ? tl : '<div class="rq-ct">Continued on next page…</div>') + ft + '</div>';
+      return sheetOpen(lab, pg, bd) + (k ? top1 : top0) + body + (last ? T.last : T.mid) + ft + '</div>';
     });
   };
 
