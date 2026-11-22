@@ -58,8 +58,7 @@
 .rxp .rq-t .rq-sb td{padding:7px 6px 3px;font-weight:700;font-style:italic;text-decoration:underline;border-bottom:0}
 .rxp .rq-t .rq-rs{font-size:12.6px}
 .rxp .rq-t .rq-ab .rq-rs,.rxp .rq-t .rq-ab .rq-fl{font-weight:700}
-.rxp .rq-t .rq-cr td{background:var(--acl)}
-.rxp .rq-t .rq-cr .rq-rs,.rxp .rq-t .rq-cr .rq-fl{font-weight:800;text-decoration:underline}
+.rxp .rq-t .rq-cr .rq-rs,.rxp .rq-t .rq-cr .rq-fl{font-weight:800}
 .rxp.acc .rq-t .rq-ab .rq-rs,.rxp.acc .rq-t .rq-ab .rq-fl{color:#b3261e}
 .rxp .rq-t .rq-fl{white-space:nowrap}
 .rxp .rq-t .rq-rg{font-size:11.5px}
@@ -161,6 +160,8 @@
     const opt = [['Patient Type', pt.pst], ['Bed / Ward', pt.bed], ['Phone', pt.ph]].filter(a => a[1]);
     opt.forEach(a => cells.push(cell(a[0], a[1])));
     while (cells.length % 3) cells.push('<div></div>');
+    const tl = R.testsLine(pg);
+    if (tl) cells.push(cell('Tests', tl, 1, 1));
     cells.push(cell('Referred By', pt.rb, 0, 1));
     return `<div class="rq-ib">${cells.join('')}</div>`;
   };
@@ -173,8 +174,7 @@
   const rowHTML = (x, c, pg, lab) => {
     const sx = R.sexOf(c);
     if (x.h) {
-      const psp = pg.mix ? R.specLabel(x.psp || (x.acc || [])[0]) : '';
-      return `<tr class="rq-ph"><td colspan="5">${E(x.n)}${x.mn && lab.nts ? `<i>${E(x.mn)}</i>` : ''}${psp ? `<em>${E(psp)}</em>` : ''}</td></tr>`;
+      return `<tr class="rq-ph"><td colspan="5">${E(R.panelTitle(x.n))}${x.mn && lab.nts ? `<i>${E(x.mn)}</i>` : ''}</td></tr>`;
     }
     if (x.sub) return `<tr class="rq-sb"><td colspan="5">${E(x.n)}</td></tr>`;
     const f = R.flag(x, sx), ft = R.flagTxt(f, lab);
@@ -317,7 +317,7 @@
       for (let i = 0; i < info.length; i += 3) ir.push('<tr>' + [0, 1, 2].map(k => (info[i + k] ? `<td width="33%" style="padding:1pt 5pt;font-size:9.5pt">${info[i + k][0]} : <b>${E(info[i + k][1] || '')}</b></td>` : '<td></td>')).join('') + '</tr>');
       const td = (t, b, w) => `<td${w ? ` width="${w}"` : ''} style="border-bottom:.5pt dotted #777;padding:3pt 4pt;${b ? 'font-weight:bold' : ''}">${t}</td>`;
       const body = rows.map(x => {
-        if (x.h) return `<tr><td colspan="5" style="padding-top:8pt;border-bottom:1pt solid #000"><b>${E(x.n).toUpperCase()}</b>${x.mn && lab.nts ? ` <i style="font-size:8pt">${E(x.mn)}</i>` : ''}</td></tr>`;
+        if (x.h) return `<tr><td colspan="5" style="padding-top:8pt;border-bottom:1pt solid #000"><b>${E(R.panelTitle(x.n)).toUpperCase()}</b>${x.mn && lab.nts ? ` <i style="font-size:8pt">${E(x.mn)}</i>` : ''}</td></tr>`;
         if (x.sub) return `<tr><td colspan="5" style="padding-top:5pt"><b><i><u>${E(x.n)}</u></i></b></td></tr>`;
         const f = R.flag(x, sx);
         return '<tr>' + td(E(x.n), 0, '38%') + td(E(x.r), f.f) + td(E(R.flagTxt(f, lab)), 1) + td(E(x.u)) + td(E(R.ref(x, sx)).replace(/\s*\|\s*/g, '<br/>')) + '</tr>';
@@ -330,7 +330,7 @@
       };
       const head = lab.hdr === 'gap' ? `<div style="height:${Math.round((+lab.gap || 40) * 2.83)}pt"></div>` : lab.hdr === 'img' && lab.himg ? `<p align="center"><img src="${lab.himg.u}" width="640"/></p>` : `<table width="100%" style="border-bottom:2pt solid #000"><tr>${lab.logo ? `<td width="90"><img src="${lab.logo.u}" height="60"/></td>` : ''}<td align="${lab.logo ? 'left' : 'center'}"><span style="font:bold 20pt Georgia">${E(L.n || 'Clinical Laboratory')}</span>${lab.tag ? `<br/><i style="font-size:9pt">${E(lab.tag)}</i>` : ''}<br/><span style="font-size:9pt">${E(L.a || '')}${L.t ? ' · Tel ' + E(L.t) : ''}${lab.em ? ' · ' + E(lab.em) : ''}</span></td></tr></table>`;
       const ttl = pg.ttl || (pg.dept ? pg.dept + ' Report' : 'Laboratory Report');
-      return `${head}<table width="100%" style="border:1.2pt solid #000;margin-top:8pt;border-collapse:collapse">${ir.join('')}<tr><td colspan="3" style="padding:1pt 5pt;font-size:9.5pt">Referred By : <b>${E(c.pt.rb)}</b></td></tr></table>
+      return `${head}<table width="100%" style="border:1.2pt solid #000;margin-top:8pt;border-collapse:collapse">${ir.join('')}${R.testsLine(pg) ? `<tr><td colspan="3" style="padding:1pt 5pt;font-size:9.5pt">Tests : <b>${E(R.testsLine(pg))}</b></td></tr>` : ''}<tr><td colspan="3" style="padding:1pt 5pt;font-size:9.5pt">Referred By : <b>${E(c.pt.rb)}</b></td></tr></table>
 <table width="100%" style="margin-top:8pt"><tr><td width="30%">${lab.bc && code ? `<img src="${R.barcodePng(code)}" width="150" height="30"/><br/><span style="font:7pt Courier New">${E(code)}</span>` : ''}</td><td width="40%" align="center" style="border:1.5pt solid #000;padding:5pt;font:bold 15pt Arial">${E(ttl)}</td><td width="30%" align="right" style="font-size:9pt">${R.pageSpecLabel(pg) ? 'Sample type: <b>' + E(R.pageSpecLabel(pg)) + '</b>' : ''}</td></tr></table>
 ${pg.mn ? `<p align="center" style="font:italic bold 9.5pt Arial">${E(pg.mn)}</p>` : ''}
 <table width="100%" style="margin-top:8pt;border-collapse:collapse"><tr>${th('Test Name')}${th('Result')}${th('Flag')}${th('Unit')}${th('Reference Range')}</tr>${body}</table>

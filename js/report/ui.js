@@ -78,10 +78,10 @@ ${c.demo ? '<div class="rx-demo"><span><b>Demo report.</b> Every field is editab
   const secPage = () => {
     const pg = R.page(), cf = R.conflicts(pg), sp = R.SPEC_BY[pg.sp], u1 = R.units(pg)[0];
     const hint = sp ? `<p class="rx-hint">🧪 ${E(sp[2] || sp[1])}${pg.spAuto && u1 ? ' · auto-selected for ' + E(u1.row.n) : ''}</p>` : '';
-    const warn = cf.length ? `<div class="rx-warn bad"><b>Specimen conflict.</b> ${cf.map(u => `“${E(u.row.n)}” needs ${E(R.specLabel(u.row.acc[0]))}`).join('; ')}. One report page should carry one specimen type.<div class="rx-row"><button class="btn" data-ra="splitpg">Move to separate pages</button><button class="btn" data-ra="seg" data-k="pg.mix" data-v="1">Allow mixed on this page</button></div></div>` : '';
+    const psec = R.pageSec(pg), warn = cf.length ? `<div class="rx-warn bad"><b>Wrong page.</b> ${cf.map(u => R.rowSec(u.row) && psec && R.rowSec(u.row) !== psec ? `“${E(u.row.n)}” belongs to ${E(R.rowSec(u.row))}` : `“${E(u.row.n)}” needs ${E(R.specLabel(u.row.acc[0]))}`).join('; ')}. Each report page carries one department and one specimen type.<div class="rx-row"><button class="btn" data-ra="splitpg">Move to separate pages</button></div></div>` : '';
     return sec('spec', 'Page setup & specimen', 'Department, specimen, status and title',
       `<div class="rx-g">${specSelect(pg)}${pg.sp === 'other' ? fld('pg.spx', 'Specimen (type it)') : ''}</div>${hint}${warn}
-<div class="rx-g">${chk('pg.mix', 'Allow mixed specimens on this page (specimen printed beside each panel)')}${fld('pg.dept', 'Department', { h: 1, list: 'rxo-dept' })}${sel('pg.st', 'Report status', STATUS.map(s => [s, s]), { h: 1 })}${fld('pg.ttl', 'Report title (optional)', { ph: (pg.dept || 'Laboratory') + ' Report' })}${fld('pg.mn', 'Method note under title (optional)')}</div>`);
+<div class="rx-g">${fld('pg.dept', 'Department', { h: 1, list: 'rxo-dept' })}${sel('pg.st', 'Report status', STATUS.map(s => [s, s]), { h: 1 })}${fld('pg.ttl', 'Report title (optional)', { ph: (pg.dept || 'Laboratory') + ' Report' })}${fld('pg.mn', 'Method note under title (optional)')}</div>`);
   };
 
   const plist = () => {
@@ -92,8 +92,8 @@ ${c.demo ? '<div class="rx-demo"><span><b>Demo report.</b> Every field is editab
     else if (cat === 'all') ps = R.PROF;
     else ps = R.PROF.filter(p => p.cat === cat);
     let h = ps.map(p => {
-      const on = R.hasProfile(pg, p.id), ok = !pg.sp || pg.mix || !units || p.acc.includes(pg.sp);
-      return `<button class="rx-pc${on ? ' on' : ''}${ok ? '' : ' x'}" data-ra="padd" data-id="${p.id}"><b>${E(p.n)}</b><small>${p.t.filter(t => t[0] !== '#').length} tests · ${E(p.spl || R.specLabel(p.acc[0]))}</small>${on ? '<i>✓ on this page</i>' : ok ? '' : '<i class="w">different specimen</i>'}</button>`;
+      const psec = R.pageSec(pg), on = R.hasProfile(pg, p.id), okSp = !pg.sp || !units || p.acc.includes(pg.sp), okSec = !psec || R.secOf(p) === psec, ok = okSp && okSec;
+      return `<button class="rx-pc${on ? ' on' : ''}${ok ? '' : ' x'}" data-ra="padd" data-id="${p.id}"><b>${E(p.n)}</b><small>${p.t.filter(t => t[0] !== '#').length} tests · ${E(p.spl || R.specLabel(p.acc[0]))}</small>${on ? '<i>✓ on this page</i>' : ok ? '' : `<i class="w">${okSec ? 'different specimen' : E(R.secOf(p)) + ' page'}</i>`}</button>`;
     }).join('');
     if (q) {
       const ts = R.TESTS.filter(x => x.t[1].toLowerCase().includes(q) || x.t[0] === q).slice(0, 14);
@@ -348,36 +348,38 @@ ${c.demo ? '<div class="rx-demo"><span><b>Demo report.</b> Every field is editab
     const row = R.mkRow(hit.t, hit.p, R.lab().prefill);
     row.acc = hit.p.acc.slice();
     pg.rows = pg.rows.filter(x => x.h || x.sub || x.n || x.r);
-    if (!R.units(pg).length && (!pg.sp || pg.spAuto)) { pg.sp = row.acc[0]; pg.spAuto = 1; if (!pg.dept) pg.dept = hit.p.dept; }
+    if (!R.units(pg).length && (!pg.sp || pg.spAuto)) { pg.sp = row.acc[0]; pg.spAuto = 1; if (!pg.dept) pg.dept = R.secOf(hit.p); }
     pg.rows.push(row);
     S.rxu.q = '';
     R.auto(S.rx); R.save(); R.redraw(); hap();
     toast(hit.t[1] + ' added');
   };
   // returns true if added right away; otherwise opens the conflict sheet
-  const place = (acc, name, add, kind, id) => {
-    const c = S.rx, pg = R.page(), units = R.units(pg);
-    if (!units.length || !pg.sp || pg.sp === 'other' || pg.mix || acc.includes(pg.sp)) { add(pg, pg.mix ? acc[0] : ''); return; }
-    const common = R.commonSpec(units.map(u => u.row.acc).concat([acc])), other = c.pages.findIndex((p, i) => i !== c.cur && !p.mix && p.sp && acc.includes(p.sp));
-    sheet(`<h3>Specimen conflict</h3><p class="rx-sub"><b>${E(name)}</b> is tested on <b>${E(acc.map(a => R.specLabel(a)).join(' / '))}</b>, but this page is <b>${E(R.specLabel(pg.sp, pg.spx))}</b>. Each report page should carry one specimen type.</p><div class="rx-menu">
+  const place = (acc, name, add, kind, id, sec) => {
+    const c = S.rx, pg = R.page(), units = R.units(pg), psec = R.pageSec(pg);
+    const secOk = !psec || !sec || psec === sec, spOk = !units.length || !pg.sp || pg.sp === 'other' || acc.includes(pg.sp);
+    if (secOk && spOk) { add(pg, ''); return; }
+    const fits = p => (!R.pageSec(p) || !sec || R.pageSec(p) === sec) && (!R.units(p).length || !p.sp || p.sp === 'other' || acc.includes(p.sp));
+    const common = secOk ? R.commonSpec(units.map(u => u.row.acc).concat([acc])) : [], other = c.pages.findIndex((p, i) => i !== c.cur && R.units(p).length && fits(p));
+    const why = !secOk ? `<b>${E(name)}</b> is a <b>${E(sec)}</b> test, but this is a <b>${E(psec)}</b> page. Each report page carries one department only.` : `<b>${E(name)}</b> is tested on <b>${E(acc.map(a => R.specLabel(a)).join(' / '))}</b>, but this page is <b>${E(R.specLabel(pg.sp, pg.spx))}</b>. Each report page carries one specimen type only.`;
+    sheet(`<h3>${secOk ? 'Different specimen' : 'Different department'}</h3><p class="rx-sub">${why}</p><div class="rx-menu">
 ${common.length ? `<button data-ra="cfx" data-o="switch" data-sp="${common[0]}" data-kind="${kind}" data-id="${E(id)}">⇄ Switch page to ${E(R.specLabel(common[0]))} (accepted by every test here)</button>` : ''}
 ${other >= 0 ? `<button data-ra="cfx" data-o="page" data-pg="${other}" data-kind="${kind}" data-id="${E(id)}">→ Add to page “${E(c.pages[other].nm)}” (${E(R.specLabel(c.pages[other].sp))})</button>` : ''}
 <button class="pri" data-ra="cfx" data-o="new" data-kind="${kind}" data-id="${E(id)}">＋ Add on a new page (recommended)</button>
-<button data-ra="cfx" data-o="mix" data-kind="${kind}" data-id="${E(id)}">⚠ Add anyway — mixed specimens on this page</button>
 <button data-ra="cfxno">Cancel</button></div>`);
   };
   const addFns = (kind, id) => {
-    if (kind === 'p') { const p = R.PROF_BY[id]; return { acc: p.acc, name: p.n, add: (pg, psp) => doAdd(pg, p, psp) }; }
-    const hit = R.TEST_BY_NAME[id]; return { acc: hit.p.acc, name: hit.t[1], add: pg => doAddTest(pg, hit) };
+    if (kind === 'p') { const p = R.PROF_BY[id]; return { acc: p.acc, name: p.n, sec: R.secOf(p), add: (pg, psp) => doAdd(pg, p, psp) }; }
+    const hit = R.TEST_BY_NAME[id]; return { acc: hit.p.acc, name: hit.t[1], sec: R.secOf(hit.p), add: pg => doAddTest(pg, hit) };
   };
   X.padd = d => {
     const p = R.PROF_BY[d.id], pg = R.page();
     if (!p) return;
-    const go = () => place(p.acc, p.n, (pg2, psp) => doAdd(pg2, p, psp), 'p', p.id);
+    const go = () => place(p.acc, p.n, (pg2, psp) => doAdd(pg2, p, psp), 'p', p.id, R.secOf(p));
     if (R.hasProfile(pg, p.id)) { S.cb = go; sheet(`<h3>${E(p.n)} is already on this page</h3><p class="rx-sub">Add it a second time (e.g. a repeat sample)?</p><div class="ac"><button data-a="no">Cancel</button><button data-a="yes">Add again</button></div>`); return; }
     go();
   };
-  X.tadd = d => { const hit = R.TEST_BY_NAME[d.k]; if (!hit) return; place(hit.p.acc, hit.t[1], pg => doAddTest(pg, hit), 't', d.k); };
+  X.tadd = d => { const hit = R.TEST_BY_NAME[d.k]; if (!hit) return; place(hit.p.acc, hit.t[1], pg => doAddTest(pg, hit), 't', d.k, R.secOf(hit.p)); };
   X.tcust = () => { const pg = R.page(), n = S.rxu.q.trim(); if (!n) return; pg.rows.push({ n, r: '', u: '', g: '' }); S.rxu.q = ''; R.save(); R.redraw(); setTimeout(() => { const l = document.querySelectorAll('#rx [data-c="r"]'); l.length && l[l.length - 1].focus(); }, 30); };
   X.cfxno = () => closeS();
   X.cfx = d => {
@@ -386,7 +388,6 @@ ${other >= 0 ? `<button data-ra="cfx" data-o="page" data-pg="${other}" data-kind
     if (d.o === 'switch') { const pg = R.page(); pg.sp = d.sp; pg.spAuto = 0; f.add(pg, ''); toast('Page specimen → ' + R.specLabel(d.sp)); }
     else if (d.o === 'page') { c.cur = +d.pg; f.add(R.page(), ''); }
     else if (d.o === 'new') { const p = R.newPage('Page ' + (c.pages.length + 1)); c.pages.push(p); c.cur = c.pages.length - 1; f.add(p, ''); }
-    else if (d.o === 'mix') { const pg = R.page(); pg.mix = 1; f.add(pg, f.acc[0]); }
   };
   X.pcat = d => { S.rxu.cat = d.k; S.rxu.q = ''; saveU(); R.redraw(); };
   X.splitpg = () => {
@@ -395,7 +396,7 @@ ${other >= 0 ? `<button data-ra="cfx" data-o="page" data-pg="${other}" data-kind
     for (let g = 0; g < 50; g++) {
       const u = R.conflicts(from)[0];
       if (!u) break;
-      const k = R.pageFor(c, u.row.acc, fi);
+      const k = R.pageFor(c, u.row.acc, fi, '', R.rowSec(u.row));
       R.moveUnit(from, u.i, c.pages[k]);
       moved++;
     }
@@ -404,7 +405,7 @@ ${other >= 0 ? `<button data-ra="cfx" data-o="page" data-pg="${other}" data-kind
   X.fixsp = d => {
     const c = S.rx, from = c.pages[+d.pg], u = from && from.rows[+d.i];
     if (!u || !u.acc) return;
-    const k = R.pageFor(c, u.acc, +d.pg);
+    const k = R.pageFor(c, u.acc, +d.pg, '', R.rowSec(u));
     R.moveUnit(from, +d.i, c.pages[k]);
     c.cur = k; R.save(); R.redraw(); toast('Moved “' + u.n + '” to page ' + c.pages[k].nm);
   };
@@ -559,7 +560,7 @@ ${leg ? `<p class="rx-lb">Older single-page reports (${leg})</p>${S.rps.map((x, 
     if (R.store('rximg', S.rximg) && R.store('rxs', S.rxs)) { toast(i >= 0 ? 'Case updated' : 'Case saved'); R.audit('save report'); }
     if ($1('#ov.on')) X.cases();
   };
-  const openCase = c => { S.rx = c; S.rx.cur = 0; S.rxsel = null; ST.set('rxsel', null); closeS(); R.auto(S.rx); R.saveNow(); R.redraw(); scrollTo(0, 0); };
+  const openCase = c => { (c.pages || []).forEach(p => { p.mix = 0; }); S.rx = c; S.rx.cur = 0; S.rxsel = null; ST.set('rxsel', null); closeS(); R.auto(S.rx); R.saveNow(); R.redraw(); scrollTo(0, 0); };
   X.copen = d => { const x = S.rxs[+d.i]; if (!x) return; openCase(unpack(x.c)); toast('Opened — edit, then Save to update'); };
   X.cdup = d => { const x = S.rxs[+d.i]; if (!x) return; const c = unpack(x.c); c.id = R.uid(); c.demo = 0; openCase(c); toast('Opened as a new copy'); };
   X.cdel = d => { const i = +d.i, [x] = S.rxs.splice(i, 1); R.store('rxs', S.rxs); X.cases(); toast('Case deleted', () => { S.rxs.splice(i, 0, x); R.store('rxs', S.rxs); X.cases(); }); pruneLater(); };

@@ -86,7 +86,7 @@
     if (p.nocm && !pg.cmMan) { pg.acm = 0; pg.cm = ''; }
     if (first) {
       if (!pg.sp || pg.spAuto) { pg.sp = p.acc[0]; pg.spAuto = 1; }
-      if (!pg.dept) pg.dept = p.dept;
+      if (!pg.dept) pg.dept = R.secOf(p);
       if (/^Page \d+$/.test(pg.nm)) pg.nm = p.cat === 'Urine & stool' ? (p.acc.includes('stool') ? 'Stool' : 'Urine') : p.cat === 'Fluids' ? p.n.split(' ')[0] : p.cat;
     }
   };
@@ -229,7 +229,58 @@
     pg.rows.forEach((x, i) => { if (x.acc && x.acc.length && !x.sub) o.push({ i, row: x, single: !x.h }); });
     return o;
   };
-  R.conflicts = pg => (pg.mix || !pg.sp || pg.sp === 'other' ? [] : R.units(pg).filter(u => !u.row.acc.includes(pg.sp)));
+  /* one department per page: profiles are grouped into report sections by category
+     (hormones and tumour markers are run and reported by Biochemistry) */
+  R.SECT = { Biochemistry: 'Biochemistry', Hormones: 'Biochemistry', 'Tumor markers': 'Biochemistry', Hematology: 'Hematology', Coagulation: 'Coagulation', Serology: 'Serology', 'Urine & stool': 'Clinical Pathology', Fluids: 'Clinical Pathology', Microbiology: 'Microbiology' };
+  R.secOf = p => (p ? R.SECT[p.cat] || p.dept || p.cat || '' : '');
+  R.rowSec = x => (x && x.pid && R.PROF_BY && R.PROF_BY[x.pid] ? R.secOf(R.PROF_BY[x.pid]) : '');
+  R.pageSec = pg => { for (const u of R.units(pg)) { const s = R.rowSec(u.row); if (s) return s; } return ''; };
+  R.conflicts = pg => {
+    const sec = R.pageSec(pg), spOk = !pg.sp || pg.sp === 'other';
+    return R.units(pg).filter(u => (!spOk && !u.row.acc.includes(pg.sp)) || (sec && R.rowSec(u.row) && R.rowSec(u.row) !== sec));
+  };
+  /* short test name for the header box: "Free T4 (FT4)" → FT4, "TSH (3rd generation)" → TSH */
+  R.shortName = n => {
+    n = String(n || '').trim();
+    const m = n.match(/^(.*?)\s*\(([^()]*)\)\s*$/);
+    if (!m) return n;
+    const pre = m[1].trim(), inn = m[2].trim();
+    const ac = s => /^[^\s]{2,10}$/.test(s) && /[A-Z]/.test(s) && !/^[A-Z][a-z]+$/.test(s);
+    if (ac(inn)) return inn;
+    const first = inn.split(/\s*\/\s*/)[0];
+    if (inn.includes('/') && ac(first)) return first;
+    return pre || n;
+  };
+  /* panel title without the list of tests: "Thyroid Profile (FT3, FT4, TSH)" → "Thyroid Profile" */
+  R.panelTitle = n => String(n || '').replace(/\s*\(([^()]*)\)\s*$/, (all, inn) => {
+    const [list, ...rest] = inn.split('—');
+    if (!/,/.test(list) && (list.match(/\//g) || []).length < 2) return all;
+    const tail = rest.join('—').trim();
+    return tail ? ` (${tail})` : '';
+  });
+  /* tests printed on a page, short names (unticked rows are left out) */
+  R.testsLine = (pg, rows) => {
+    rows = rows || (R.printable ? R.printable(pg) : pg.rows);
+    const out = [];
+    let i = 0;
+    while (i < rows.length) {
+      const x = rows[i];
+      if (x.h) {
+        const pn = R.panels(pg).find(p => p.row === x), all = pn ? pg.rows.slice(pn.i + 1, pn.end).filter(r => !r.sub && !r.h).length : 0;
+        let j = i + 1; const mine = [];
+        while (j < rows.length && !rows[j].h) { if (!rows[j].sub) mine.push(rows[j]); j++; }
+        if (mine.length > 4 && mine.length === all) out.push(R.panelTitle(x.n) === x.n ? R.shortName(x.n) : R.panelTitle(x.n));
+        else out.push(...mine.map(r => r.n));
+        i = j; continue;
+      }
+      if (!x.sub) out.push(x.n);
+      i++;
+    }
+    const sh = out.map(R.shortName);
+    /* a short name that repeats or hides inside another one (Bilirubin / Bilirubin, Plasma Glucose / Fasting Plasma Glucose) keeps its full name */
+    const amb = (s, k) => s !== out[k] && sh.some((o, j) => j !== k && (o === s || o.toLowerCase().includes(s.toLowerCase())));
+    return [...new Set(sh.map((s, k) => (amb(s, k) ? out[k] : s)))].join(', ');
+  };
   /* move one unit (panel with its rows, or a single test) to another page */
   R.moveUnit = (from, i, to) => {
     const x = from.rows[i];
@@ -241,11 +292,12 @@
     to.rows.push(...rows);
   };
   /* find (or create) a page whose specimen suits `acc` */
-  R.pageFor = (c, acc, exceptIdx, nm) => {
-    let k = c.pages.findIndex((p, i) => i !== exceptIdx && !p.mix && p.sp && acc.includes(p.sp));
+  R.pageFor = (c, acc, exceptIdx, nm, sec) => {
+    let k = c.pages.findIndex((p, i) => i !== exceptIdx && p.sp && acc.includes(p.sp) && (!sec || !R.pageSec(p) || R.pageSec(p) === sec));
     if (k < 0) {
-      const p = R.newPage(nm || 'Page ' + (c.pages.length + 1));
+      const p = R.newPage(nm || sec || 'Page ' + (c.pages.length + 1));
       p.sp = acc[0];
+      if (sec) p.dept = sec;
       c.pages.push(p);
       k = c.pages.length - 1;
     }
@@ -257,10 +309,6 @@
     return L[0].filter(s => L.every(a => a.includes(s)));
   };
   R.pageSpecLabel = pg => {
-    if (pg.mix) {
-      const s = [...new Set(R.units(pg).map(p => p.row.psp || p.row.acc[0]).filter(Boolean))].map(id => R.specLabel(id));
-      return s.length ? s.join(' + ') : 'Multiple';
-    }
     const p1 = R.panels(pg)[0];
     if (p1 && p1.row.spl && R.panels(pg).length === 1) return p1.row.spl;
     return R.specLabel(pg.sp, pg.spx);
@@ -451,6 +499,7 @@
     if (!S.rx) {
       const c = ST.get('rx', null);
       S.rx = c && c.v === 2 && c.pages && c.pages.length ? c : R.buildDemo();
+      S.rx.pages.forEach(p => { p.mix = 0; });
     }
     // one-time: switch off auto interpretation on pages holding CBC / urine / stool routine panels
     if (!S.rx.m3) {
